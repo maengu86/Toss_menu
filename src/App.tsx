@@ -272,6 +272,16 @@ function HomeScreen({
         <h1>오늘의 제철 음식 추천</h1>
       </header>
 
+      <TabDrafts
+        seasons={seasons}
+        seasonIngredients={seasonIngredients}
+        selectedSeason={selectedSeason}
+        selectedSeasonalIngredientId={selectedSeasonalIngredientId}
+        onScrollActivity={onScrollActivity}
+        onSelectSeason={onSelectSeason}
+        onSelectSeasonalIngredient={onSelectSeasonalIngredient}
+      />
+
       <div className="season-panel">
         <div className="season-tabs" aria-label="계절 선택">
           {seasons.map((season) => (
@@ -355,6 +365,69 @@ function HomeScreen({
           </button>
         </div>
       )}
+    </section>
+  )
+}
+
+function TabDrafts({
+  seasons,
+  seasonIngredients,
+  selectedSeason,
+  selectedSeasonalIngredientId,
+  onScrollActivity,
+  onSelectSeason,
+  onSelectSeasonalIngredient,
+}: {
+  seasons: { key: SeasonKey; label: string; accent: string }[]
+  seasonIngredients: SeasonalIngredient[]
+  selectedSeason: SeasonKey
+  selectedSeasonalIngredientId: string
+  onScrollActivity: () => void
+  onSelectSeason: (season: SeasonKey) => void
+  onSelectSeasonalIngredient: (id: string) => void
+}) {
+  const drafts = [
+    { id: 1, label: '시안 1', className: 'draft-clip' },
+    { id: 2, label: '시안 2', className: 'draft-folder' },
+    { id: 3, label: '시안 3', className: 'draft-notebook' },
+  ]
+
+  return (
+    <section className="tab-drafts" aria-label="홈 탭 시안">
+      <div className="section-title">
+        <h2>홈 탭 시안</h2>
+        <span>탭 + 식재료 박스</span>
+      </div>
+      {drafts.map((draft) => (
+        <div className={`tab-draft ${draft.className}`} key={draft.id}>
+          <strong className="draft-label">{draft.label}</strong>
+          <div className="draft-tabs">
+            {seasons.map((season) => (
+              <button
+                className={selectedSeason === season.key ? 'active' : ''}
+                key={season.key}
+                onClick={() => onSelectSeason(season.key)}
+                type="button"
+              >
+                {season.label}
+              </button>
+            ))}
+          </div>
+          <div className="draft-ingredient-box" onScroll={onScrollActivity}>
+            {seasonIngredients.map((ingredient) => (
+              <button
+                className={selectedSeasonalIngredientId === ingredient.id ? 'active' : ''}
+                key={`${draft.id}-${ingredient.id}`}
+                onClick={() => onSelectSeasonalIngredient(ingredient.id)}
+                type="button"
+              >
+                <span aria-hidden="true">{ingredient.emoji}</span>
+                <b>{ingredient.name}</b>
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
     </section>
   )
 }
