@@ -15,7 +15,7 @@ const deliveryOptions = ['문 앞에 놓기', '직접 받을게요']
 const maxExp = 100
 
 type ShopStep = 'cart' | 'store' | 'checkout' | 'complete'
-type SeasonPanelConcept = 'sticker' | 'shelf' | 'rail'
+type SeasonPanelConcept = 'line' | 'chip' | 'mono' | 'compact' | 'split'
 
 function formatWon(value: number) {
   return value.toLocaleString('ko-KR') + '원'
@@ -266,7 +266,7 @@ function HomeScreen({
   onToggleMenu: (id: string) => void
   onStartShopping: () => void
 }) {
-  const [seasonPanelConcept, setSeasonPanelConcept] = useState<SeasonPanelConcept>('sticker')
+  const [seasonPanelConcept, setSeasonPanelConcept] = useState<SeasonPanelConcept>('line')
 
   return (
     <section className="screen" onScroll={onScrollActivity}>
@@ -278,9 +278,11 @@ function HomeScreen({
       <div className={`season-panel season-panel-${seasonPanelConcept}`}>
         <div className="season-concept-switch" aria-label="제철 탭 시안 선택">
           {[
-            ['sticker', '시안 1'],
-            ['shelf', '시안 2'],
-            ['rail', '시안 3'],
+            ['line', '1'],
+            ['chip', '2'],
+            ['mono', '3'],
+            ['compact', '4'],
+            ['split', '5'],
           ].map(([concept, label]) => (
             <button
               className={seasonPanelConcept === concept ? 'active' : ''}
@@ -355,19 +357,18 @@ function HomeScreen({
       {selectedMenus.length > 0 && (
         <div className={`selected-menu-widget ${selectedMenuOpen ? 'open' : ''}`}>
           {selectedMenuOpen && (
-            <div className="selected-menu-panel">
-              <div className="selected-menu-panel-head">
-                <strong>선택한 메뉴</strong>
-                <button aria-label="선택 메뉴 닫기" onClick={() => onSetSelectedMenuOpen(false)} type="button">×</button>
+            <>
+              <button className="selected-menu-backdrop" aria-label="선택 메뉴 닫기" onClick={() => onSetSelectedMenuOpen(false)} type="button" />
+              <div className="selected-menu-panel">
+                {selectedMenus.map((menu) => (
+                  <div className="selected-menu-chip" key={menu.id}>
+                    <span>{menu.name}</span>
+                    <button aria-label={`${menu.name} 삭제`} onClick={() => onRemoveMenu(menu.id)} type="button">삭제</button>
+                  </div>
+                ))}
+                <button className="selected-menu-shop" onClick={onStartShopping} type="button">장보기로 이동</button>
               </div>
-              {selectedMenus.map((menu) => (
-                <div className="selected-menu-chip" key={menu.id}>
-                  <span>{menu.name}</span>
-                  <button aria-label={`${menu.name} 삭제`} onClick={() => onRemoveMenu(menu.id)} type="button">삭제</button>
-                </div>
-              ))}
-              <button className="selected-menu-shop" onClick={onStartShopping} type="button">장보기로 이동</button>
-            </div>
+            </>
           )}
           <button className="selected-menu-fab" onClick={() => onSetSelectedMenuOpen(!selectedMenuOpen)} type="button">
             <span>{selectedMenus.length}</span>
