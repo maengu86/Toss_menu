@@ -15,6 +15,7 @@ const deliveryOptions = ['문 앞에 놓기', '직접 받을게요']
 const maxExp = 100
 
 type ShopStep = 'cart' | 'store' | 'checkout' | 'complete'
+type SeasonPanelConcept = 'sticker' | 'shelf' | 'rail'
 
 function formatWon(value: number) {
   return value.toLocaleString('ko-KR') + '원'
@@ -265,46 +266,34 @@ function HomeScreen({
   onToggleMenu: (id: string) => void
   onStartShopping: () => void
 }) {
-  const selectedIngredient = seasonIngredients.find((ingredient) => ingredient.id === selectedSeasonalIngredientId)
-  const featuredMenu = seasonalMenus[0]
-  const selectedTotal = selectedMenus.reduce(
-    (sum, menu) => sum + menu.ingredients.reduce((menuSum, ingredient) => menuSum + ingredient.price, 0),
-    0,
-  )
+  const [seasonPanelConcept, setSeasonPanelConcept] = useState<SeasonPanelConcept>('sticker')
 
   return (
-    <section className="screen home-screen" onScroll={onScrollActivity}>
-      <header className="home-hero">
-        <div>
-          <p>{today}</p>
-          <h1>오늘 뭐 먹지?</h1>
-          <span>{selectedIngredient ? `${selectedIngredient.name} 기준 추천` : '제철 재료 기준 추천'}</span>
-        </div>
-        <div className="home-hero-mark" aria-hidden="true">
-          {selectedIngredient?.emoji ?? '🍽️'}
-        </div>
+    <section className="screen" onScroll={onScrollActivity}>
+      <header className="top-header">
+        <p>{today}</p>
+        <h1>오늘의 제철 음식 추천</h1>
       </header>
 
-      {featuredMenu && (
-        <button
-          className={`today-pick ${selectedMenuIds.includes(featuredMenu.id) ? 'selected' : ''}`}
-          onClick={() => onToggleMenu(featuredMenu.id)}
-          style={{ '--menu-color': featuredMenu.color } as CSSProperties}
-          type="button"
-        >
-          <span className="today-pick-label">오늘의 한 끼</span>
-          <strong>{featuredMenu.name}</strong>
-          <p>{featuredMenu.weather} · {featuredMenu.ingredients.map((item) => item.name).join(', ')}</p>
-          <b>{selectedMenuIds.includes(featuredMenu.id) ? '선택됨' : `+${featuredMenu.exp} xp`}</b>
-        </button>
-      )}
-
-      <section className="home-section">
-        <div className="home-section-head">
-          <h2>계절 고르기</h2>
-          <span>{selectedIngredient?.season}</span>
+      <div className={`season-panel season-panel-${seasonPanelConcept}`}>
+        <div className="season-concept-switch" aria-label="제철 탭 시안 선택">
+          {[
+            ['sticker', '시안 1'],
+            ['shelf', '시안 2'],
+            ['rail', '시안 3'],
+          ].map(([concept, label]) => (
+            <button
+              className={seasonPanelConcept === concept ? 'active' : ''}
+              key={concept}
+              onClick={() => setSeasonPanelConcept(concept as SeasonPanelConcept)}
+              type="button"
+            >
+              {label}
+            </button>
+          ))}
         </div>
-        <div className="season-strip" aria-label="계절 선택">
+
+        <div className="season-tabs" aria-label="계절 선택">
           {seasons.map((season) => (
             <button
               className={selectedSeason === season.key ? 'active' : ''}
@@ -317,67 +306,51 @@ function HomeScreen({
             </button>
           ))}
         </div>
-      </section>
 
-      <section className="home-section">
-        <div className="home-section-head">
-          <h2>제철 재료</h2>
-          <span>{seasonIngredients.length}개</span>
-        </div>
-        <div className="ingredient-strip" aria-label="제철 식재료" onScroll={onScrollActivity}>
+        <div className="seasonal-grid" aria-label="제철 식재료" onScroll={onScrollActivity}>
           {seasonIngredients.map((ingredient) => (
             <button
-              className={`ingredient-pill ${selectedSeasonalIngredientId === ingredient.id ? 'active' : ''}`}
+              className={`seasonal-tile ${selectedSeasonalIngredientId === ingredient.id ? 'active' : ''}`}
               key={ingredient.id}
               onClick={() => onSelectSeasonalIngredient(ingredient.id)}
               type="button"
             >
-              <span aria-hidden="true">{ingredient.emoji}</span>
+              <span className="food-emoji" aria-hidden="true">{ingredient.emoji}</span>
               <strong>{ingredient.name}</strong>
             </button>
           ))}
         </div>
-      </section>
-
-      <section className="home-section">
-        <div className="home-section-head">
-          <h2>추천 메뉴</h2>
-          <span>{selectedMenuIds.length}개 선택</span>
-        </div>
-        <div className="home-menu-stack">
-          {seasonalMenus.map((menu) => {
-            const selected = selectedMenuIds.includes(menu.id)
-            const price = menu.ingredients.reduce((sum, ingredient) => sum + ingredient.price, 0)
-            return (
-              <button
-                className={`home-menu-card ${selected ? 'selected' : ''}`}
-                key={menu.id}
-                onClick={() => onToggleMenu(menu.id)}
-                style={{ '--menu-color': menu.color } as CSSProperties}
-                type="button"
-              >
-                <span className="home-menu-dot" aria-hidden="true" />
-                <div>
-                  <strong>{menu.name}</strong>
-                  <p>{menu.ingredients.map((item) => item.name).join(' · ')}</p>
-                </div>
-                <div className="home-menu-meta">
-                  <b>{formatWon(price)}</b>
-                  <small>{menu.exp} xp</small>
-                </div>
-              </button>
-            )
-          })}
-        </div>
-      </section>
-
-      <div className="home-checkout-bar">
-        <div>
-          <span>{selectedMenuIds.length}개 메뉴</span>
-          <strong>{formatWon(selectedTotal)}</strong>
-        </div>
-        <button onClick={onStartShopping} type="button">장보기</button>
       </div>
+
+      <div className="section-title sub-directory-title">
+        <h2>메뉴 추천</h2>
+        <span>{selectedMenuIds.length}개 선택</span>
+      </div>
+
+      <div className="menu-list nested-menu-list">
+        {seasonalMenus.map((menu) => {
+          const selected = selectedMenuIds.includes(menu.id)
+          return (
+            <button
+              className={`menu-card ${selected ? 'selected' : ''}`}
+              key={menu.id}
+              onClick={() => onToggleMenu(menu.id)}
+              style={{ '--menu-color': menu.color } as CSSProperties}
+              type="button"
+            >
+              <div>
+                <strong>{menu.name}</strong>
+                <p>{menu.ingredients.map((item) => item.name).join(', ')}</p>
+              </div>
+              <b>{menu.exp}xp</b>
+            </button>
+          )
+        })}
+      </div>
+
+      <button className="primary-action" onClick={onStartShopping} type="button">
+        구매하기
+      </button>
 
       {selectedMenus.length > 0 && (
         <div className={`selected-menu-widget ${selectedMenuOpen ? 'open' : ''}`}>
