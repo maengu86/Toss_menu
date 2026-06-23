@@ -386,31 +386,6 @@
   box-shadow: 0 8px 18px rgba(97, 76, 45, 0.07);
 }
 
-.season-concept-switch {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 4px;
-  padding: 6px;
-  border-bottom: 1px solid rgba(226, 216, 195, 0.62);
-  background: #ffffff;
-}
-
-.season-concept-switch button {
-  min-height: 28px;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  color: #9c8b78;
-  font-size: 11px;
-  font-weight: 900;
-  background: #ffffff;
-}
-
-.season-concept-switch button.active {
-  border-color: rgba(47, 37, 29, 0.14);
-  color: #2f251d;
-  background: #f8f4ee;
-}
-
 .season-tabs {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -452,142 +427,12 @@
   box-shadow: inset 0 -3px 0 #ff8a58;
 }
 
-.season-panel-line {
-  border-radius: 12px;
-  box-shadow: none;
-}
-
-.season-panel-line .season-tabs button {
-  border-color: rgba(226, 216, 195, 0.64);
-  color: #8d765e;
-}
-
-.season-panel-line .season-tabs button.active {
-  color: #2f251d;
-  box-shadow: inset 0 -2px 0 #2f251d;
-}
-
-.season-panel-line .seasonal-tile {
-  border-color: rgba(226, 216, 195, 0.7);
-  border-radius: 10px;
-  box-shadow: none;
-}
-
-.season-panel-chip {
-  padding-bottom: 12px;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-.season-panel-chip .season-tabs {
-  gap: 6px;
-  padding: 10px 0 8px;
-}
-
-.season-panel-chip .season-tabs button {
-  border-width: 1px;
-  border-radius: 999px;
-  background: #ffffff;
-  box-shadow: none;
-}
-
-.season-panel-chip .season-tabs button.active,
-.season-panel-chip .seasonal-tile.active {
-  border-color: #2f251d;
-  color: #2f251d;
-  background: #ffffff;
-  box-shadow: none;
-}
-
-.season-panel-chip .seasonal-grid {
-  padding: 0;
-}
-
-.season-panel-chip .seasonal-tile {
-  border-radius: 999px;
-  min-width: 104px;
-  min-height: 50px;
-  grid-template-columns: auto 1fr;
-  align-content: center;
-  justify-items: start;
-  padding: 8px 12px;
-  box-shadow: none;
-}
-
-.season-panel-chip .food-emoji {
-  font-size: 17px;
-}
-
-.season-panel-mono {
-  border-color: rgba(47, 37, 29, 0.12);
-  border-radius: 8px;
-  box-shadow: none;
-}
-
-.season-panel-mono .season-tabs button.active {
-  color: #ffffff;
-  background: #2f251d;
-  box-shadow: none;
-}
-
-.season-panel-mono .seasonal-tile {
-  border: 0;
-  border-radius: 8px;
-  background: #f8f6f3;
-  box-shadow: none;
-}
-
-.season-panel-mono .seasonal-tile.active {
-  color: #ffffff;
-  background: #2f251d;
-  box-shadow: none;
-}
-
-.season-panel-mono .seasonal-tile.active strong {
-  color: #ffffff;
-}
-
-.season-panel-compact {
-  padding-bottom: 8px;
-  border-radius: 8px;
-  box-shadow: none;
-}
-
-.season-panel-compact .season-tabs button {
-  min-height: 32px;
-  font-size: 11px;
-}
-
-.season-panel-compact .seasonal-grid {
-  gap: 6px;
-  padding: 8px;
-}
-
-.season-panel-compact .seasonal-tile {
-  min-width: 64px;
-  min-height: 62px;
-  gap: 5px;
-  padding: 7px 5px;
-  border-radius: 8px;
-  box-shadow: none;
-}
-
-.season-panel-compact .seasonal-tile.active {
-  border-color: #2f251d;
-  box-shadow: none;
-}
-
 .season-panel-split {
   display: grid;
   grid-template-columns: 82px minmax(0, 1fr);
   padding: 0;
   border-radius: 10px;
   box-shadow: none;
-}
-
-.season-panel-split .season-concept-switch {
-  grid-column: 1 / -1;
 }
 
 .season-panel-split .season-tabs {
@@ -611,15 +456,16 @@
 }
 
 .season-panel-split .seasonal-grid {
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 7px;
   padding: 8px;
   overflow-x: hidden;
 }
 
 .season-panel-split .seasonal-tile {
-  flex: 1 1 72px;
-  min-width: 72px;
+  width: 100%;
+  min-width: 0;
   min-height: 66px;
   border-radius: 8px;
   box-shadow: none;

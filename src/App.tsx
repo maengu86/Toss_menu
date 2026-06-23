@@ -15,7 +15,6 @@ const deliveryOptions = ['문 앞에 놓기', '직접 받을게요']
 const maxExp = 100
 
 type ShopStep = 'cart' | 'store' | 'checkout' | 'complete'
-type SeasonPanelConcept = 'line' | 'chip' | 'mono' | 'compact' | 'split'
 
 function formatWon(value: number) {
   return value.toLocaleString('ko-KR') + '원'
@@ -266,8 +265,6 @@ function HomeScreen({
   onToggleMenu: (id: string) => void
   onStartShopping: () => void
 }) {
-  const [seasonPanelConcept, setSeasonPanelConcept] = useState<SeasonPanelConcept>('line')
-
   return (
     <section className="screen" onScroll={onScrollActivity}>
       <header className="top-header">
@@ -275,26 +272,7 @@ function HomeScreen({
         <h1>오늘의 제철 음식 추천</h1>
       </header>
 
-      <div className={`season-panel season-panel-${seasonPanelConcept}`}>
-        <div className="season-concept-switch" aria-label="제철 탭 시안 선택">
-          {[
-            ['line', '1'],
-            ['chip', '2'],
-            ['mono', '3'],
-            ['compact', '4'],
-            ['split', '5'],
-          ].map(([concept, label]) => (
-            <button
-              className={seasonPanelConcept === concept ? 'active' : ''}
-              key={concept}
-              onClick={() => setSeasonPanelConcept(concept as SeasonPanelConcept)}
-              type="button"
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
+      <div className="season-panel season-panel-split">
         <div className="season-tabs" aria-label="계절 선택">
           {seasons.map((season) => (
             <button
