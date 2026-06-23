@@ -384,7 +384,6 @@
   border-radius: 10px;
   background: #ffffff;
   box-shadow: 0 8px 18px rgba(97, 76, 45, 0.07);
-  --active-season-surface: #fff7f1;
   --season-spring-surface: #f1f8ee;
   --season-spring-ink: #5f8e4f;
   --season-summer-surface: #fff3ec;
@@ -395,43 +394,14 @@
   --season-winter-ink: #5c91ad;
 }
 
-.season-panel.season-spring {
-  --active-season-surface: var(--season-spring-surface);
-  --active-season-ink: var(--season-spring-ink);
-}
-
-.season-panel.season-summer {
-  --active-season-surface: var(--season-summer-surface);
-  --active-season-ink: var(--season-summer-ink);
-}
-
-.season-panel.season-autumn {
-  --active-season-surface: var(--season-autumn-surface);
-  --active-season-ink: var(--season-autumn-ink);
-}
-
-.season-panel.season-winter {
-  --active-season-surface: var(--season-winter-surface);
-  --active-season-ink: var(--season-winter-ink);
-}
-
 .season-tabs {
-  display: flex;
-  gap: 6px;
-  align-items: stretch;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  align-content: start;
   margin: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
-  overscroll-behavior-x: contain;
-  scroll-snap-type: x proximity;
-  -webkit-overflow-scrolling: touch;
+  overflow: visible;
   transform: none;
-  scrollbar-width: none;
-  touch-action: pan-x;
-}
-
-.season-tabs::-webkit-scrollbar {
-  display: none;
 }
 
 .decor-tabs {
@@ -446,19 +416,16 @@
 }
 
 .season-tabs button {
-  min-width: 110px;
-  min-height: 40px;
-  flex: 0 0 auto;
-  border: 1px solid rgba(226, 216, 195, 0.72);
-  border-bottom: 0;
-  border-radius: 10px 10px 0 0;
+  min-height: 42px;
+  border: 0;
+  border-right: 1px solid rgba(226, 216, 195, 0.82);
+  border-radius: 0;
   clip-path: none;
   color: #8d765e;
   font-size: 12px;
   font-weight: 900;
   background: #ffffff;
   box-shadow: none;
-  scroll-snap-align: start;
 }
 
 .season-tabs button[style*="7abf63"] {
@@ -482,18 +449,25 @@
 }
 
 .season-tabs button.active {
-  color: var(--active-season-ink);
-  min-height: 40px;
+  color: #2f251d;
+  min-height: 42px;
   position: relative;
   z-index: 2;
-  border-color: rgba(226, 216, 195, 0.82);
-  background: var(--active-season-surface);
+  border-right-color: #ffffff;
+  border-radius: 8px 0 0 8px;
+  background: #ffffff;
   transform: none;
-  box-shadow: 0 1px 0 var(--active-season-surface);
+  box-shadow: none;
+}
+
+.season-panel-index {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  box-shadow: none;
 }
 
 .season-panel-index .season-tabs {
-  padding: 8px 8px 0;
+  padding: 8px 0 8px 8px;
   background: #ffffff;
 }
 
@@ -501,21 +475,9 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
-  margin-top: -1px;
-  max-height: 160px;
-  padding: 10px 8px 10px;
-  background: var(--active-season-surface);
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior-y: contain;
-  scroll-behavior: smooth;
-  scrollbar-width: none;
-  touch-action: pan-y;
-  -webkit-overflow-scrolling: touch;
-}
-
-.season-panel-index .seasonal-grid::-webkit-scrollbar {
-  display: none;
+  padding: 8px;
+  background: #ffffff;
+  overflow: visible;
 }
 
 .season-panel-index .seasonal-tile {
@@ -528,7 +490,7 @@
 }
 
 .season-panel-index .seasonal-tile.active {
-  border-color: var(--active-season-ink);
+  border-color: #ff8a58;
   background: #ffffff;
   box-shadow: none;
   transform: none;
