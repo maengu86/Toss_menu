@@ -272,7 +272,7 @@ function HomeScreen({
         <h1>오늘의 제철 음식 추천</h1>
       </header>
 
-      <div className="season-panel season-panel-split">
+      <div className={`season-panel season-panel-index season-${selectedSeason}`}>
         <div className="season-tabs" aria-label="계절 선택">
           {seasons.map((season) => (
             <button
@@ -327,10 +327,6 @@ function HomeScreen({
           )
         })}
       </div>
-
-      <button className="primary-action" onClick={onStartShopping} type="button">
-        구매하기
-      </button>
 
       {selectedMenus.length > 0 && (
         <div className={`selected-menu-widget ${selectedMenuOpen ? 'open' : ''}`}>

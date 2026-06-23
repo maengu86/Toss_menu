@@ -379,20 +379,59 @@
 .season-panel {
   overflow: hidden;
   margin: 18px 0 20px;
-  padding: 0 0 10px;
+  padding: 0;
   border: 1px solid rgba(226, 216, 195, 0.82);
   border-radius: 10px;
   background: #ffffff;
   box-shadow: 0 8px 18px rgba(97, 76, 45, 0.07);
+  --active-season-surface: #fff7f1;
+  --season-spring-surface: #f1f8ee;
+  --season-spring-ink: #5f8e4f;
+  --season-summer-surface: #fff3ec;
+  --season-summer-ink: #d96d43;
+  --season-autumn-surface: #f8f0e7;
+  --season-autumn-ink: #a86d3c;
+  --season-winter-surface: #eef7fb;
+  --season-winter-ink: #5c91ad;
+}
+
+.season-panel.season-spring {
+  --active-season-surface: var(--season-spring-surface);
+  --active-season-ink: var(--season-spring-ink);
+}
+
+.season-panel.season-summer {
+  --active-season-surface: var(--season-summer-surface);
+  --active-season-ink: var(--season-summer-ink);
+}
+
+.season-panel.season-autumn {
+  --active-season-surface: var(--season-autumn-surface);
+  --active-season-ink: var(--season-autumn-ink);
+}
+
+.season-panel.season-winter {
+  --active-season-surface: var(--season-winter-surface);
+  --active-season-ink: var(--season-winter-ink);
 }
 
 .season-tabs {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0;
+  display: flex;
+  gap: 6px;
   align-items: stretch;
   margin: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
   transform: none;
+  scrollbar-width: none;
+  touch-action: pan-x;
+}
+
+.season-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .decor-tabs {
@@ -407,68 +446,81 @@
 }
 
 .season-tabs button {
-  min-height: 36px;
-  border: 1px solid rgba(226, 216, 195, 0.78);
-  border-width: 0 1px 1px 0;
-  border-radius: 0;
+  min-width: 110px;
+  min-height: 40px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(226, 216, 195, 0.72);
+  border-bottom: 0;
+  border-radius: 10px 10px 0 0;
   clip-path: none;
   color: #8d765e;
   font-size: 12px;
   font-weight: 900;
   background: #ffffff;
-  box-shadow: inset -1px 0 0 rgba(226, 216, 195, 0.52);
+  box-shadow: none;
+  scroll-snap-align: start;
+}
+
+.season-tabs button[style*="7abf63"] {
+  color: var(--season-spring-ink);
+  background: var(--season-spring-surface);
+}
+
+.season-tabs button[style*="ff9a62"] {
+  color: var(--season-summer-ink);
+  background: var(--season-summer-surface);
+}
+
+.season-tabs button[style*="d79555"] {
+  color: var(--season-autumn-ink);
+  background: var(--season-autumn-surface);
+}
+
+.season-tabs button[style*="70aeca"] {
+  color: var(--season-winter-ink);
+  background: var(--season-winter-surface);
 }
 
 .season-tabs button.active {
-  color: #ff8a58;
-  min-height: 36px;
-  background: #ffffff;
+  color: var(--active-season-ink);
+  min-height: 40px;
+  position: relative;
+  z-index: 2;
+  border-color: rgba(226, 216, 195, 0.82);
+  background: var(--active-season-surface);
   transform: none;
-  box-shadow: inset 0 -3px 0 #ff8a58;
+  box-shadow: 0 1px 0 var(--active-season-surface);
 }
 
-.season-panel-split {
-  display: grid;
-  grid-template-columns: 82px minmax(0, 1fr);
-  padding: 0;
-  border-radius: 10px;
-  box-shadow: none;
+.season-panel-index .season-tabs {
+  padding: 8px 8px 0;
+  background: #ffffff;
 }
 
-.season-panel-split .season-tabs {
-  grid-template-columns: 1fr;
-  align-content: start;
-  padding: 8px;
-  border-right: 1px solid rgba(226, 216, 195, 0.62);
-}
-
-.season-panel-split .season-tabs button {
-  min-height: 38px;
-  border: 0;
-  border-radius: 8px;
-  box-shadow: none;
-}
-
-.season-panel-split .season-tabs button.active {
-  color: #2f251d;
-  background: #f8f4ee;
-  box-shadow: none;
-}
-
-.season-panel-split .seasonal-grid {
+.season-panel-index .seasonal-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 7px;
-  padding: 8px;
+  gap: 8px;
+  margin-top: -1px;
+  padding: 10px 8px 10px;
+  background: var(--active-season-surface);
   overflow-x: hidden;
 }
 
-.season-panel-split .seasonal-tile {
+.season-panel-index .seasonal-tile {
   width: 100%;
   min-width: 0;
   min-height: 66px;
   border-radius: 8px;
+  background: rgba(255, 255, 255, 0.66);
   box-shadow: none;
+}
+
+.season-panel-index .seasonal-tile.active {
+  border-color: var(--active-season-ink);
+  background: #ffffff;
+  box-shadow: none;
+  transform: none;
 }
 
 .menu-list,
