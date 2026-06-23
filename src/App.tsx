@@ -340,13 +340,12 @@ function HomeScreen({
                     <button aria-label={`${menu.name} 삭제`} onClick={() => onRemoveMenu(menu.id)} type="button">삭제</button>
                   </div>
                 ))}
-                <button className="selected-menu-shop" onClick={onStartShopping} type="button">장보기로 이동</button>
+                <button className="selected-menu-shop" onClick={onStartShopping} type="button">구매하기</button>
               </div>
             </>
           )}
-          <button className="selected-menu-fab" onClick={() => onSetSelectedMenuOpen(!selectedMenuOpen)} type="button">
+          <button className="selected-menu-fab" aria-label="선택 메뉴 열기" onClick={() => onSetSelectedMenuOpen(!selectedMenuOpen)} type="button">
             <span>{selectedMenus.length}</span>
-            🛒
           </button>
         </div>
       )}

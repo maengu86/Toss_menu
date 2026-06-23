@@ -502,9 +502,20 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   margin-top: -1px;
+  max-height: 160px;
   padding: 10px 8px 10px;
   background: var(--active-season-surface);
   overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+.season-panel-index .seasonal-grid::-webkit-scrollbar {
+  display: none;
 }
 
 .season-panel-index .seasonal-tile {
@@ -665,15 +676,30 @@
 .selected-menu-fab {
   width: 62px;
   height: 62px;
-  display: grid;
-  place-items: center;
+  display: block;
   position: relative;
   border: 0;
   border-radius: 50%;
   color: #ffffff;
-  font-size: 24px;
   background: #ff8a58;
   box-shadow: 0 18px 36px rgba(84, 51, 19, 0.22);
+}
+
+.selected-menu-fab::before,
+.selected-menu-fab::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 24px;
+  height: 3px;
+  border-radius: 999px;
+  background: #ffffff;
+  transform: translate(-50%, -50%);
+}
+
+.selected-menu-fab::after {
+  transform: translate(-50%, -50%) rotate(90deg);
 }
 
 .selected-menu-fab span {
@@ -761,7 +787,7 @@
   border-radius: 10px;
   color: #ffffff;
   font-weight: 900;
-  background: #2f251d;
+  background: #ff8a58;
 }
 
 .menu-card {
