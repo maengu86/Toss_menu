@@ -331,6 +331,11 @@ function HomeScreen({
             <>
               <button className="selected-menu-backdrop" aria-label="선택 메뉴 닫기" onClick={() => onSetSelectedMenuOpen(false)} type="button" />
               <div className="selected-menu-panel">
+                <div className="fab-panel-variants" aria-label="구매 패널 색상 시안">
+                  <span>시안 1</span>
+                  <span>시안 2</span>
+                  <span>시안 3</span>
+                </div>
                 {selectedMenus.map((menu) => (
                   <div className="selected-menu-chip" key={menu.id}>
                     <span>{menu.name}</span>
@@ -717,18 +722,17 @@ function roomClass(background: string) {
 }
 
 function TabBar({ current, onChange }: { current: Screen; onChange: (screen: Screen) => void }) {
-  const tabs: { id: Screen; label: string; icon: string }[] = [
-    { id: 'home', label: '홈', icon: '🏠' },
-    { id: 'shopping', label: '장보기', icon: '🛒' },
-    { id: 'petHome', label: '펫홈', icon: '🐾' },
+  const tabs: { id: Screen; label: string }[] = [
+    { id: 'home', label: '홈' },
+    { id: 'shopping', label: '장보기' },
+    { id: 'petHome', label: '펫홈' },
   ]
 
   return (
     <nav className="tab-bar" aria-label="하단 탭">
       {tabs.map((tab) => (
         <button className={current === tab.id ? 'active' : ''} key={tab.id} onClick={() => onChange(tab.id)} type="button">
-          <span>{tab.icon}</span>
-          {tab.label}
+          <span>{tab.label}</span>
         </button>
       ))}
     </nav>
