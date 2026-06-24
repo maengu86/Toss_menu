@@ -22,7 +22,7 @@ const navEmojiDrafts = [
   { id: 5, icons: ['🌿', '🛍️', '💛'] },
 ]
 
-type ShopStep = 'cart' | 'store' | 'checkout' | 'complete'
+type ShopStep = 'cart' | 'checkout' | 'complete'
 
 function formatWon(value: number) {
   return value.toLocaleString('ko-KR') + '원'
@@ -43,7 +43,6 @@ function App() {
   const [checkedIngredients, setCheckedIngredients] = useState<string[]>([])
   const [level, setLevel] = useState(1)
   const [exp, setExp] = useState(18)
-  const [selectedDeliveryType, setSelectedDeliveryType] = useState(tossShoppingOptions[0].name)
   const [shopStep, setShopStep] = useState<ShopStep>('cart')
   const [paymentMethod, setPaymentMethod] = useState(paymentOptions[0])
   const [deliveryOption, setDeliveryOption] = useState(deliveryOptions[0])
@@ -69,7 +68,7 @@ function App() {
   const checkedPrice = shoppingItems.reduce((sum, item) => (
     checkedIngredients.includes(ingredientKey(item.menuId, item.ingredient.name)) ? sum + item.ingredient.price : sum
   ), 0)
-  const selectedDeliveryInfo = tossShoppingOptions.find((option) => option.name === selectedDeliveryType) ?? tossShoppingOptions[0]
+  const selectedDeliveryInfo = tossShoppingOptions[0]
   const orderTotal = checkedPrice + selectedDeliveryInfo.fee
   const checkedTotal = shoppingItems.filter((item) => checkedIngredients.includes(ingredientKey(item.menuId, item.ingredient.name))).length
   function showToast(message: string) {
@@ -189,9 +188,7 @@ function App() {
             deliveryOptions={deliveryOptions}
             selectedMenus={selectedMenus}
             checkedPrice={checkedPrice}
-            deliveryType={selectedDeliveryType}
             deliveryTypeInfo={selectedDeliveryInfo}
-            deliveryTypes={tossShoppingOptions}
             orderTotal={orderTotal}
             paymentMethod={paymentMethod}
             paymentOptions={paymentOptions}
@@ -200,7 +197,6 @@ function App() {
             onGoHome={() => setScreen('petHome')}
             onScrollActivity={handleScrollActivity}
             onSelectDelivery={setDeliveryOption}
-            onSelectDeliveryType={setSelectedDeliveryType}
             onSelectPayment={setPaymentMethod}
             onSetStep={setShopStep}
             onToggleIngredient={toggleIngredient}
@@ -382,16 +378,13 @@ function ShoppingScreen({
   checkedTotal,
   checkedPrice,
   orderTotal,
-  deliveryType,
   deliveryTypeInfo,
-  deliveryTypes,
   step,
   paymentMethod,
   paymentOptions,
   deliveryOption,
   deliveryOptions,
   onToggleIngredient,
-  onSelectDeliveryType,
   onSelectPayment,
   onSelectDelivery,
   onSetStep,
@@ -404,16 +397,13 @@ function ShoppingScreen({
   checkedTotal: number
   checkedPrice: number
   orderTotal: number
-  deliveryType: string
   deliveryTypeInfo: (typeof tossShoppingOptions)[number]
-  deliveryTypes: typeof tossShoppingOptions
   step: ShopStep
   paymentMethod: string
   paymentOptions: string[]
   deliveryOption: string
   deliveryOptions: string[]
   onToggleIngredient: (name: string) => void
-  onSelectDeliveryType: (deliveryType: string) => void
   onSelectPayment: (method: string) => void
   onSelectDelivery: (option: string) => void
   onSetStep: (step: ShopStep) => void
@@ -438,8 +428,8 @@ function ShoppingScreen({
       </header>
 
       <div className="toss-steps" aria-label="쇼핑 진행 단계">
-        {['상품', '배송', '결제'].map((label, index) => {
-          const activeIndex = step === 'cart' ? 0 : step === 'store' ? 1 : 2
+        {['장바구니', '주문서', '완료'].map((label, index) => {
+          const activeIndex = step === 'cart' ? 0 : step === 'checkout' ? 1 : 2
           return (
             <div className={index <= activeIndex ? 'active' : ''} key={label}>
               <span>{index + 1}</span>
@@ -502,37 +492,19 @@ function ShoppingScreen({
               <span>총 주문 예상금액</span>
               <strong>{formatWon(checkedPrice)}</strong>
             </div>
-            <button className="toss-primary toss-cart-continue" disabled={!canContinue} onClick={() => onSetStep('store')} type="button">
-              주문하기
+            <button className="toss-primary toss-cart-continue" disabled={!canContinue} onClick={() => onSetStep('checkout')} type="button">
+              토스쇼핑 주문서로 계속하기
             </button>
-          </div>
-        </>
-      )}
-
-      {step === 'store' && (
-        <>
-          <div className="toss-copy">
-            <strong>배송 방식을 선택해주세요</strong>
-            <p>토스쇼핑 주문서에 붙일 배송 옵션만 고르는 체험 화면이에요.</p>
-          </div>
-          <div className="store-list">
-            {deliveryTypes.map((option) => (
-              <button className={`store-card ${deliveryType === option.name ? 'selected' : ''}`} key={option.name} onClick={() => onSelectDeliveryType(option.name)} type="button">
-                <span>{option.perk}</span>
-                <strong>{option.name}</strong>
-                <p>{option.eta} · 배송비 {formatWon(option.fee)}</p>
-              </button>
-            ))}
-          </div>
-          <div className="toss-button-row">
-            <button className="toss-secondary" onClick={() => onSetStep('cart')} type="button">이전</button>
-            <button className="toss-primary" onClick={() => onSetStep('checkout')} type="button">결제 화면으로</button>
           </div>
         </>
       )}
 
       {step === 'checkout' && (
         <>
+          <div className="toss-copy toss-order-note">
+            <strong>토스쇼핑 주문서</strong>
+            <p>선택한 재료와 배송 정보, 결제 수단을 한 화면에서 확인해요.</p>
+          </div>
           <div className="checkout-card">
             <div>
               <span>토스쇼핑 배송</span>
@@ -557,7 +529,7 @@ function ShoppingScreen({
             <div className="total"><span>총 결제 금액</span><b>{formatWon(orderTotal)}</b></div>
           </div>
           <div className="toss-button-row">
-            <button className="toss-secondary" onClick={() => onSetStep('store')} type="button">이전</button>
+            <button className="toss-secondary" onClick={() => onSetStep('cart')} type="button">이전</button>
             <button className="toss-primary" onClick={onCompleteOrder} type="button">{formatWon(orderTotal)} 결제하기</button>
           </div>
         </>
@@ -656,7 +628,7 @@ function PetHomeScreen({
   return (
     <section className="screen pet-home-screen" onScroll={onScrollActivity}>
       <div className={`pet-room-stage ${roomClass(background)}`}>
-        <button className="pet-share-button" aria-label="먹보 링크 복사" onClick={onShare} type="button">🔗</button>
+        <button className="pet-share-button" aria-label="먹보 링크 복사" onClick={onShare} type="button">📤</button>
         <PetAvatar outfit={outfit} background={background} accessory={accessory} />
       </div>
 
@@ -770,9 +742,9 @@ function roomClass(background: string) {
 
 function TabBar({ current, onChange }: { current: Screen; onChange: (screen: Screen) => void }) {
   const tabs: { id: Screen; label: string; icon: string }[] = [
-    { id: 'home', label: '홈', icon: '🏠' },
-    { id: 'shopping', label: '장보기', icon: '🧺' },
-    { id: 'petHome', label: '펫홈', icon: '🐾' },
+    { id: 'home', label: '홈', icon: '🌿' },
+    { id: 'shopping', label: '장보기', icon: '🛍️' },
+    { id: 'petHome', label: '펫홈', icon: '💛' },
   ]
 
   return (

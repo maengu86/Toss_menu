@@ -14,7 +14,7 @@
   --ink: #3f3a36;
   --muted: #8d765e;
   --soft-text: #725f4b;
-  --orange: #f28b66;
+  --orange: #f27f5b;
   --green: #75b84f;
 }
 
@@ -308,7 +308,7 @@
 .pet-inventory .decor-tabs button.active {
   min-height: 34px;
   color: #4d3e2e;
-  background: #fffdf8;
+  background: #ffffff;
   transform: none;
   box-shadow: inset 0 -3px 0 rgba(255, 255, 255, 0.55);
 }
@@ -317,7 +317,7 @@
 .pet-inventory .decor-tabs button:nth-child(2).active,
 .pet-inventory .decor-tabs button:nth-child(3).active,
 .pet-inventory .decor-tabs button:nth-child(4).active {
-  background: #fffdf8;
+  background: #ffffff;
 }
 
 .recommend-card,
@@ -363,7 +363,7 @@
   flex: 0 0 auto;
   padding: 10px 13px;
   color: #3f3a36;
-  background: #ffd8c8;
+  background: #fff1eb;
 }
 
 .section-title {
@@ -509,9 +509,11 @@
 
 .season-panel-index .seasonal-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, 72px);
+  justify-content: space-between;
+  align-content: start;
   gap: 8px;
-  max-height: 178px;
+  max-height: 154px;
   padding: 8px;
   background: #ffffff;
   overflow-x: hidden;
@@ -529,9 +531,12 @@
 .season-panel-index .seasonal-tile {
   width: 100%;
   min-width: 0;
-  min-height: 0;
-  aspect-ratio: 1 / 1;
-  padding: 6px 4px;
+  height: 72px;
+  min-height: 72px;
+  aspect-ratio: auto;
+  align-content: center;
+  gap: 4px;
+  padding: 5px 3px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.66);
   box-shadow: none;
@@ -618,14 +623,17 @@
 .seasonal-tile.active {
   border-color: var(--orange);
   background: #ffffff;
-  box-shadow: 0 10px 22px rgba(242, 139, 102, 0.18);
+  box-shadow: 0 10px 22px rgba(242, 127, 91, 0.14);
   transform: translateY(-1px);
 }
 
 .seasonal-tile strong {
   color: #3f3a36;
-  font-size: 11px;
-  line-height: 1.15;
+  min-height: 22px;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  line-height: 1.1;
   text-align: center;
   white-space: nowrap;
 }
@@ -666,7 +674,7 @@
   padding: 8px;
   border: 1px solid rgba(226, 216, 195, 0.78);
   border-radius: 10px;
-  background: #fffdf8;
+  background: #ffffff;
 }
 
 .nav-emoji-draft > span {
@@ -689,7 +697,7 @@
   align-content: center;
   gap: 4px;
   border-radius: 8px;
-  background: rgba(255, 216, 200, 0.42);
+  background: rgba(242, 127, 91, 0.08);
   font-style: normal;
 }
 
@@ -802,7 +810,7 @@
 
 .draft-ingredient-box button.active {
   border-color: var(--orange);
-  box-shadow: inset 0 0 0 1px rgba(242, 139, 102, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(242, 127, 91, 0.14);
 }
 
 .draft-ingredient-box span {
@@ -987,12 +995,12 @@
 }
 
 .selected-menu-panel.variant-2 {
-  background: #fff7f2;
+  background: #fff8f5;
 }
 
 .selected-menu-panel.variant-2 .selected-menu-shop {
   color: #3f3a36;
-  background: #ffd8c8;
+  background: #fff1eb;
 }
 
 .selected-menu-panel-head,
@@ -1018,7 +1026,7 @@
   width: 30px;
   height: 30px;
   color: #725f4b;
-  background: #ffd8c8;
+  background: #fff1eb;
 }
 
 .selected-menu-chip {
@@ -1054,7 +1062,7 @@
   border-radius: 10px;
   color: #3f3a36;
   font-weight: 900;
-  background: #ffd8c8;
+  background: #fff1eb;
 }
 
 .menu-card {
@@ -1074,7 +1082,7 @@
 
 .menu-card.selected {
   border-color: var(--orange);
-  box-shadow: 0 10px 22px rgba(242, 139, 102, 0.18);
+  box-shadow: 0 10px 22px rgba(242, 127, 91, 0.14);
   transform: translateY(-1px);
 }
 
@@ -1109,7 +1117,7 @@
   min-height: 54px;
   margin-top: 18px;
   color: #3f3a36;
-  background: #ffd8c8;
+  background: #fff1eb;
   box-shadow: 0 12px 24px rgba(84, 51, 19, 0.12);
 }
 
@@ -1330,7 +1338,7 @@
   margin-top: 16px;
   padding: 6px;
   border-radius: 18px;
-  background: #ffd8c8;
+  background: #fff1eb;
 }
 
 .market-group button {
@@ -1610,7 +1618,7 @@
 
 .toss-steps div.active span {
   color: #3f3a36;
-  background: #ffd8c8;
+  background: #fff1eb;
 }
 
 .toss-summary-card,
@@ -1731,7 +1739,7 @@
   width: 100%;
   margin-top: 16px;
   color: #3f3a36;
-  background: #ffd8c8;
+  background: #fff1eb;
   box-shadow: 0 14px 24px rgba(84, 51, 19, 0.12);
 }
 
@@ -1747,7 +1755,7 @@
 
 .toss-secondary {
   color: #4e5968;
-  background: #ffd8c8;
+  background: #fff1eb;
 }
 
 .toss-secondary.wide {
@@ -1784,7 +1792,7 @@
 
 .store-card.selected {
   border-color: var(--orange);
-  box-shadow: inset 0 0 0 2px rgba(242, 139, 102, 0.18);
+  box-shadow: inset 0 0 0 2px rgba(242, 127, 91, 0.14);
   transform: translateY(-1px);
 }
 
@@ -1836,7 +1844,7 @@
   border-radius: 14px;
   color: #3f3a36;
   font-weight: 900;
-  background: #ffd8c8;
+  background: #fff1eb;
 }
 
 .checkout-card > div {
@@ -1958,14 +1966,14 @@
   gap: 12px;
   position: fixed;
   right: max(0px, calc((100vw - 430px) / 2));
-  bottom: 110px;
+  bottom: 101px;
   left: max(0px, calc((100vw - 430px) / 2));
   z-index: 90;
   width: min(100vw, 430px);
   padding: 10px 16px;
-  border-top: 1px solid rgba(226, 216, 195, 0.9);
-  background: rgba(255, 250, 244, 0.98);
-  box-shadow: 0 -10px 24px rgba(84, 51, 19, 0.08);
+  border-top: 1px solid rgba(229, 232, 235, 0.95);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 -8px 20px rgba(25, 31, 40, 0.06);
   backdrop-filter: blur(14px);
 }
 
@@ -2001,7 +2009,7 @@
 }
 
 .toss-screen {
-  background: #f6f7f9;
+  background: #ffffff;
 }
 
 .toss-summary-card {
@@ -2099,7 +2107,7 @@
 
 .toss-cart-continue {
   border-radius: 8px;
-  background: #ffd8c8;
+  background: #fff1eb;
   box-shadow: none;
 }
 
@@ -2115,20 +2123,20 @@
 }
 
 .pet-share-button {
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 36px;
   display: grid;
   place-items: center;
   position: absolute;
   right: 14px;
   top: 14px;
   z-index: 6;
-  border: 1px solid rgba(255, 255, 255, 0.54);
-  border-radius: 50%;
-  color: #473627;
-  font-size: 20px;
+  border: 1px solid rgba(229, 232, 235, 0.88);
+  border-radius: 12px;
+  color: #3f3a36;
+  font-size: 18px;
   font-weight: 900;
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.68);
   backdrop-filter: blur(10px);
 }
 
@@ -2138,8 +2146,8 @@
   gap: 0;
   margin: 0 16px;
   padding: 8px 8px 7px;
-  border-top: 1px solid rgba(226, 216, 195, 0.72);
-  background: #ffd8c8;
+  border-top: 1px solid rgba(229, 232, 235, 0.95);
+  background: #ffffff;
 }
 
 .pet-action-tabs button {
@@ -2158,7 +2166,7 @@
 
 .pet-action-tabs button.active {
   color: #3f3a36;
-  background: #fff7f2;
+  background: rgba(242, 127, 91, 0.08);
 }
 
 .pet-action-tabs span {
@@ -2200,7 +2208,7 @@
   padding: 7px 4px 8px;
   border: 1px solid rgba(226, 216, 195, 0.78);
   border-radius: 10px;
-  background: #fffdf8;
+  background: #ffffff;
 }
 
 .pet-character-concept svg {
@@ -2292,6 +2300,7 @@
     padding-left: 16px;
   }
 }
+
 
 
 

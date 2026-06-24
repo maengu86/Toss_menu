@@ -231,6 +231,12 @@ function ConceptAvatar({ concept }: { concept: (typeof characterConcepts)[number
   return (
     <svg viewBox="0 0 140 170" role="img" aria-label={`${concept.name} 캐릭터`}>
       <ellipse cx="70" cy="157" rx="39" ry="8" fill="#3f3a36" opacity="0.1" />
+      <path d="M45 110c-16 6-22 17-17 27 12 0 21-8 26-22z" fill={concept.accent} stroke="#6f5a45" strokeWidth="4" strokeLinecap="round" />
+      <path d="M95 110c16 6 22 17 17 27-12 0-21-8-26-22z" fill={concept.accent} stroke="#6f5a45" strokeWidth="4" strokeLinecap="round" />
+      <path d="M43 104c3-22 17-34 27-34s24 12 27 34l5 40H38z" fill={concept.body} stroke="#6f5a45" strokeWidth="4" />
+      <path d="M49 114h42l-5 25H54z" fill="#fff8f5" opacity="0.9" />
+      <path d="M51 144c-8 4-8 12 1 15 8 0 13-4 15-12z" fill={concept.accent} stroke="#6f5a45" strokeWidth="4" strokeLinecap="round" />
+      <path d="M89 144c8 4 8 12-1 15-8 0-13-4-15-12z" fill={concept.accent} stroke="#6f5a45" strokeWidth="4" strokeLinecap="round" />
       {concept.ear === 'leaf' && (
         <>
           <path d="M39 45c-18-14-21-31-8-39 13 9 18 23 15 42z" fill={concept.accent} />
@@ -250,17 +256,12 @@ function ConceptAvatar({ concept }: { concept: (typeof characterConcepts)[number
         </>
       )}
       <circle cx="70" cy="56" r="42" fill={concept.body} stroke="#6f5a45" strokeWidth="4" />
+      <path d="M48 78c12 12 32 12 44 0 2 15-8 26-22 26S46 93 48 78z" fill="#ffffff" opacity="0.35" />
       <ellipse cx="54" cy="64" rx="7" ry="9" fill="#3f3a36" />
       <ellipse cx="86" cy="64" rx="7" ry="9" fill="#3f3a36" />
       <circle cx="52" cy="61" r="2" fill="#ffffff" />
       <circle cx="84" cy="61" r="2" fill="#ffffff" />
       <path d="M62 77c5 5 11 5 16 0" fill="none" stroke="#3f3a36" strokeWidth="4" strokeLinecap="round" />
-      <path d="M43 103c3-22 17-33 27-33s24 11 27 33l5 40H38z" fill={concept.body} stroke="#6f5a45" strokeWidth="4" />
-      <path d="M49 113h42l-5 26H54z" fill="#fff7f2" opacity="0.9" />
-      <path d="M45 109c-17 5-23 17-18 27 12 0 22-8 27-22z" fill={concept.accent} stroke="#6f5a45" strokeWidth="4" strokeLinecap="round" />
-      <path d="M95 109c17 5 23 17 18 27-12 0-22-8-27-22z" fill={concept.accent} stroke="#6f5a45" strokeWidth="4" strokeLinecap="round" />
-      <path d="M51 144c-8 4-8 12 1 15 8 0 13-4 15-12z" fill={concept.accent} stroke="#6f5a45" strokeWidth="4" strokeLinecap="round" />
-      <path d="M89 144c8 4 8 12-1 15-8 0-13-4-15-12z" fill={concept.accent} stroke="#6f5a45" strokeWidth="4" strokeLinecap="round" />
     </svg>
   )
 }
