@@ -431,39 +431,59 @@ function ShoppingScreen({
       {step === 'cart' && (
         <>
           <div className="toss-summary-card">
-            <span>선택 메뉴 재료</span>
+            <span>예상 주문금액</span>
             <strong>{formatWon(totalPrice)}</strong>
             <p>구매 체크 {checkedTotal}/{itemCount}</p>
           </div>
           <div className="toss-menu-list">
             {selectedMenus.length === 0 && <p className="empty">홈에서 메뉴를 먼저 선택해주세요.</p>}
-            {selectedMenus.map((menu) => (
-              <article className="toss-menu-box" key={menu.id}>
-                <div className="toss-menu-box-head">
-                  <span>메뉴</span>
-                  <strong>{menu.name}</strong>
-                  <b>{formatWon(menu.ingredients.reduce((sum, item) => sum + item.price, 0))}</b>
-                </div>
-                <div className="ingredient-list toss-list">
-                  {menu.ingredients.map((item) => {
-                    const key = ingredientKey(menu.id, item.name)
-                    return (
-                      <label className="ingredient-row toss-row" key={key}>
-                        <input checked={checkedIngredients.includes(key)} onChange={() => onToggleIngredient(key)} type="checkbox" />
-                        <span>
-                          <strong>{item.name}</strong>
-                        </span>
-                        <b>{formatWon(item.price)}</b>
+            {selectedMenus.map((menu) => {
+                const menuKeys = menu.ingredients.map((item) => ingredientKey(menu.id, item.name))
+                const menuChecked = menuKeys.every((key) => checkedIngredients.includes(key))
+                return (
+                  <article className="toss-menu-box" key={menu.id}>
+                    <div className="toss-menu-box-head">
+                      <label>
+                        <input
+                          checked={menuChecked}
+                          onChange={() => {
+                            menuKeys.forEach((key) => {
+                              if (menuChecked === checkedIngredients.includes(key)) onToggleIngredient(key)
+                            })
+                          }}
+                          type="checkbox"
+                        />
+                        <strong>{menu.name}</strong>
                       </label>
-                    )
-                  })}
-                </div>
-              </article>
-            ))}
+                      <span>오늘뭐먹지</span>
+                      <b>{formatWon(menu.ingredients.reduce((sum, item) => sum + item.price, 0))}</b>
+                    </div>
+                    <div className="ingredient-list toss-list toss-product-list">
+                      {menu.ingredients.map((item) => {
+                        const key = ingredientKey(menu.id, item.name)
+                        return (
+                          <label className="ingredient-row toss-row" key={key}>
+                            <input checked={checkedIngredients.includes(key)} onChange={() => onToggleIngredient(key)} type="checkbox" />
+                            <em aria-hidden="true">{shoppingItemEmoji(item.name)}</em>
+                            <span>
+                              <i>pay 혜택</i>
+                              <strong>{item.name}</strong>
+                              <small>{item.quantity}</small>
+                            </span>
+                            <b>{formatWon(item.price)}</b>
+                          </label>
+                        )
+                      })}
+                    </div>
+                    <button className="toss-option-button" type="button">옵션 변경</button>
+                  </article>
+                )
+            })}
           </div>
           <div className="toss-cart-spacer" />
           <button className="toss-primary toss-cart-continue" disabled={!canContinue} onClick={() => onSetStep('store')} type="button">
-            토스쇼핑 주문서로 계속하기
+            <span>토스쇼핑 주문서로 계속하기</span>
+            <b>{formatWon(totalPrice)}</b>
           </button>
         </>
       )}
@@ -550,6 +570,28 @@ function OptionGroup({ title, children }: { title: string; children: ReactNode }
   )
 }
 
+function shoppingItemEmoji(name: string) {
+  if (name.includes('수박')) return '🍉'
+  if (name.includes('콩국수') || name.includes('소면') || name.includes('파스타')) return '🍜'
+  if (name.includes('콩국물') || name.includes('우유') || name.includes('요거트')) return '🥛'
+  if (name.includes('복숭아')) return '🍑'
+  if (name.includes('옥수수')) return '🌽'
+  if (name.includes('토마토')) return '🍅'
+  if (name.includes('오이')) return '🥒'
+  if (name.includes('가지')) return '🍆'
+  if (name.includes('귤')) return '🍊'
+  if (name.includes('배추')) return '🥬'
+  if (name.includes('굴')) return '🦪'
+  if (name.includes('무')) return '⚪'
+  if (name.includes('고구마')) return '🍠'
+  if (name.includes('버섯')) return '🍄'
+  if (name.includes('딸기')) return '🍓'
+  if (name.includes('샐러드')) return '🥗'
+  if (name.includes('치즈')) return '🧀'
+  if (name.includes('쌀') || name.includes('밥')) return '🍚'
+  return '🛒'
+}
+
 function PetHomeScreen({
   level,
   exp,
@@ -584,26 +626,27 @@ function PetHomeScreen({
   const [decorTab, setDecorTab] = useState<'all' | DecorItem['type']>('all')
   const [petTab, setPetTab] = useState<'feed' | 'decor'>('feed')
   const visibleItems = decorTab === 'all' ? decorItems : decorItems.filter((item) => item.type === decorTab)
-  const nextReward = getClosestReward(level, shoppingRewardUnlocked)
+  const expPercent = Math.min(100, Math.max(0, exp))
 
   return (
     <section className="screen pet-home-screen" onScroll={onScrollActivity}>
+      <div className="pet-index-tabs" aria-label="펫홈 보기">
+        <button className={petTab === 'feed' ? 'active' : ''} onClick={() => setPetTab('feed')} type="button">
+          <span>먹이기</span>
+        </button>
+        <button className={petTab === 'decor' ? 'active' : ''} onClick={() => setPetTab('decor')} type="button">
+          <span>꾸미기</span>
+        </button>
+      </div>
+
       <div className={`pet-room-stage ${roomClass(background)}`}>
         <button className="pet-share-button" aria-label="먹보 링크 복사" onClick={onShare} type="button">⤴</button>
         <PetAvatar mood={petMood} outfit={outfit} background={background} accessory={accessory} />
-        <div className="pet-room-status">
-          <span>{nextReward.title}</span>
-          <strong>{nextReward.reward}</strong>
+        <div className="pet-level-badge" aria-label={`레벨 ${level}, 경험치 ${expPercent}퍼센트`}>
+          <strong>Lv. {level}</strong>
+          <span>{exp}/{maxExp} xp</span>
+          <div className="pet-level-track"><i style={{ width: `${expPercent}%` }} /></div>
         </div>
-      </div>
-
-      <div className="pet-mode-tabs" aria-label="펫홈 보기">
-        <button className={petTab === 'feed' ? 'active' : ''} onClick={() => setPetTab('feed')} type="button">
-          <span>🍚</span> 먹이기
-        </button>
-        <button className={petTab === 'decor' ? 'active' : ''} onClick={() => setPetTab('decor')} type="button">
-          <span>✨</span> 꾸미기
-        </button>
       </div>
 
       {petTab === 'feed' && (
@@ -658,25 +701,6 @@ function PetHomeScreen({
       )}
     </section>
   )
-}
-
-function getClosestReward(level: number, shoppingRewardUnlocked: boolean) {
-  if (!shoppingRewardUnlocked) {
-    return {
-      title: '장보기 주문서 완료',
-      reward: '구름 방',
-    }
-  }
-  if (level < 2) {
-    return {
-      title: '먹보 Lv.2',
-      reward: '야시장',
-    }
-  }
-  return {
-    title: '다음 보상',
-    reward: '선글라스',
-  }
 }
 
 function decorIcon(item: DecorItem) {

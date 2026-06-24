@@ -383,10 +383,10 @@
   overflow: hidden;
   margin: 18px 0 20px;
   padding: 0;
-  border: 1px solid rgba(226, 216, 195, 0.82);
+  border: 0;
   border-radius: 10px;
   background: #ffffff;
-  box-shadow: 0 8px 18px rgba(97, 76, 45, 0.07);
+  box-shadow: 0 8px 18px rgba(97, 76, 45, 0.05);
   --season-spring-surface: #f1f8ee;
   --season-spring-ink: #5f8e4f;
   --season-summer-surface: #fff3ec;
@@ -499,12 +499,12 @@
 
 .season-panel-index .season-tabs {
   padding: 8px 0 8px 8px;
-  border-right: 1px solid rgba(226, 216, 195, 0.82);
+  border-right: 0;
   background: #ffffff;
 }
 
 .season-panel-index .season-tabs button + button {
-  border-top: 1px solid rgba(226, 216, 195, 0.72);
+  border-top: 0;
 }
 
 .season-panel-index .seasonal-grid {
@@ -1783,21 +1783,50 @@
 }
 
 .toss-menu-box {
+  overflow: hidden;
   border: 0;
-  border-radius: 8px;
-  box-shadow: 0 1px 0 rgba(25, 31, 40, 0.06);
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 1px 0 rgba(25, 31, 40, 0.08);
 }
 
 .toss-menu-box-head {
   grid-template-columns: 1fr auto;
-  padding: 13px 14px;
+  gap: 8px 10px;
+  padding: 12px 14px;
   border-bottom-color: #e5e8eb;
   background: #ffffff;
 }
 
-.toss-menu-box-head span {
+.toss-menu-box-head label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   color: #363a40;
-  font-size: 13px;
+}
+
+.toss-menu-box-head input {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  accent-color: #ff8a58;
+}
+
+.toss-menu-box-head span {
+  justify-self: end;
+  padding: 4px 7px;
+  border-radius: 4px;
+  color: #ff5f3f;
+  font-size: 11px;
+  font-weight: 900;
+  background: #fff0e9;
+}
+
+.toss-menu-box-head b {
+  grid-column: 1 / -1;
+  justify-self: end;
+  color: #363a40;
+  font-size: 14px;
 }
 
 .toss-menu-box-head strong {
@@ -1806,9 +1835,66 @@
 }
 
 .toss-list .toss-row {
-  min-height: 48px;
+  min-height: 72px;
   padding: 12px 14px;
-  background: #f8fafc;
+  background: #ffffff;
+}
+
+.toss-product-list {
+  gap: 0;
+}
+
+.toss-product-list .toss-row {
+  grid-template-columns: 18px 54px 1fr auto;
+  gap: 10px;
+  border-bottom: 0;
+}
+
+.toss-product-list .toss-row + .toss-row {
+  border-top: 1px solid #f0f2f4;
+}
+
+.toss-product-list em {
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  font-size: 24px;
+  font-style: normal;
+  background: #f4f6f8;
+}
+
+.toss-product-list i {
+  display: inline-block;
+  width: fit-content;
+  margin-bottom: 3px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  color: #178f5f;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 900;
+  background: #e9f8f0;
+}
+
+.toss-product-list small {
+  display: block;
+  margin-top: 3px;
+  color: #8b95a1;
+  font-size: 11px;
+}
+
+.toss-option-button {
+  width: calc(100% - 28px);
+  min-height: 36px;
+  margin: 0 14px 14px;
+  border: 1px solid #edf0f3;
+  border-radius: 6px;
+  color: #4e5968;
+  font-size: 12px;
+  font-weight: 800;
+  background: #ffffff;
 }
 
 .toss-row input {
@@ -1819,6 +1905,17 @@
 .toss-cart-continue {
   border-radius: 8px;
   background: #ff8a58;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 0 18px;
+  text-align: left;
+}
+
+.toss-cart-continue b {
+  color: #ffffff;
+  font-size: 15px;
 }
 
 .pet-home-screen {
@@ -1826,9 +1923,43 @@
   background: #ffffff;
 }
 
+.pet-index-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+  margin: 12px 16px 0;
+  padding: 8px;
+  border-radius: 10px 10px 0 0;
+  background: #ffffff;
+}
+
+.pet-index-tabs button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 0;
+  color: #3f3a36;
+  font-size: 13px;
+  font-weight: 900;
+  background: #ffffff;
+}
+
+.pet-index-tabs button span {
+  display: inline-grid;
+  min-width: 50px;
+  min-height: 22px;
+  place-items: center;
+  border-radius: 0;
+  background: transparent;
+}
+
+.pet-index-tabs button.active span {
+  background: color-mix(in srgb, #ff8a58 18%, #ffffff);
+}
+
 .pet-room-stage {
-  min-height: 360px;
-  margin: 0;
+  min-height: 350px;
+  margin: 0 16px;
+  border-radius: 0 0 10px 10px;
 }
 
 .pet-share-button {
@@ -1849,59 +1980,42 @@
   backdrop-filter: blur(10px);
 }
 
-.pet-room-status {
-  grid-template-columns: 1fr auto;
-  margin: 0 16px 14px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.76);
-}
-
-.pet-room-status span {
-  color: #473627;
-  font-size: 12px;
-}
-
-.pet-room-status strong {
-  margin: 0;
-  padding: 6px 10px;
-  border-radius: 999px;
-  color: #ffffff;
-  font-size: 12px;
-  background: #ff8a58;
-}
-
-.pet-mode-tabs {
+.pet-level-badge {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0;
-  margin: 14px 16px 0;
-  overflow: hidden;
-  border: 1px solid rgba(226, 216, 195, 0.82);
-  border-radius: 10px;
-  background: #ffffff;
+  grid-template-columns: auto 1fr;
+  gap: 5px 10px;
+  align-items: center;
+  margin: 0 16px 14px;
+  padding: 10px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(10px);
 }
 
-.pet-mode-tabs button {
-  min-height: 46px;
-  border: 0;
-  border-right: 1px solid rgba(226, 216, 195, 0.82);
-  color: #8d765e;
-  font-size: 13px;
-  font-weight: 900;
-  background: #ffffff;
-}
-
-.pet-mode-tabs button:last-child {
-  border-right: 0;
-}
-
-.pet-mode-tabs button.active {
+.pet-level-badge strong {
   color: #3f3a36;
-  background: #fff7f1;
+  font-size: 14px;
 }
 
-.pet-mode-tabs span {
-  margin-right: 5px;
+.pet-level-badge span {
+  color: #6f665f;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.pet-level-track {
+  grid-column: 1 / -1;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(226, 216, 195, 0.78);
+}
+
+.pet-level-track i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #ff8a58;
 }
 
 .pet-feed-panel {
