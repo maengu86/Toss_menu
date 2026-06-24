@@ -722,17 +722,18 @@ function roomClass(background: string) {
 }
 
 function TabBar({ current, onChange }: { current: Screen; onChange: (screen: Screen) => void }) {
-  const tabs: { id: Screen; label: string }[] = [
-    { id: 'home', label: '홈' },
-    { id: 'shopping', label: '장보기' },
-    { id: 'petHome', label: '펫홈' },
+  const tabs: { id: Screen; label: string; icon: string }[] = [
+    { id: 'home', label: '홈', icon: '🏠' },
+    { id: 'shopping', label: '장보기', icon: '🧺' },
+    { id: 'petHome', label: '펫홈', icon: '🐾' },
   ]
 
   return (
     <nav className="tab-bar" aria-label="하단 탭">
       {tabs.map((tab) => (
         <button className={current === tab.id ? 'active' : ''} key={tab.id} onClick={() => onChange(tab.id)} type="button">
-          <span>{tab.label}</span>
+          <span className="tab-icon" aria-hidden="true">{tab.icon}</span>
+          <span className="tab-label">{tab.label}</span>
         </button>
       ))}
     </nav>

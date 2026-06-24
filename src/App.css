@@ -1242,6 +1242,8 @@
 .tab-bar button {
   display: grid;
   place-items: center;
+  align-content: center;
+  gap: 3px;
   border: 0;
   color: #3f3a36;
   font-size: 12px;
@@ -1249,9 +1251,18 @@
   background: transparent;
 }
 
-.tab-bar span {
-  min-width: 58px;
-  min-height: 34px;
+.tab-bar .tab-icon {
+  min-width: auto;
+  min-height: auto;
+  display: block;
+  color: #6f665f;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.tab-bar .tab-label {
+  min-width: 42px;
+  min-height: 22px;
   display: grid;
   place-items: center;
   border-radius: 0;
@@ -1263,8 +1274,8 @@
   background: transparent;
 }
 
-.tab-bar button.active span {
-  background: #dff1cf;
+.tab-bar button.active .tab-label {
+  background: color-mix(in srgb, #dff1cf 60%, transparent);
 }
 
 .toast {
