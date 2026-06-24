@@ -419,7 +419,6 @@
   width: 74px;
   min-height: 42px;
   border: 0;
-  border-right: 1px solid rgba(226, 216, 195, 0.82);
   border-radius: 0;
   clip-path: none;
   color: #8d765e;
@@ -431,10 +430,10 @@
 
 .season-tabs button span {
   display: inline-grid;
-  min-width: 52px;
-  min-height: 30px;
+  min-width: 50px;
+  min-height: 26px;
   place-items: center;
-  border-radius: 7px;
+  border-radius: 6px;
   background: transparent;
 }
 
@@ -479,8 +478,7 @@
   min-height: 42px;
   position: relative;
   z-index: 2;
-  border-right-color: #ffffff;
-  border-radius: 8px 0 0 8px;
+  border-radius: 0;
   background: #ffffff;
   transform: none;
   box-shadow: none;
@@ -498,6 +496,7 @@
 
 .season-panel-index .season-tabs {
   padding: 8px 0 8px 8px;
+  border-right: 1px solid rgba(226, 216, 195, 0.82);
   background: #ffffff;
 }
 
