@@ -458,7 +458,6 @@ function ShoppingScreen({
                             <em aria-hidden="true">{shoppingItemEmoji(item.name)}</em>
                             <span>
                               <strong>{item.name}</strong>
-                              <small>{item.quantity}</small>
                             </span>
                             <b>{formatWon(item.price)}</b>
                           </label>
@@ -619,7 +618,6 @@ function PetHomeScreen({
   const [petTab, setPetTab] = useState<'feed' | 'decor'>('feed')
   const visibleItems = decorTab === 'all' ? decorItems : decorItems.filter((item) => item.type === decorTab)
   const feedMenus = selectedMenus.filter((menu) => !fedMenuIds.includes(menu.id))
-  const expPercent = Math.min(100, Math.max(0, exp))
   const decorTabs: { id: 'all' | DecorItem['type']; label: string; icon: string }[] = [
     { id: 'all', label: '전체', icon: '▦' },
     { id: 'background', label: '방', icon: '▭' },
@@ -632,11 +630,6 @@ function PetHomeScreen({
       <div className={`pet-room-stage ${roomClass(background)}`}>
         <button className="pet-share-button" aria-label="먹보 링크 복사" onClick={onShare} type="button">⤴</button>
         <PetAvatar outfit={outfit} background={background} accessory={accessory} />
-        <div className="pet-level-badge" aria-label={`레벨 ${level}, 경험치 ${expPercent}퍼센트`}>
-          <strong>Lv. {level}</strong>
-          <span>{exp}/{maxExp} xp</span>
-          <div className="pet-level-track"><i style={{ width: `${expPercent}%` }} /></div>
-        </div>
       </div>
 
       <div className="pet-action-tabs" aria-label="펫홈 작업">
