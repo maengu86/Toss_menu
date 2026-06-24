@@ -44,7 +44,6 @@ function App() {
   const [selectedOutfit, setSelectedOutfit] = useState('기본 앞치마')
   const [selectedAccessory, setSelectedAccessory] = useState('장바구니')
   const [toast, setToast] = useState('')
-  const [petMood, setPetMood] = useState<'idle' | 'happy'>('idle')
   const [isScrolling, setIsScrolling] = useState(false)
   const scrollTimerRef = useRef<number | undefined>(undefined)
 
@@ -105,8 +104,6 @@ function App() {
     setLevel((current) => current + gainedLevel)
     setExp(next % maxExp)
     setFedMenuIds((current) => [...current, menu.id])
-    setPetMood('happy')
-    window.setTimeout(() => setPetMood('idle'), 1200)
     showToast(gainedLevel > 0 ? '먹보가 레벨업했어요!' : `${menu.name} 먹고 경험치 +${menu.exp}`)
   }
 
@@ -190,7 +187,7 @@ function App() {
             step={shopStep}
             totalPrice={totalPrice}
             onCompleteOrder={completeOrderFlow}
-            onGoHome={() => setScreen('home')}
+            onGoHome={() => setScreen('petHome')}
             onScrollActivity={handleScrollActivity}
             onSelectDelivery={setDeliveryOption}
             onSelectDeliveryType={setSelectedDeliveryType}
@@ -209,7 +206,6 @@ function App() {
             fedMenuIds={fedMenuIds}
             level={level}
             outfit={selectedOutfit}
-            petMood={petMood}
             selectedMenus={selectedMenus}
             shoppingRewardUnlocked={shoppingRewardUnlocked}
             onFeed={feedPet}
@@ -553,7 +549,7 @@ function ShoppingScreen({
             <div><span>배송 요청</span><b>{deliveryOption}</b></div>
             <div><span>총액</span><b>{formatWon(orderTotal)}</b></div>
           </div>
-          <button className="toss-primary" onClick={onGoHome} type="button">홈에서 펫에게 밥 먹이기</button>
+          <button className="toss-primary" onClick={onGoHome} type="button">펫홈에서 밥 먹이기</button>
           <button className="toss-secondary wide" onClick={() => onSetStep('cart')} type="button">다시 장보기 보기</button>
         </div>
       )}
@@ -600,7 +596,6 @@ function PetHomeScreen({
   accessory,
   selectedMenus,
   fedMenuIds,
-  petMood,
   decorItems,
   shoppingRewardUnlocked,
   onFeed,
@@ -615,7 +610,6 @@ function PetHomeScreen({
   accessory: string
   selectedMenus: Menu[]
   fedMenuIds: string[]
-  petMood: 'idle' | 'happy'
   decorItems: DecorItem[]
   shoppingRewardUnlocked: boolean
   onFeed: (menu: Menu) => void
@@ -626,6 +620,7 @@ function PetHomeScreen({
   const [decorTab, setDecorTab] = useState<'all' | DecorItem['type']>('all')
   const [petTab, setPetTab] = useState<'feed' | 'decor'>('feed')
   const visibleItems = decorTab === 'all' ? decorItems : decorItems.filter((item) => item.type === decorTab)
+  const feedMenus = selectedMenus.filter((menu) => !fedMenuIds.includes(menu.id))
   const expPercent = Math.min(100, Math.max(0, exp))
 
   return (
@@ -641,7 +636,7 @@ function PetHomeScreen({
 
       <div className={`pet-room-stage ${roomClass(background)}`}>
         <button className="pet-share-button" aria-label="먹보 링크 복사" onClick={onShare} type="button">⤴</button>
-        <PetAvatar mood={petMood} outfit={outfit} background={background} accessory={accessory} />
+        <PetAvatar outfit={outfit} background={background} accessory={accessory} />
         <div className="pet-level-badge" aria-label={`레벨 ${level}, 경험치 ${expPercent}퍼센트`}>
           <strong>Lv. {level}</strong>
           <span>{exp}/{maxExp} xp</span>
@@ -661,16 +656,13 @@ function PetHomeScreen({
             </div>
           </div>
           <div className="feed-list compact-feed-list">
-            {selectedMenus.length === 0 && <p className="empty">홈에서 메뉴를 고르면 먹보에게 먹일 수 있어요.</p>}
-            {selectedMenus.map((menu) => {
-              const fed = fedMenuIds.includes(menu.id)
-              return (
-                <button className="feed-card" disabled={fed} key={menu.id} onClick={() => onFeed(menu)} type="button">
-                  <span>{menu.name}</span>
-                  <b>{fed ? '먹었어요' : `+${menu.exp} xp`}</b>
-                </button>
-              )
-            })}
+            {feedMenus.length === 0 && <p className="empty">먹일 메뉴가 없어요. 홈에서 메뉴를 골라주세요.</p>}
+            {feedMenus.map((menu) => (
+              <button className="feed-card" key={menu.id} onClick={() => onFeed(menu)} type="button">
+                <span>{menu.name}</span>
+                <b>+{menu.exp} xp</b>
+              </button>
+            ))}
           </div>
         </section>
       )}

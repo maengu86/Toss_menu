@@ -1,17 +1,14 @@
 type PetAvatarProps = {
-  mood?: 'idle' | 'happy'
   outfit?: string
   background?: string
   accessory?: string
 }
 
 function PetAvatar({
-  mood = 'idle',
   outfit = '기본 앞치마',
   background = '햇살 주방',
   accessory = '장바구니',
 }: PetAvatarProps) {
-  const isHappy = mood === 'happy'
   const hasWatermelonHat = outfit.includes('수박')
   const hasScarf = outfit.includes('목도리')
   const hasChefCoat = outfit.includes('셰프')
@@ -44,8 +41,8 @@ function PetAvatar({
                   : ''
 
   return (
-    <div className={`pet-stage pet-dress-stage ${stageClass} ${isHappy ? 'is-eating' : ''}`}>
-      <svg className={`pet-svg dress-pet soft-pet ${isHappy ? 'is-eating' : ''}`} viewBox="0 0 260 260" role="img" aria-label="먹보 펫">
+    <div className={`pet-stage pet-dress-stage ${stageClass}`}>
+      <svg className="pet-svg dress-pet soft-pet" viewBox="0 0 260 260" role="img" aria-label="먹보 펫">
         <defs>
           <linearGradient id="mukboBody" x1="70" x2="190" y1="42" y2="218" gradientUnits="userSpaceOnUse">
             <stop stopColor="#fffdf5" />
@@ -84,15 +81,7 @@ function PetAvatar({
         <ellipse cx="85" cy="133" rx="11" ry="8" fill="#f3a4a0" opacity="0.72" />
         <ellipse cx="175" cy="133" rx="11" ry="8" fill="#f3a4a0" opacity="0.72" />
         <path d="M124 124c4 4 8 4 12 0" fill="none" stroke="#d49836" strokeWidth="5" strokeLinecap="round" />
-        <path d={isHappy ? 'M106 143c14 14 34 14 48 0' : 'M111 144c12 7 26 7 38 0'} fill="none" stroke="#3f3a36" strokeWidth="5" strokeLinecap="round" />
-
-        {isHappy && (
-          <g className="munch-bites">
-            <circle cx="115" cy="135" r="4" fill="#ff8a58" />
-            <circle cx="145" cy="135" r="4" fill="#75b84f" />
-            <path d="M121 153c6 4 12 4 18 0" stroke="#ff8a58" strokeWidth="4" strokeLinecap="round" />
-          </g>
-        )}
+        <path d="M111 144c12 7 26 7 38 0" fill="none" stroke="#3f3a36" strokeWidth="5" strokeLinecap="round" />
 
         <path d="M93 168h74l-7 42h-60z" fill="#fff8ed" stroke="#6f5a45" strokeWidth="4" />
         <path d="M103 180h54" stroke="#e6d5bd" strokeWidth="4" strokeLinecap="round" />

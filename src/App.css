@@ -2079,37 +2079,6 @@
   transform: translate(-50%, -50%);
 }
 
-.pet-stage.is-eating .dress-pet,
-.dress-pet.is-eating {
-  animation: eat-bounce 560ms ease-in-out 2;
-}
-
-.munch-bites {
-  animation: munch-pop 560ms ease-in-out 2;
-}
-
-@keyframes eat-bounce {
-  0%,
-  100% {
-    transform: translateY(0) scale(1);
-  }
-  45% {
-    transform: translateY(5px) scale(1.035);
-  }
-}
-
-@keyframes munch-pop {
-  0%,
-  100% {
-    opacity: 0;
-    transform: translateY(0);
-  }
-  45% {
-    opacity: 1;
-    transform: translateY(-5px);
-  }
-}
-
 @media (max-width: 520px) {
   .app-shell {
     padding: 0;
