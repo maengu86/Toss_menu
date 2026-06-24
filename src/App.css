@@ -639,6 +639,178 @@
   margin-top: 4px;
 }
 
+.tab-drafts {
+  display: grid;
+  gap: 16px;
+  margin: 18px 0 22px;
+}
+
+.tab-drafts .section-title {
+  margin-bottom: 0;
+}
+
+.tab-draft {
+  position: relative;
+  padding-top: 26px;
+}
+
+.draft-label {
+  position: absolute;
+  top: 0;
+  left: 2px;
+  color: #725f4b;
+  font-size: 12px;
+}
+
+.draft-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  align-items: end;
+  padding: 0 8px;
+}
+
+.draft-tabs button {
+  min-height: 30px;
+  border: 1px solid rgba(226, 216, 195, 0.88);
+  border-bottom: 0;
+  color: #8d765e;
+  font-size: 12px;
+  font-weight: 900;
+  background: #faf7ef;
+}
+
+.draft-tabs button.active {
+  color: #2f251d;
+  background: #ffffff;
+}
+
+.draft-ingredient-box {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 12px;
+  border: 1px solid rgba(226, 216, 195, 0.88);
+  background: #ffffff;
+  scrollbar-color: transparent transparent;
+  scrollbar-width: thin;
+  scroll-snap-type: x proximity;
+}
+
+.draft-ingredient-box::-webkit-scrollbar {
+  height: 7px;
+}
+
+.draft-ingredient-box::-webkit-scrollbar-track,
+.draft-ingredient-box::-webkit-scrollbar-button,
+.draft-ingredient-box::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.draft-ingredient-box::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: transparent;
+}
+
+.phone.is-scrolling .draft-ingredient-box {
+  scrollbar-color: var(--orange) transparent;
+}
+
+.phone.is-scrolling .draft-ingredient-box::-webkit-scrollbar-thumb {
+  background: var(--orange);
+}
+
+.draft-ingredient-box button {
+  min-width: 74px;
+  min-height: 72px;
+  display: grid;
+  flex: 0 0 auto;
+  gap: 6px;
+  place-items: center;
+  padding: 8px 6px;
+  border: 1px solid rgba(226, 216, 195, 0.82);
+  border-radius: 14px;
+  background: #ffffff;
+  scroll-snap-align: center;
+}
+
+.draft-ingredient-box button.active {
+  border-color: #ff8a58;
+  box-shadow: inset 0 0 0 1px rgba(255, 138, 88, 0.18);
+}
+
+.draft-ingredient-box span {
+  font-size: 19px;
+  line-height: 1;
+}
+
+.draft-ingredient-box b {
+  color: #2f251d;
+  font-size: 11px;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.draft-clip .draft-tabs {
+  gap: 5px;
+}
+
+.draft-clip .draft-tabs button {
+  border-radius: 12px 12px 3px 3px;
+  clip-path: polygon(10% 0, 90% 0, 100% 100%, 0 100%);
+}
+
+.draft-clip .draft-ingredient-box {
+  margin-top: -1px;
+  border-radius: 16px;
+}
+
+.draft-folder .draft-tabs {
+  gap: 0;
+  padding: 0;
+}
+
+.draft-folder .draft-tabs button {
+  border-radius: 0;
+  background: #fbf8f1;
+}
+
+.draft-folder .draft-tabs button:first-child {
+  border-radius: 14px 0 0 0;
+}
+
+.draft-folder .draft-tabs button:last-child {
+  border-radius: 0 14px 0 0;
+}
+
+.draft-folder .draft-tabs button.active {
+  box-shadow: inset 0 -3px 0 #ff8a58;
+}
+
+.draft-folder .draft-ingredient-box {
+  margin-top: -1px;
+  border-radius: 0 0 16px 16px;
+}
+
+.draft-notebook .draft-tabs {
+  gap: 4px;
+  padding: 0 18px;
+}
+
+.draft-notebook .draft-tabs button {
+  min-height: 27px;
+  border-radius: 9px 9px 0 0;
+  transform: translateY(1px);
+}
+
+.draft-notebook .draft-tabs button.active {
+  transform: translateY(0);
+}
+
+.draft-notebook .draft-ingredient-box {
+  border-radius: 18px;
+  box-shadow: inset 0 6px 0 rgba(250, 247, 239, 0.9);
+}
+
 .nested-menu-list {
   padding: 0;
   border: 0;
