@@ -63,8 +63,6 @@ function App() {
   const selectedDeliveryInfo = tossShoppingOptions.find((option) => option.name === selectedDeliveryType) ?? tossShoppingOptions[0]
   const orderTotal = totalPrice + selectedDeliveryInfo.fee
   const checkedTotal = shoppingItems.filter((item) => checkedIngredients.includes(ingredientKey(item.menuId, item.ingredient.name))).length
-  const unlockedItems = decorItems.filter((item) => isDecorUnlocked(item, level, shoppingRewardUnlocked))
-
   function showToast(message: string) {
     setToast(message)
     window.setTimeout(() => setToast(''), 2200)
@@ -214,7 +212,6 @@ function App() {
             petMood={petMood}
             selectedMenus={selectedMenus}
             shoppingRewardUnlocked={shoppingRewardUnlocked}
-            unlockedCount={unlockedItems.length}
             onFeed={feedPet}
             onSelectDecor={selectDecor}
             onShare={copyShareLink}
@@ -559,7 +556,6 @@ function PetHomeScreen({
   petMood,
   decorItems,
   shoppingRewardUnlocked,
-  unlockedCount,
   onFeed,
   onSelectDecor,
   onShare,
@@ -575,130 +571,106 @@ function PetHomeScreen({
   petMood: 'idle' | 'happy'
   decorItems: DecorItem[]
   shoppingRewardUnlocked: boolean
-  unlockedCount: number
   onFeed: (menu: Menu) => void
   onSelectDecor: (item: DecorItem) => void
   onShare: () => void
   onScrollActivity: () => void
 }) {
   const [decorTab, setDecorTab] = useState<'all' | DecorItem['type']>('all')
+  const [petTab, setPetTab] = useState<'feed' | 'decor'>('feed')
   const visibleItems = decorTab === 'all' ? decorItems : decorItems.filter((item) => item.type === decorTab)
   const nextReward = getClosestReward(level, shoppingRewardUnlocked)
 
   return (
     <section className="screen pet-home-screen" onScroll={onScrollActivity}>
-      <header className="compact-header pet-home-header">
-        <div>
-          <span>먹보</span>
-          <h1>먹보의 방 꾸미기</h1>
-        </div>
-        <button aria-label="먹보 링크 복사" onClick={onShare} type="button">↗</button>
-      </header>
-
       <div className={`pet-room-stage ${roomClass(background)}`}>
-        <SeasonRoomDecor background={background} />
+        <button className="pet-share-button" aria-label="먹보 링크 복사" onClick={onShare} type="button">⤴</button>
         <PetAvatar mood={petMood} outfit={outfit} background={background} accessory={accessory} />
         <div className="pet-room-status">
-          <div>
-            <span>해금 {unlockedCount}/{decorItems.length}</span>
-            <strong>{nextReward.title}</strong>
-          </div>
-          <small>{nextReward.reward}</small>
+          <span>{nextReward.title}</span>
+          <strong>{nextReward.reward}</strong>
         </div>
       </div>
 
-      <section className="pet-feed-panel">
-        <div className="section-title">
-          <h2>먹보에게 먹이기</h2>
-          <span>Lv. {level}</span>
-        </div>
-        <div className="level-card">
-          <div>
-            <strong>Lv. {level}</strong>
-            <span>{exp}/{maxExp} xp</span>
-          </div>
-          <div className="progress-track">
-            <div className="progress-fill" style={{ width: `${exp}%` }} />
-          </div>
-        </div>
-        <div className="feed-list compact-feed-list">
-          {selectedMenus.length === 0 && <p className="empty">홈에서 메뉴를 고르면 먹보에게 먹일 수 있어요.</p>}
-          {selectedMenus.map((menu) => {
-            const fed = fedMenuIds.includes(menu.id)
-            return (
-              <button className="feed-card" disabled={fed} key={menu.id} onClick={() => onFeed(menu)} type="button">
-                <span>{menu.name}</span>
-                <b>{fed ? '먹었어요' : `+${menu.exp} xp`}</b>
-              </button>
-            )
-          })}
-        </div>
-      </section>
-
-      <div className="pet-inventory">
-        <div className="decor-tabs" aria-label="꾸미기 분류">
-          <button className={decorTab === 'all' ? 'active' : ''} onClick={() => setDecorTab('all')} type="button">♥</button>
-          <button className={decorTab === 'background' ? 'active' : ''} onClick={() => setDecorTab('background')} type="button">▦</button>
-          <button className={decorTab === 'outfit' ? 'active' : ''} onClick={() => setDecorTab('outfit')} type="button">👕</button>
-          <button className={decorTab === 'accessory' ? 'active' : ''} onClick={() => setDecorTab('accessory')} type="button">☕</button>
-        </div>
-
-        <div className="decor-grid">
-          {visibleItems.map((item) => {
-            const unlocked = isDecorUnlocked(item, level, shoppingRewardUnlocked)
-            const selected = item.name === background || item.name === outfit || item.name === accessory
-            return (
-              <button className={`decor-card ${selected ? 'selected' : ''} ${unlocked ? '' : 'locked'}`} key={item.id} onClick={() => onSelectDecor(item)} type="button">
-                <span>{decorIcon(item)}</span>
-                <strong>{item.name}</strong>
-                <small>{unlocked ? (selected ? '착용중' : '해금됨') : item.unlockByShopping ? '장보기 보상' : `Lv.${item.unlockLevel}`}</small>
-              </button>
-            )
-          })}
-        </div>
+      <div className="pet-mode-tabs" aria-label="펫홈 보기">
+        <button className={petTab === 'feed' ? 'active' : ''} onClick={() => setPetTab('feed')} type="button">
+          <span>🍚</span> 먹이기
+        </button>
+        <button className={petTab === 'decor' ? 'active' : ''} onClick={() => setPetTab('decor')} type="button">
+          <span>✨</span> 꾸미기
+        </button>
       </div>
+
+      {petTab === 'feed' && (
+        <section className="pet-feed-panel">
+          <div className="level-card">
+            <div>
+              <strong>Lv. {level}</strong>
+              <span>{exp}/{maxExp} xp</span>
+            </div>
+            <div className="progress-track">
+              <div className="progress-fill" style={{ width: `${exp}%` }} />
+            </div>
+          </div>
+          <div className="feed-list compact-feed-list">
+            {selectedMenus.length === 0 && <p className="empty">홈에서 메뉴를 고르면 먹보에게 먹일 수 있어요.</p>}
+            {selectedMenus.map((menu) => {
+              const fed = fedMenuIds.includes(menu.id)
+              return (
+                <button className="feed-card" disabled={fed} key={menu.id} onClick={() => onFeed(menu)} type="button">
+                  <span>{menu.name}</span>
+                  <b>{fed ? '먹었어요' : `+${menu.exp} xp`}</b>
+                </button>
+              )
+            })}
+          </div>
+        </section>
+      )}
+
+      {petTab === 'decor' && (
+        <div className="pet-inventory">
+          <div className="decor-tabs" aria-label="꾸미기 분류">
+            <button className={decorTab === 'all' ? 'active' : ''} onClick={() => setDecorTab('all')} type="button">전체</button>
+            <button className={decorTab === 'background' ? 'active' : ''} onClick={() => setDecorTab('background')} type="button">방</button>
+            <button className={decorTab === 'outfit' ? 'active' : ''} onClick={() => setDecorTab('outfit')} type="button">옷</button>
+            <button className={decorTab === 'accessory' ? 'active' : ''} onClick={() => setDecorTab('accessory')} type="button">소품</button>
+          </div>
+
+          <div className="decor-grid">
+            {visibleItems.map((item) => {
+              const unlocked = isDecorUnlocked(item, level, shoppingRewardUnlocked)
+              const selected = item.name === background || item.name === outfit || item.name === accessory
+              return (
+                <button className={`decor-card ${selected ? 'selected' : ''} ${unlocked ? '' : 'locked'}`} key={item.id} onClick={() => onSelectDecor(item)} type="button">
+                  <span>{decorIcon(item)}</span>
+                  <strong>{item.name}</strong>
+                  <small>{unlocked ? (selected ? '착용중' : '') : item.unlockByShopping ? '장보기 보상' : `Lv.${item.unlockLevel}`}</small>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </section>
-  )
-}
-
-function SeasonRoomDecor({ background }: { background: string }) {
-  const isSpring = background.includes('봄꽃') || background.includes('피크닉')
-  const isSummer = background.includes('여름') || background.includes('햇살') || background.includes('바닷가')
-  const isAutumn = background.includes('가을') || background.includes('야시장')
-  const isWinter = background.includes('겨울') || background.includes('구름') || background.includes('눈꽃')
-  const icons = isSpring
-    ? ['🌷', '🍓', '🌿']
-    : isAutumn
-      ? ['🍁', '🍠', '🌰']
-      : isWinter
-        ? ['❄️', '🍊', '☃️']
-        : isSummer
-          ? ['🍉', '🌊', '🧊']
-          : ['☀️', '🌿', '🍽️']
-
-  return (
-    <div className="season-room-decor" aria-hidden="true">
-      {icons.map((icon, index) => <span key={`${icon}-${index}`}>{icon}</span>)}
-    </div>
   )
 }
 
 function getClosestReward(level: number, shoppingRewardUnlocked: boolean) {
   if (!shoppingRewardUnlocked) {
     return {
-      title: '다음 보상: 장보기 주문서 완료',
-      reward: '구름 방 · 레인 판초 · 미니 선풍기',
+      title: '장보기 주문서 완료',
+      reward: '구름 방',
     }
   }
   if (level < 2) {
     return {
-      title: '다음 보상: 먹보 Lv.2',
-      reward: '야시장 · 겨울 목도리 · 선글라스',
+      title: '먹보 Lv.2',
+      reward: '야시장',
     }
   }
   return {
-    title: '보상 수집 진행중',
-    reward: '새 메뉴를 먹이면 경험치가 올라요',
+    title: '다음 보상',
+    reward: '선글라스',
   }
 }
 

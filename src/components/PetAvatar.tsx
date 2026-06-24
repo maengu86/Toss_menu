@@ -44,8 +44,8 @@ function PetAvatar({
                   : ''
 
   return (
-    <div className={`pet-stage pet-dress-stage ${stageClass}`}>
-      <svg className="pet-svg dress-pet soft-pet" viewBox="0 0 260 260" role="img" aria-label="먹보 펫">
+    <div className={`pet-stage pet-dress-stage ${stageClass} ${isHappy ? 'is-eating' : ''}`}>
+      <svg className={`pet-svg dress-pet soft-pet ${isHappy ? 'is-eating' : ''}`} viewBox="0 0 260 260" role="img" aria-label="먹보 펫">
         <defs>
           <linearGradient id="petHead" x1="68" x2="192" y1="36" y2="155" gradientUnits="userSpaceOnUse">
             <stop stopColor="#fff9e9" />
@@ -58,11 +58,13 @@ function PetAvatar({
         </defs>
 
         <ellipse cx="130" cy="229" rx="65" ry="14" fill="#7b5835" opacity="0.13" />
+        <circle cx="62" cy="58" r="8" fill="#ffffff" opacity="0.6" />
+        <circle cx="205" cy="54" r="6" fill="#ffffff" opacity="0.55" />
 
         <path d="M84 82c-21-19-34-19-43-5 18 2 30 12 39 30z" fill="#ffe0a2" stroke="#8b6038" strokeWidth="5" />
         <path d="M176 82c21-19 34-19 43-5-18 2-30 12-39 30z" fill="#ffe0a2" stroke="#8b6038" strokeWidth="5" />
-        <path d="M104 49c8-18 22-23 36-10-14 4-22 13-25 28z" fill="#83c874" />
-        <path d="M156 49c-8-18-22-23-36-10 14 4 22 13 25 28z" fill="#75b84f" />
+        <path d="M104 49c8-18 22-23 36-10-14 4-22 13-25 28z" fill="#8fdc80" />
+        <path d="M156 49c-8-18-22-23-36-10 14 4 22 13 25 28z" fill="#75c963" />
 
         <path
           d="M62 104c0-39 30-68 68-68s68 29 68 68c0 43-27 73-68 73s-68-30-68-73z"
@@ -91,6 +93,13 @@ function PetAvatar({
         <circle cx="172" cy="123" r="12" fill="#f29aa0" opacity="0.74" />
         <path d="M124 116c4 4 8 4 12 0" fill="none" stroke="#d7a131" strokeWidth="5" strokeLinecap="round" />
         <path d={isHappy ? 'M106 135c15 15 33 15 48 0' : 'M112 138c11 7 25 7 36 0'} fill="none" stroke="#29384a" strokeWidth="5" strokeLinecap="round" />
+        {isHappy && (
+          <g className="munch-bites">
+            <circle cx="94" cy="141" r="5" fill="#ff8a58" />
+            <circle cx="166" cy="142" r="4" fill="#75b84f" />
+            <path d="M126 129c4 3 8 3 12 0" stroke="#ff8a58" strokeWidth="4" strokeLinecap="round" />
+          </g>
+        )}
 
         {hasGlasses && (
           <g>
