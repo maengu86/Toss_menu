@@ -416,6 +416,7 @@
 }
 
 .season-tabs button {
+  width: 74px;
   min-height: 42px;
   border: 0;
   border-right: 1px solid rgba(226, 216, 195, 0.82);
@@ -428,24 +429,49 @@
   box-shadow: none;
 }
 
+.season-tabs button span {
+  display: inline-grid;
+  min-width: 52px;
+  min-height: 30px;
+  place-items: center;
+  border-radius: 7px;
+  background: transparent;
+}
+
 .season-tabs button[style*="7abf63"] {
   color: var(--season-spring-ink);
-  background: var(--season-spring-surface);
+  background: #ffffff;
+}
+
+.season-tabs button[style*="7abf63"] span {
+  background: color-mix(in srgb, var(--season-spring-surface) 60%, transparent);
 }
 
 .season-tabs button[style*="ff9a62"] {
   color: var(--season-summer-ink);
-  background: var(--season-summer-surface);
+  background: #ffffff;
+}
+
+.season-tabs button[style*="ff9a62"] span {
+  background: color-mix(in srgb, var(--season-summer-surface) 60%, transparent);
 }
 
 .season-tabs button[style*="d79555"] {
   color: var(--season-autumn-ink);
-  background: var(--season-autumn-surface);
+  background: #ffffff;
+}
+
+.season-tabs button[style*="d79555"] span {
+  background: color-mix(in srgb, var(--season-autumn-surface) 60%, transparent);
 }
 
 .season-tabs button[style*="70aeca"] {
   color: var(--season-winter-ink);
-  background: var(--season-winter-surface);
+  background: #ffffff;
+}
+
+.season-tabs button[style*="70aeca"] span {
+  background: color-mix(in srgb, var(--season-winter-surface) 60%, transparent);
 }
 
 .season-tabs button.active {
@@ -458,6 +484,10 @@
   background: #ffffff;
   transform: none;
   box-shadow: none;
+}
+
+.season-tabs button.active span {
+  background: #ffffff;
 }
 
 .season-panel-index {
@@ -475,9 +505,19 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
+  max-height: 160px;
   padding: 8px;
   background: #ffffff;
-  overflow: visible;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+.season-panel-index .seasonal-grid::-webkit-scrollbar {
+  display: none;
 }
 
 .season-panel-index .seasonal-tile {

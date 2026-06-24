@@ -282,7 +282,7 @@ function HomeScreen({
               style={{ '--season-accent': season.accent } as CSSProperties}
               type="button"
             >
-              {season.label}
+              <span>{season.label}</span>
             </button>
           ))}
         </div>
