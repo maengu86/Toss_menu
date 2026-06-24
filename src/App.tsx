@@ -29,7 +29,6 @@ function App() {
   const [screen, setScreen] = useState<Screen>('home')
   const [selectedMenuIds, setSelectedMenuIds] = useState<string[]>([])
   const [selectedMenuOpen, setSelectedMenuOpen] = useState(false)
-  const [selectedMenuVariant, setSelectedMenuVariant] = useState(1)
   const [selectedSeason, setSelectedSeason] = useState<SeasonKey>('summer')
   const [selectedSeasonalIngredientId, setSelectedSeasonalIngredientId] = useState(firstSummerIngredient.id)
   const [fedMenuIds, setFedMenuIds] = useState<string[]>([])
@@ -159,8 +158,6 @@ function App() {
             selectedMenuIds={selectedMenuIds}
             onRemoveMenu={removeMenu}
             onScrollActivity={handleScrollActivity}
-            selectedMenuVariant={selectedMenuVariant}
-            onSelectMenuVariant={setSelectedMenuVariant}
             onSelectSeason={changeSeason}
             onSelectSeasonalIngredient={setSelectedSeasonalIngredientId}
             onSetSelectedMenuOpen={setSelectedMenuOpen}
@@ -238,10 +235,8 @@ function HomeScreen({
   selectedMenuOpen,
   selectedMenus,
   selectedMenuIds,
-  selectedMenuVariant,
   onRemoveMenu,
   onScrollActivity,
-  onSelectMenuVariant,
   onSelectSeason,
   onSelectSeasonalIngredient,
   onSetSelectedMenuOpen,
@@ -257,10 +252,8 @@ function HomeScreen({
   selectedMenuOpen: boolean
   selectedMenus: Menu[]
   selectedMenuIds: string[]
-  selectedMenuVariant: number
   onRemoveMenu: (id: string) => void
   onScrollActivity: () => void
-  onSelectMenuVariant: (variant: number) => void
   onSelectSeason: (season: SeasonKey) => void
   onSelectSeasonalIngredient: (id: string) => void
   onSetSelectedMenuOpen: (open: boolean) => void
@@ -335,19 +328,7 @@ function HomeScreen({
           {selectedMenuOpen && (
             <>
               <button className="selected-menu-backdrop" aria-label="선택 메뉴 닫기" onClick={() => onSetSelectedMenuOpen(false)} type="button" />
-              <div className={`selected-menu-panel variant-${selectedMenuVariant}`}>
-                <div className="fab-panel-variants" aria-label="구매 패널 색상 시안">
-                  {[1, 2, 3].map((variant) => (
-                    <button
-                      className={selectedMenuVariant === variant ? 'active' : ''}
-                      key={variant}
-                      onClick={() => onSelectMenuVariant(variant)}
-                      type="button"
-                    >
-                      시안 {variant}
-                    </button>
-                  ))}
-                </div>
+              <div className="selected-menu-panel variant-2">
                 {selectedMenus.map((menu) => (
                   <div className="selected-menu-chip" key={menu.id}>
                     <span>{menu.name}</span>
@@ -489,10 +470,15 @@ function ShoppingScreen({
             })}
           </div>
           <div className="toss-cart-spacer" />
-          <button className="toss-primary toss-cart-continue" disabled={!canContinue} onClick={() => onSetStep('store')} type="button">
-            <span>토스쇼핑 주문서로 계속하기</span>
-            <b>{formatWon(checkedPrice)}</b>
-          </button>
+          <div className="toss-cart-orderbar" aria-label="주문 예상 금액">
+            <div>
+              <span>총 주문 예상금액</span>
+              <strong>{formatWon(checkedPrice)}</strong>
+            </div>
+            <button className="toss-primary toss-cart-continue" disabled={!canContinue} onClick={() => onSetStep('store')} type="button">
+              주문하기
+            </button>
+          </div>
         </>
       )}
 
