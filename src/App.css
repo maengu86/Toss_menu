@@ -509,12 +509,12 @@
 
 .season-panel-index .seasonal-grid {
   display: grid;
-  grid-template-columns: repeat(3, 72px);
-  justify-content: space-between;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  justify-content: stretch;
   align-content: start;
-  gap: 8px;
-  max-height: 154px;
-  padding: 8px;
+  gap: 7px;
+  max-height: 146px;
+  padding: 7px;
   background: #ffffff;
   overflow-x: hidden;
   overflow-y: auto;
@@ -531,8 +531,8 @@
 .season-panel-index .seasonal-tile {
   width: 100%;
   min-width: 0;
-  height: 72px;
-  min-height: 72px;
+  height: 66px;
+  min-height: 66px;
   aspect-ratio: auto;
   align-content: center;
   gap: 4px;
@@ -629,10 +629,10 @@
 
 .seasonal-tile strong {
   color: #3f3a36;
-  min-height: 22px;
+  min-height: 20px;
   display: grid;
   place-items: center;
-  font-size: 10px;
+  font-size: 9.5px;
   line-height: 1.1;
   text-align: center;
   white-space: nowrap;
@@ -647,71 +647,6 @@
 
 .sub-directory-title {
   margin-top: 4px;
-}
-
-.compact-draft-title {
-  margin: 16px 0 10px;
-}
-
-.compact-draft-title h2 {
-  font-size: 15px;
-}
-
-.nav-emoji-drafts {
-  margin: 16px 0 18px;
-}
-
-.nav-emoji-draft-list {
-  display: grid;
-  gap: 8px;
-}
-
-.nav-emoji-draft {
-  display: grid;
-  grid-template-columns: 54px minmax(0, 1fr);
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
-  border: 1px solid rgba(226, 216, 195, 0.78);
-  border-radius: 10px;
-  background: #ffffff;
-}
-
-.nav-emoji-draft > span {
-  color: #8d765e;
-  font-size: 11px;
-  font-weight: 900;
-}
-
-.nav-emoji-draft div {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 5px;
-}
-
-.nav-emoji-draft i {
-  min-width: 0;
-  min-height: 42px;
-  display: grid;
-  place-items: center;
-  align-content: center;
-  gap: 4px;
-  border-radius: 8px;
-  background: rgba(242, 127, 91, 0.08);
-  font-style: normal;
-}
-
-.nav-emoji-draft b {
-  font-size: 15px;
-  line-height: 1;
-}
-
-.nav-emoji-draft em {
-  color: #3f3a36;
-  font-size: 10px;
-  font-style: normal;
-  font-weight: 900;
-  line-height: 1;
 }
 
 .tab-drafts {
@@ -995,12 +930,12 @@
 }
 
 .selected-menu-panel.variant-2 {
-  background: #fff8f5;
+  background: #ffffff;
 }
 
 .selected-menu-panel.variant-2 .selected-menu-shop {
-  color: #3f3a36;
-  background: #fff1eb;
+  color: #ffffff;
+  background: var(--orange);
 }
 
 .selected-menu-panel-head,
@@ -1060,9 +995,9 @@
   margin-top: 4px;
   border: 0;
   border-radius: 10px;
-  color: #3f3a36;
+  color: #ffffff;
   font-weight: 900;
-  background: #fff1eb;
+  background: var(--orange);
 }
 
 .menu-card {
@@ -1071,12 +1006,12 @@
   grid-template-columns: 1fr auto;
   gap: 12px;
   align-items: center;
-  padding: 14px;
-  border: 1px solid #efd8b4;
-  border-radius: 18px;
+  padding: 15px 14px;
+  border: 1px solid rgba(226, 216, 195, 0.9);
+  border-radius: 12px;
   color: #3e3327;
   text-align: left;
-  background: #fffdf4;
+  background: #ffffff;
   transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
@@ -1097,7 +1032,8 @@
   display: block;
   margin: 3px 0;
   color: #3f3a36;
-  font-size: 17px;
+  font-size: 19px;
+  line-height: 1.2;
 }
 
 .menu-card p {
@@ -1462,6 +1398,7 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
   position: absolute;
+  z-index: 200;
   right: 0;
   bottom: 0;
   left: 0;
@@ -1961,14 +1898,14 @@
 
 .toss-cart-orderbar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 142px;
+  grid-template-columns: minmax(0, 1fr) 104px;
   align-items: center;
   gap: 12px;
   position: fixed;
   right: max(0px, calc((100vw - 430px) / 2));
   bottom: 101px;
   left: max(0px, calc((100vw - 430px) / 2));
-  z-index: 90;
+  z-index: 120;
   width: min(100vw, 430px);
   padding: 10px 16px;
   border-top: 1px solid rgba(229, 232, 235, 0.95);
@@ -1981,17 +1918,18 @@
   display: grid;
   gap: 4px;
   min-width: 0;
+  overflow: hidden;
 }
 
 .toss-cart-orderbar span {
   color: #8d765e;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 900;
 }
 
 .toss-cart-orderbar strong {
   color: #3f3a36;
-  font-size: 18px;
+  font-size: 17px;
   line-height: 1;
 }
 
@@ -2107,7 +2045,8 @@
 
 .toss-cart-continue {
   border-radius: 8px;
-  background: #fff1eb;
+  color: #ffffff;
+  background: var(--orange);
   box-shadow: none;
 }
 

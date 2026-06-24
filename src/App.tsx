@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import './App.css'
-import PetAvatar, { PetCharacterConcepts } from './components/PetAvatar'
+import PetAvatar from './components/PetAvatar'
 import { decorItems, menus, seasonalIngredients, seasons } from './data'
 import type { DecorItem, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
 
@@ -13,14 +13,6 @@ const tossShoppingOptions = [
 const paymentOptions = ['토스페이', '카드 간편결제', '계좌 결제']
 const deliveryOptions = ['문 앞에 놓기', '직접 받을게요']
 const maxExp = 100
-
-const navEmojiDrafts = [
-  { id: 1, icons: ['🏠', '🧺', '🐾'] },
-  { id: 2, icons: ['🍽️', '🛒', '🐶'] },
-  { id: 3, icons: ['🥗', '🧾', '🏡'] },
-  { id: 4, icons: ['🍚', '🥕', '🐕'] },
-  { id: 5, icons: ['🌿', '🛍️', '💛'] },
-]
 
 type ShopStep = 'cart' | 'checkout' | 'complete'
 
@@ -268,7 +260,7 @@ function HomeScreen({
     <section className="screen" onScroll={onScrollActivity}>
       <header className="top-header">
         <p>{today}</p>
-        <h1>오늘의 제철 음식 추천</h1>
+        <h1>지금 제철 음식은 뭐가 있을까?</h1>
       </header>
 
       <div className={`season-panel season-panel-index season-${selectedSeason}`}>
@@ -325,27 +317,6 @@ function HomeScreen({
           )
         })}
       </div>
-
-      <section className="nav-emoji-drafts" aria-label="하단 네비바 이모지 시안">
-        <div className="section-title compact-draft-title">
-          <h2>하단 네비 이모지 시안</h2>
-        </div>
-        <div className="nav-emoji-draft-list">
-          {navEmojiDrafts.map((draft) => (
-            <div className="nav-emoji-draft" key={draft.id}>
-              <span>시안 {draft.id}</span>
-              <div>
-                {['홈', '장보기', '펫홈'].map((label, index) => (
-                  <i key={label}>
-                    <b aria-hidden="true">{draft.icons[index]}</b>
-                    <em>{label}</em>
-                  </i>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {selectedMenus.length > 0 && (
         <div className={`selected-menu-widget ${selectedMenuOpen ? 'open' : ''}`}>
@@ -416,12 +387,6 @@ function ShoppingScreen({
 
   return (
     <section className="screen toss-screen" onScroll={onScrollActivity}>
-      <header className="toss-shopping-header">
-        <button aria-label="뒤로" type="button">‹</button>
-        <strong>토스쇼핑</strong>
-        <span>주문</span>
-      </header>
-
       <header className="compact-header toss-header">
         <span>오늘 뭐 먹지? 장보기</span>
         <h1>{step === 'complete' ? '주문 체험 완료' : '토스쇼핑에서 재료를 담아요'}</h1>
@@ -441,11 +406,6 @@ function ShoppingScreen({
 
       {step === 'cart' && (
         <>
-          <div className="toss-summary-card">
-            <span>예상 주문금액</span>
-            <strong>{formatWon(checkedPrice)}</strong>
-            <p>구매 체크 {checkedTotal}/{itemCount}</p>
-          </div>
           <div className="toss-menu-list">
             {selectedMenus.length === 0 && <p className="empty">홈에서 메뉴를 먼저 선택해주세요.</p>}
             {selectedMenus.map((menu) => {
@@ -493,7 +453,7 @@ function ShoppingScreen({
               <strong>{formatWon(checkedPrice)}</strong>
             </div>
             <button className="toss-primary toss-cart-continue" disabled={!canContinue} onClick={() => onSetStep('checkout')} type="button">
-              토스쇼핑 주문서로 계속하기
+              주문하기
             </button>
           </div>
         </>
@@ -673,7 +633,6 @@ function PetHomeScreen({
               </button>
             ))}
           </div>
-          <PetCharacterConcepts />
         </section>
       )}
 

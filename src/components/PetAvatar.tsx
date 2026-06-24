@@ -44,48 +44,59 @@ function PetAvatar({
     <div className={`pet-stage pet-dress-stage ${stageClass}`}>
       <svg className="pet-svg dress-pet soft-pet" viewBox="0 0 260 260" role="img" aria-label="먹보 펫">
         <defs>
+          {/* Character palette: 시안 3번 기준입니다. stopColor만 바꾸면 몸 전체 톤을 쉽게 조정할 수 있습니다. */}
           <linearGradient id="mukboBody" x1="70" x2="190" y1="42" y2="218" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#fffdf5" />
-            <stop offset="0.55" stopColor="#fff0cf" />
-            <stop offset="1" stopColor="#ffd79a" />
+            <stop stopColor="#fff3ec" />
+            <stop offset="0.55" stopColor="#f7d7c4" />
+            <stop offset="1" stopColor="#eec2ad" />
           </linearGradient>
-          <linearGradient id="mukboEar" x1="55" x2="92" y1="76" y2="118" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#ffe2b5" />
-            <stop offset="1" stopColor="#ffba80" />
+          <linearGradient id="mukboEar" x1="55" x2="92" y1="40" y2="132" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#f0cde8" />
+            <stop offset="1" stopColor="#d7a9e5" />
           </linearGradient>
         </defs>
 
         <ellipse cx="130" cy="230" rx="66" ry="13" fill="#7b5835" opacity="0.12" />
 
-        <path d="M78 98c-18-20-38-19-49 1 17 0 31 10 43 26z" fill="url(#mukboEar)" stroke="#6f5a45" strokeWidth="5" strokeLinejoin="round" />
-        <path d="M182 98c18-20 38-19 49 1-17 0-31 10-43 26z" fill="url(#mukboEar)" stroke="#6f5a45" strokeWidth="5" strokeLinejoin="round" />
-
+        {/* Z-order guide: SVG는 아래 코드가 먼저 뒤에 깔립니다. 몸통/팔을 먼저 그리고 얼굴을 나중에 그려 얼굴이 가려지지 않게 합니다. */}
+        {/* Body: 3등신 비율의 몸통입니다. d 경로의 숫자를 바꾸면 키, 몸통 폭, 다리 길이를 수정할 수 있습니다. */}
         <path
-          d="M58 132c0-54 30-91 72-91s72 37 72 91c0 61-28 96-72 96s-72-35-72-96z"
+          d="M78 135c6-36 28-56 52-56s46 20 52 56l12 82H66z"
           fill="url(#mukboBody)"
           stroke="#6f5a45"
           strokeWidth="6"
           strokeLinejoin="round"
         />
-        <path d="M83 163c8 33 25 49 47 49s39-16 47-49c-11 13-27 20-47 20s-36-7-47-20z" fill="#fffaf0" opacity="0.78" />
+        <path d="M88 155h84l-10 52h-64z" fill="#fff8f5" opacity="0.9" />
+        <text x="130" y="190" textAnchor="middle" fill="#7e887f" fontSize="11" fontWeight="900">MUKBO</text>
 
-        <path d="M72 166c-15 7-23 19-21 31 14 3 27-6 34-25z" fill="#ffe0ad" stroke="#6f5a45" strokeWidth="5" strokeLinecap="round" />
-        <path d="M188 166c15 7 23 19 21 31-14 3-27-6-34-25z" fill="#ffe0ad" stroke="#6f5a45" strokeWidth="5" strokeLinecap="round" />
-        <path d="M104 222c-12 6-11 17 2 20 10-1 17-7 19-17z" fill="#ffd79a" stroke="#6f5a45" strokeWidth="5" strokeLinecap="round" />
-        <path d="M156 222c12 6 11 17-2 20-10-1-17-7-19-17z" fill="#ffd79a" stroke="#6f5a45" strokeWidth="5" strokeLinecap="round" />
+        {/* Arms/feet: 얼굴보다 뒤쪽에 있어야 해서 머리보다 먼저 렌더링합니다. */}
+        <path d="M82 158c-24 9-34 25-27 42 18 0 31-12 40-33z" fill="url(#mukboEar)" stroke="#6f5a45" strokeWidth="5" strokeLinecap="round" />
+        <path d="M178 158c24 9 34 25 27 42-18 0-31-12-40-33z" fill="url(#mukboEar)" stroke="#6f5a45" strokeWidth="5" strokeLinecap="round" />
+        <path d="M96 218c-13 6-13 18 2 22 11 0 18-6 21-17z" fill="#d7a9e5" stroke="#6f5a45" strokeWidth="5" strokeLinecap="round" />
+        <path d="M164 218c13 6 13 18-2 22-11 0-18-6-21-17z" fill="#d7a9e5" stroke="#6f5a45" strokeWidth="5" strokeLinecap="round" />
 
-        <circle cx="101" cy="112" r="8" fill="#3f3a36" />
-        <circle cx="159" cy="112" r="8" fill="#3f3a36" />
-        <circle cx="98" cy="109" r="2.5" fill="#ffffff" />
-        <circle cx="156" cy="109" r="2.5" fill="#ffffff" />
-        <ellipse cx="85" cy="133" rx="11" ry="8" fill="#f3a4a0" opacity="0.72" />
-        <ellipse cx="175" cy="133" rx="11" ry="8" fill="#f3a4a0" opacity="0.72" />
-        <path d="M124 124c4 4 8 4 12 0" fill="none" stroke="#d49836" strokeWidth="5" strokeLinecap="round" />
-        <path d="M111 144c12 7 26 7 38 0" fill="none" stroke="#3f3a36" strokeWidth="5" strokeLinecap="round" />
+        {/* Ears/head: 시안 3번의 물방울 귀입니다. 귀 모양은 M/C 좌표를 조절해서 바꿀 수 있습니다. */}
+        <path d="M78 91c-31-18-40-48-22-69 28 10 40 35 34 68z" fill="url(#mukboEar)" stroke="#6f5a45" strokeWidth="5" strokeLinejoin="round" />
+        <path d="M182 91c31-18 40-48 22-69-28 10-40 35-34 68z" fill="url(#mukboEar)" stroke="#6f5a45" strokeWidth="5" strokeLinejoin="round" />
+        <path
+          d="M58 95c0-43 32-72 72-72s72 29 72 72c0 45-30 74-72 74s-72-29-72-74z"
+          fill="url(#mukboBody)"
+          stroke="#6f5a45"
+          strokeWidth="6"
+          strokeLinejoin="round"
+        />
+        <path d="M86 120c16 18 72 18 88 0 3 25-16 42-44 42s-47-17-44-42z" fill="#ffffff" opacity="0.36" />
 
-        <path d="M93 168h74l-7 42h-60z" fill="#fff8ed" stroke="#6f5a45" strokeWidth="4" />
-        <path d="M103 180h54" stroke="#e6d5bd" strokeWidth="4" strokeLinecap="round" />
-        <text x="130" y="198" textAnchor="middle" fill="#7e887f" fontSize="11" fontWeight="900">MUKBO</text>
+        {/* Face: 눈(cx/cy), 볼(ellipse), 입(path)을 바꾸면 표정을 수정할 수 있습니다. */}
+        <circle cx="103" cy="89" r="8" fill="#3f3a36" />
+        <circle cx="157" cy="89" r="8" fill="#3f3a36" />
+        <circle cx="100" cy="86" r="2.5" fill="#ffffff" />
+        <circle cx="154" cy="86" r="2.5" fill="#ffffff" />
+        <ellipse cx="87" cy="111" rx="11" ry="8" fill="#f3a4a0" opacity="0.62" />
+        <ellipse cx="173" cy="111" rx="11" ry="8" fill="#f3a4a0" opacity="0.62" />
+        <path d="M124 103c4 4 8 4 12 0" fill="none" stroke="#b884a2" strokeWidth="5" strokeLinecap="round" />
+        <path d="M113 124c11 8 23 8 34 0" fill="none" stroke="#3f3a36" strokeWidth="5" strokeLinecap="round" />
 
         {hasScarf && (
           <>
@@ -198,71 +209,6 @@ function AccessoryMandarin() {
       <circle cx="38" cy="28" r="9" fill="#ffb25f" />
       <circle cx="32" cy="39" r="9" fill="#f2a13b" />
     </g>
-  )
-}
-
-const characterConcepts = [
-  { id: 1, name: '시안 1', body: '#ffdca8', accent: '#f28b66', ear: 'round' },
-  { id: 2, name: '시안 2', body: '#fff1c8', accent: '#8fc8a0', ear: 'leaf' },
-  { id: 3, name: '시안 3', body: '#f7d7c4', accent: '#d7a9e5', ear: 'drop' },
-  { id: 4, name: '시안 4', body: '#d9edf7', accent: '#f2b66d', ear: 'round' },
-  { id: 5, name: '시안 5', body: '#f4e2bc', accent: '#7eb7a0', ear: 'leaf' },
-]
-
-export function PetCharacterConcepts() {
-  return (
-    <section className="pet-character-concepts" aria-label="3등신 캐릭터 시안">
-      <div className="section-title compact-draft-title">
-        <h2>3등신 캐릭터 시안</h2>
-      </div>
-      <div className="pet-character-concept-grid">
-        {characterConcepts.map((concept) => (
-          <article className="pet-character-concept" key={concept.id}>
-            <ConceptAvatar concept={concept} />
-            <strong>{concept.name}</strong>
-          </article>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-function ConceptAvatar({ concept }: { concept: (typeof characterConcepts)[number] }) {
-  return (
-    <svg viewBox="0 0 140 170" role="img" aria-label={`${concept.name} 캐릭터`}>
-      <ellipse cx="70" cy="157" rx="39" ry="8" fill="#3f3a36" opacity="0.1" />
-      <path d="M45 110c-16 6-22 17-17 27 12 0 21-8 26-22z" fill={concept.accent} stroke="#6f5a45" strokeWidth="4" strokeLinecap="round" />
-      <path d="M95 110c16 6 22 17 17 27-12 0-21-8-26-22z" fill={concept.accent} stroke="#6f5a45" strokeWidth="4" strokeLinecap="round" />
-      <path d="M43 104c3-22 17-34 27-34s24 12 27 34l5 40H38z" fill={concept.body} stroke="#6f5a45" strokeWidth="4" />
-      <path d="M49 114h42l-5 25H54z" fill="#fff8f5" opacity="0.9" />
-      <path d="M51 144c-8 4-8 12 1 15 8 0 13-4 15-12z" fill={concept.accent} stroke="#6f5a45" strokeWidth="4" strokeLinecap="round" />
-      <path d="M89 144c8 4 8 12-1 15-8 0-13-4-15-12z" fill={concept.accent} stroke="#6f5a45" strokeWidth="4" strokeLinecap="round" />
-      {concept.ear === 'leaf' && (
-        <>
-          <path d="M39 45c-18-14-21-31-8-39 13 9 18 23 15 42z" fill={concept.accent} />
-          <path d="M101 45c18-14 21-31 8-39-13 9-18 23-15 42z" fill={concept.accent} />
-        </>
-      )}
-      {concept.ear === 'drop' && (
-        <>
-          <path d="M42 48c-18-10-23-27-13-39 16 6 22 20 20 39z" fill={concept.accent} />
-          <path d="M98 48c18-10 23-27 13-39-16 6-22 20-20 39z" fill={concept.accent} />
-        </>
-      )}
-      {concept.ear === 'round' && (
-        <>
-          <circle cx="37" cy="43" r="18" fill={concept.accent} />
-          <circle cx="103" cy="43" r="18" fill={concept.accent} />
-        </>
-      )}
-      <circle cx="70" cy="56" r="42" fill={concept.body} stroke="#6f5a45" strokeWidth="4" />
-      <path d="M48 78c12 12 32 12 44 0 2 15-8 26-22 26S46 93 48 78z" fill="#ffffff" opacity="0.35" />
-      <ellipse cx="54" cy="64" rx="7" ry="9" fill="#3f3a36" />
-      <ellipse cx="86" cy="64" rx="7" ry="9" fill="#3f3a36" />
-      <circle cx="52" cy="61" r="2" fill="#ffffff" />
-      <circle cx="84" cy="61" r="2" fill="#ffffff" />
-      <path d="M62 77c5 5 11 5 16 0" fill="none" stroke="#3f3a36" strokeWidth="4" strokeLinecap="round" />
-    </svg>
   )
 }
 
