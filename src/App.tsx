@@ -620,18 +620,15 @@ function PetHomeScreen({
   const visibleItems = decorTab === 'all' ? decorItems : decorItems.filter((item) => item.type === decorTab)
   const feedMenus = selectedMenus.filter((menu) => !fedMenuIds.includes(menu.id))
   const expPercent = Math.min(100, Math.max(0, exp))
+  const decorTabs: { id: 'all' | DecorItem['type']; label: string; icon: string }[] = [
+    { id: 'all', label: '전체', icon: '▦' },
+    { id: 'background', label: '방', icon: '▭' },
+    { id: 'outfit', label: '옷', icon: '▱' },
+    { id: 'accessory', label: '소품', icon: '▤' },
+  ]
 
   return (
     <section className="screen pet-home-screen" onScroll={onScrollActivity}>
-      <div className="pet-index-tabs" aria-label="펫홈 보기">
-        <button className={petTab === 'feed' ? 'active' : ''} onClick={() => setPetTab('feed')} type="button">
-          <span>먹이기</span>
-        </button>
-        <button className={petTab === 'decor' ? 'active' : ''} onClick={() => setPetTab('decor')} type="button">
-          <span>꾸미기</span>
-        </button>
-      </div>
-
       <div className={`pet-room-stage ${roomClass(background)}`}>
         <button className="pet-share-button" aria-label="먹보 링크 복사" onClick={onShare} type="button">⤴</button>
         <PetAvatar outfit={outfit} background={background} accessory={accessory} />
@@ -640,6 +637,27 @@ function PetHomeScreen({
           <span>{exp}/{maxExp} xp</span>
           <div className="pet-level-track"><i style={{ width: `${expPercent}%` }} /></div>
         </div>
+      </div>
+
+      <div className="pet-action-tabs" aria-label="펫홈 작업">
+        <button className={petTab === 'feed' ? 'active' : ''} onClick={() => setPetTab('feed')} type="button">
+          <span aria-hidden="true">♥</span>
+          <b>밥먹이기</b>
+        </button>
+        {decorTabs.map((tab) => (
+          <button
+            className={petTab === 'decor' && decorTab === tab.id ? 'active' : ''}
+            key={tab.id}
+            onClick={() => {
+              setPetTab('decor')
+              setDecorTab(tab.id)
+            }}
+            type="button"
+          >
+            <span aria-hidden="true">{tab.icon}</span>
+            <b>{tab.label}</b>
+          </button>
+        ))}
       </div>
 
       {petTab === 'feed' && (
@@ -667,13 +685,6 @@ function PetHomeScreen({
 
       {petTab === 'decor' && (
         <div className="pet-inventory">
-          <div className="decor-tabs" aria-label="꾸미기 분류">
-            <button className={decorTab === 'all' ? 'active' : ''} onClick={() => setDecorTab('all')} type="button">전체</button>
-            <button className={decorTab === 'background' ? 'active' : ''} onClick={() => setDecorTab('background')} type="button">방</button>
-            <button className={decorTab === 'outfit' ? 'active' : ''} onClick={() => setDecorTab('outfit')} type="button">옷</button>
-            <button className={decorTab === 'accessory' ? 'active' : ''} onClick={() => setDecorTab('accessory')} type="button">소품</button>
-          </div>
-
           <div className="decor-grid">
             {visibleItems.map((item) => {
               const unlocked = isDecorUnlocked(item, level, shoppingRewardUnlocked)

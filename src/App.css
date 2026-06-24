@@ -2048,43 +2048,10 @@
   background: #ffffff;
 }
 
-.pet-index-tabs {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0;
-  margin: 12px 16px 0;
-  padding: 8px;
-  border-radius: 10px 10px 0 0;
-  background: #ffffff;
-}
-
-.pet-index-tabs button {
-  min-height: 42px;
-  border: 0;
-  border-radius: 0;
-  color: #3f3a36;
-  font-size: 13px;
-  font-weight: 900;
-  background: #ffffff;
-}
-
-.pet-index-tabs button span {
-  display: inline-grid;
-  min-width: 50px;
-  min-height: 22px;
-  place-items: center;
-  border-radius: 0;
-  background: transparent;
-}
-
-.pet-index-tabs button.active span {
-  background: color-mix(in srgb, #ff8a58 18%, #ffffff);
-}
-
 .pet-room-stage {
   min-height: 350px;
-  margin: 0 16px;
-  border-radius: 0 0 10px 10px;
+  margin: 12px 16px 0;
+  border-radius: 10px 10px 0 0;
 }
 
 .pet-share-button {
@@ -2143,14 +2110,60 @@
   background: #ff8a58;
 }
 
+.pet-action-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+  margin: 0 16px;
+  padding: 8px 8px 7px;
+  border-top: 1px solid rgba(226, 216, 195, 0.72);
+  background: #f4e7bf;
+}
+
+.pet-action-tabs button {
+  min-width: 0;
+  min-height: 52px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 3px;
+  border: 0;
+  border-radius: 10px;
+  color: #a98e3f;
+  font-weight: 900;
+  background: transparent;
+}
+
+.pet-action-tabs button.active {
+  color: #3f3a36;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.pet-action-tabs span {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.pet-action-tabs b {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 10px;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .pet-feed-panel {
-  margin: 12px 16px 44px;
+  margin: 0 16px 44px;
+  padding: 12px 0 0;
+  border-radius: 0 0 10px 10px;
+  background: #ffffff;
 }
 
 .pet-inventory {
-  margin: 12px 16px 12px;
+  margin: 0 16px 12px;
   padding: 0 0 16px;
-  border-radius: 10px;
+  border-radius: 0 0 10px 10px;
   background: #ffffff;
   box-shadow: none;
 }
