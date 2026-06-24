@@ -14,6 +14,22 @@ const paymentOptions = ['토스페이', '카드 간편결제', '계좌 결제']
 const deliveryOptions = ['문 앞에 놓기', '직접 받을게요']
 const maxExp = 100
 
+const receiptDrafts = [
+  { id: 1, label: '라인형', items: ['결제 수단', '배송 방식', '배송 요청', '총액'] },
+  { id: 2, label: '칩형', items: ['토스페이', '바로배송', '문 앞', '총액'] },
+  { id: 3, label: '요약형', items: ['결제', '배송', '요청', '금액'] },
+  { id: 4, label: '분리형', items: ['수단', '방식', '요청', '합계'] },
+  { id: 5, label: '영수증형', items: ['Pay', 'Ship', 'Memo', 'Total'] },
+]
+
+const emptyFeedDrafts = [
+  { id: 1, tone: '#fff4ef' },
+  { id: 2, tone: '#f2f7ff' },
+  { id: 3, tone: '#f4fbf5' },
+  { id: 4, tone: '#faf5ff' },
+  { id: 5, tone: '#fff9e8' },
+]
+
 type ShopStep = 'cart' | 'checkout' | 'complete'
 
 function formatWon(value: number) {
@@ -182,6 +198,7 @@ function App() {
             paymentMethod={paymentMethod}
             paymentOptions={paymentOptions}
             step={shopStep}
+            onBackHome={() => setScreen('home')}
             onCompleteOrder={completeOrderFlow}
             onGoHome={() => setScreen('petHome')}
             onScrollActivity={handleScrollActivity}
@@ -356,6 +373,7 @@ function ShoppingScreen({
   onSelectPayment,
   onSelectDelivery,
   onSetStep,
+  onBackHome,
   onCompleteOrder,
   onGoHome,
   onScrollActivity,
@@ -375,6 +393,7 @@ function ShoppingScreen({
   onSelectPayment: (method: string) => void
   onSelectDelivery: (option: string) => void
   onSetStep: (step: ShopStep) => void
+  onBackHome: () => void
   onCompleteOrder: () => void
   onGoHome: () => void
   onScrollActivity: () => void
@@ -383,6 +402,10 @@ function ShoppingScreen({
 
   return (
     <section className="screen toss-screen" onScroll={onScrollActivity}>
+      <div className="toss-back-row">
+        <button aria-label="홈으로 돌아가기" onClick={onBackHome} type="button">‹</button>
+      </div>
+
       {step === 'cart' && (
         <>
           <div className="toss-menu-list">
@@ -440,10 +463,6 @@ function ShoppingScreen({
 
       {step === 'checkout' && (
         <>
-          <div className="toss-copy toss-order-note">
-            <strong>토스쇼핑 주문서</strong>
-            <p>선택한 재료와 배송 정보, 결제 수단을 한 화면에서 확인해요.</p>
-          </div>
           <div className="checkout-card">
             <div>
               <span>토스쇼핑 배송</span>
@@ -483,6 +502,17 @@ function ShoppingScreen({
             <div><span>배송 방식</span><b>{deliveryTypeInfo.name}</b></div>
             <div><span>배송 요청</span><b>{deliveryOption}</b></div>
             <div><span>총액</span><b>{formatWon(orderTotal)}</b></div>
+          </div>
+          <div className="receipt-drafts" aria-label="주문 완료 정보 시안">
+            {receiptDrafts.map((draft) => (
+              <article className={`receipt-draft receipt-draft-${draft.id}`} key={draft.id}>
+                <strong>시안 {draft.id}</strong>
+                <span>{draft.label}</span>
+                <div>
+                  {draft.items.map((item) => <i key={item}>{item}</i>)}
+                </div>
+              </article>
+            ))}
           </div>
           <button className="toss-primary" onClick={onGoHome} type="button">펫홈에서 밥 먹이기</button>
           <button className="toss-secondary wide" onClick={() => onSetStep('cart')} type="button">다시 장보기 보기</button>
@@ -603,7 +633,15 @@ function PetHomeScreen({
             </div>
           </div>
           <div className="feed-list compact-feed-list">
-            {feedMenus.length === 0 && <p className="empty">먹일 메뉴가 없어요. 홈에서 메뉴를 골라주세요.</p>}
+            {feedMenus.length === 0 && (
+              <div className="empty-feed-drafts" aria-label="먹이기 빈 상태 시안">
+                {emptyFeedDrafts.map((draft) => (
+                  <p className="empty" key={draft.id} style={{ '--empty-tone': draft.tone } as CSSProperties}>
+                    시안 {draft.id} · 밥을 먹이시려면, 메뉴를 주문해주세요
+                  </p>
+                ))}
+              </div>
+            )}
             {feedMenus.map((menu) => (
               <button className="feed-card" key={menu.id} onClick={() => onFeed(menu)} type="button">
                 <span>{menu.name}</span>
