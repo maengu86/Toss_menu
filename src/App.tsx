@@ -96,7 +96,6 @@ function App() {
 
   function feedPet(menu: Menu) {
     if (fedMenuIds.includes(menu.id)) {
-      showToast('이미 먹인 메뉴예요.')
       return
     }
 
@@ -105,7 +104,6 @@ function App() {
     setLevel((current) => current + gainedLevel)
     setExp(next % maxExp)
     setFedMenuIds((current) => [...current, menu.id])
-    showToast(gainedLevel > 0 ? '먹보가 레벨업했어요!' : `${menu.name} 먹고 경험치 +${menu.exp}`)
   }
 
   function toggleIngredient(key: string) {
@@ -117,7 +115,6 @@ function App() {
   function completeOrderFlow() {
     setShoppingRewardUnlocked(true)
     setShopStep('complete')
-    showToast('주문 플로우 완료! 실제 결제는 진행되지 않았어요.')
   }
 
   function selectDecor(item: DecorItem) {
@@ -382,28 +379,10 @@ function ShoppingScreen({
   onGoHome: () => void
   onScrollActivity: () => void
 }) {
-  const itemCount = selectedMenus.reduce((count, menu) => count + menu.ingredients.length, 0)
   const canContinue = checkedTotal > 0
 
   return (
     <section className="screen toss-screen" onScroll={onScrollActivity}>
-      <header className="compact-header toss-header">
-        <span>오늘 뭐 먹지? 장보기</span>
-        <h1>{step === 'complete' ? '주문 체험 완료' : '토스쇼핑에서 재료를 담아요'}</h1>
-      </header>
-
-      <div className="toss-steps" aria-label="쇼핑 진행 단계">
-        {['장바구니', '주문서', '완료'].map((label, index) => {
-          const activeIndex = step === 'cart' ? 0 : step === 'checkout' ? 1 : 2
-          return (
-            <div className={index <= activeIndex ? 'active' : ''} key={label}>
-              <span>{index + 1}</span>
-              {label}
-            </div>
-          )
-        })}
-      </div>
-
       {step === 'cart' && (
         <>
           <div className="toss-menu-list">
@@ -497,9 +476,8 @@ function ShoppingScreen({
 
       {step === 'complete' && (
         <div className="complete-card">
-          <span>결제 기능 없음</span>
           <h2>주문 체험이 완료됐어요</h2>
-          <p>토스쇼핑에서 {itemCount}개 재료를 주문한 것처럼 처리했어요. 실제 결제와 주문은 발생하지 않습니다.</p>
+          <p>실제 결제와 주문은 발생하지 않습니다.</p>
           <div className="receipt-mini">
             <div><span>결제 수단</span><b>{paymentMethod}</b></div>
             <div><span>배송 방식</span><b>{deliveryTypeInfo.name}</b></div>

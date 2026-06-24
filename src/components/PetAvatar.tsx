@@ -51,8 +51,8 @@ function PetAvatar({
             <stop offset="1" stopColor="#eec2ad" />
           </linearGradient>
           <linearGradient id="mukboEar" x1="55" x2="92" y1="40" y2="132" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#f0cde8" />
-            <stop offset="1" stopColor="#d7a9e5" />
+            <stop stopColor="#ffd8ca" />
+            <stop offset="1" stopColor="#f27f5b" />
           </linearGradient>
         </defs>
 
@@ -73,8 +73,8 @@ function PetAvatar({
         {/* Arms/feet: 얼굴보다 뒤쪽에 있어야 해서 머리보다 먼저 렌더링합니다. */}
         <path d="M82 158c-24 9-34 25-27 42 18 0 31-12 40-33z" fill="url(#mukboEar)" stroke="#6f5a45" strokeWidth="5" strokeLinecap="round" />
         <path d="M178 158c24 9 34 25 27 42-18 0-31-12-40-33z" fill="url(#mukboEar)" stroke="#6f5a45" strokeWidth="5" strokeLinecap="round" />
-        <path d="M96 218c-13 6-13 18 2 22 11 0 18-6 21-17z" fill="#d7a9e5" stroke="#6f5a45" strokeWidth="5" strokeLinecap="round" />
-        <path d="M164 218c13 6 13 18-2 22-11 0-18-6-21-17z" fill="#d7a9e5" stroke="#6f5a45" strokeWidth="5" strokeLinecap="round" />
+        <path d="M96 218c-13 6-13 18 2 22 11 0 18-6 21-17z" fill="#f27f5b" stroke="#6f5a45" strokeWidth="5" strokeLinecap="round" />
+        <path d="M164 218c13 6 13 18-2 22-11 0-18-6-21-17z" fill="#f27f5b" stroke="#6f5a45" strokeWidth="5" strokeLinecap="round" />
 
         {/* Ears/head: 시안 3번의 물방울 귀입니다. 귀 모양은 M/C 좌표를 조절해서 바꿀 수 있습니다. */}
         <path d="M78 91c-31-18-40-48-22-69 28 10 40 35 34 68z" fill="url(#mukboEar)" stroke="#6f5a45" strokeWidth="5" strokeLinejoin="round" />
@@ -93,8 +93,8 @@ function PetAvatar({
         <circle cx="157" cy="89" r="8" fill="#3f3a36" />
         <circle cx="100" cy="86" r="2.5" fill="#ffffff" />
         <circle cx="154" cy="86" r="2.5" fill="#ffffff" />
-        <ellipse cx="87" cy="111" rx="11" ry="8" fill="#f3a4a0" opacity="0.62" />
-        <ellipse cx="173" cy="111" rx="11" ry="8" fill="#f3a4a0" opacity="0.62" />
+        <ellipse cx="87" cy="111" rx="11" ry="8" fill="#f27f5b" opacity="0.22" />
+        <ellipse cx="173" cy="111" rx="11" ry="8" fill="#f27f5b" opacity="0.22" />
         <path d="M124 103c4 4 8 4 12 0" fill="none" stroke="#b884a2" strokeWidth="5" strokeLinecap="round" />
         <path d="M113 124c11 8 23 8 34 0" fill="none" stroke="#3f3a36" strokeWidth="5" strokeLinecap="round" />
 

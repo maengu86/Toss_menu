@@ -363,7 +363,7 @@
   flex: 0 0 auto;
   padding: 10px 13px;
   color: #3f3a36;
-  background: #fff1eb;
+  background: #f2f4f6;
 }
 
 .section-title {
@@ -961,7 +961,7 @@
   width: 30px;
   height: 30px;
   color: #725f4b;
-  background: #fff1eb;
+  background: #f2f4f6;
 }
 
 .selected-menu-chip {
@@ -1053,7 +1053,7 @@
   min-height: 54px;
   margin-top: 18px;
   color: #3f3a36;
-  background: #fff1eb;
+  background: #f2f4f6;
   box-shadow: 0 12px 24px rgba(84, 51, 19, 0.12);
 }
 
@@ -1160,15 +1160,18 @@
 }
 
 .pet-home-screen .pet-stage {
-  height: 314px;
+  height: 58svh;
+  min-height: 410px;
+  max-height: 560px;
   margin: 0;
   border-radius: 0;
   background: transparent;
 }
 
 .pet-home-screen .dress-pet {
-  width: 278px;
-  max-width: 96%;
+  width: min(88%, 330px);
+  max-width: 330px;
+  max-height: 92%;
 }
 
 .sparkles {
@@ -1208,13 +1211,13 @@
   margin-top: 12px;
   overflow: hidden;
   border-radius: 999px;
-  background: #ead7b6;
+  background: #f2f4f6;
 }
 
 .progress-fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #a8c878, var(--orange));
+  background: var(--orange);
   transition: width 220ms ease;
 }
 
@@ -1274,7 +1277,7 @@
   margin-top: 16px;
   padding: 6px;
   border-radius: 18px;
-  background: #fff1eb;
+  background: #f2f4f6;
 }
 
 .market-group button {
@@ -1555,7 +1558,7 @@
 
 .toss-steps div.active span {
   color: #3f3a36;
-  background: #fff1eb;
+  background: #f2f4f6;
 }
 
 .toss-summary-card,
@@ -1654,7 +1657,7 @@
 
 .toss-row input {
   margin: 0;
-  accent-color: var(--orange);
+  accent-color: #8b95a1;
 }
 
 .toss-row strong,
@@ -1675,9 +1678,9 @@
 .toss-primary {
   width: 100%;
   margin-top: 16px;
-  color: #3f3a36;
-  background: #fff1eb;
-  box-shadow: 0 14px 24px rgba(84, 51, 19, 0.12);
+  color: #ffffff;
+  background: var(--orange);
+  box-shadow: none;
 }
 
 .complete-card .toss-primary {
@@ -1692,7 +1695,7 @@
 
 .toss-secondary {
   color: #4e5968;
-  background: #fff1eb;
+  background: #f2f4f6;
 }
 
 .toss-secondary.wide {
@@ -1781,7 +1784,7 @@
   border-radius: 14px;
   color: #3f3a36;
   font-weight: 900;
-  background: #fff1eb;
+  background: #f2f4f6;
 }
 
 .checkout-card > div {
@@ -1976,17 +1979,17 @@
 
 .toss-menu-box {
   overflow: hidden;
-  border: 0;
+  border: 1px solid #e5e8eb;
   border-radius: 10px;
   background: #ffffff;
-  box-shadow: 0 1px 0 rgba(25, 31, 40, 0.08);
+  box-shadow: none;
 }
 
 .toss-menu-box-head {
   grid-template-columns: 1fr;
   gap: 8px;
-  padding: 12px 14px;
-  border-bottom: 0;
+  padding: 10px 14px;
+  border-bottom: 1px solid #edf0f3;
   background: #ffffff;
 }
 
@@ -2001,18 +2004,18 @@
   width: 17px;
   height: 17px;
   margin: 0;
-  accent-color: var(--orange);
+  accent-color: #8b95a1;
 }
 
 .toss-menu-box-head strong {
-  font-size: 15px;
+  font-size: 13px;
   line-height: 1.25;
 }
 
 .toss-list .toss-row {
-  min-height: 72px;
+  min-height: 68px;
   padding: 12px 14px;
-  background: #f8fafc;
+  background: #ffffff;
 }
 
 .toss-product-list {
@@ -2056,7 +2059,7 @@
 }
 
 .pet-room-stage {
-  min-height: 350px;
+  min-height: 58svh;
   margin: 12px 16px 0;
   border-radius: 10px 10px 0 0;
 }
@@ -2169,6 +2172,7 @@
   padding: 0 0 16px;
   border-radius: 0 0 10px 10px;
   background: #ffffff;
+  border: 0;
   box-shadow: none;
 }
 
@@ -2177,7 +2181,7 @@
   gap: 0;
   margin: 0;
   overflow: hidden;
-  border: 1px solid rgba(226, 216, 195, 0.82);
+  border: 0;
   border-radius: 10px;
   background: #ffffff;
 }
@@ -2185,7 +2189,7 @@
 .pet-inventory .decor-tabs button {
   min-height: 42px;
   border: 0;
-  border-right: 1px solid rgba(226, 216, 195, 0.82);
+  border-right: 0;
   border-radius: 0;
   clip-path: none;
   color: #8d765e;
@@ -2199,7 +2203,7 @@
 
 .pet-inventory .decor-tabs button.active {
   color: #3f3a36;
-  background: #fff7f1;
+  background: rgba(242, 127, 91, 0.08);
 }
 
 .decor-grid {
@@ -2217,7 +2221,7 @@
 .toast {
   top: 50%;
   bottom: auto;
-  background: var(--orange);
+  background: rgba(47, 37, 29, 0.92);
   transform: translate(-50%, -50%);
 }
 
@@ -2239,6 +2243,7 @@
     padding-left: 16px;
   }
 }
+
 
 
 
