@@ -201,4 +201,68 @@ function AccessoryMandarin() {
   )
 }
 
+const characterConcepts = [
+  { id: 1, name: '시안 1', body: '#ffdca8', accent: '#f28b66', ear: 'round' },
+  { id: 2, name: '시안 2', body: '#fff1c8', accent: '#8fc8a0', ear: 'leaf' },
+  { id: 3, name: '시안 3', body: '#f7d7c4', accent: '#d7a9e5', ear: 'drop' },
+  { id: 4, name: '시안 4', body: '#d9edf7', accent: '#f2b66d', ear: 'round' },
+  { id: 5, name: '시안 5', body: '#f4e2bc', accent: '#7eb7a0', ear: 'leaf' },
+]
+
+export function PetCharacterConcepts() {
+  return (
+    <section className="pet-character-concepts" aria-label="3등신 캐릭터 시안">
+      <div className="section-title compact-draft-title">
+        <h2>3등신 캐릭터 시안</h2>
+      </div>
+      <div className="pet-character-concept-grid">
+        {characterConcepts.map((concept) => (
+          <article className="pet-character-concept" key={concept.id}>
+            <ConceptAvatar concept={concept} />
+            <strong>{concept.name}</strong>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function ConceptAvatar({ concept }: { concept: (typeof characterConcepts)[number] }) {
+  return (
+    <svg viewBox="0 0 140 170" role="img" aria-label={`${concept.name} 캐릭터`}>
+      <ellipse cx="70" cy="157" rx="39" ry="8" fill="#3f3a36" opacity="0.1" />
+      {concept.ear === 'leaf' && (
+        <>
+          <path d="M39 45c-18-14-21-31-8-39 13 9 18 23 15 42z" fill={concept.accent} />
+          <path d="M101 45c18-14 21-31 8-39-13 9-18 23-15 42z" fill={concept.accent} />
+        </>
+      )}
+      {concept.ear === 'drop' && (
+        <>
+          <path d="M42 48c-18-10-23-27-13-39 16 6 22 20 20 39z" fill={concept.accent} />
+          <path d="M98 48c18-10 23-27 13-39-16 6-22 20-20 39z" fill={concept.accent} />
+        </>
+      )}
+      {concept.ear === 'round' && (
+        <>
+          <circle cx="37" cy="43" r="18" fill={concept.accent} />
+          <circle cx="103" cy="43" r="18" fill={concept.accent} />
+        </>
+      )}
+      <circle cx="70" cy="56" r="42" fill={concept.body} stroke="#6f5a45" strokeWidth="4" />
+      <ellipse cx="54" cy="64" rx="7" ry="9" fill="#3f3a36" />
+      <ellipse cx="86" cy="64" rx="7" ry="9" fill="#3f3a36" />
+      <circle cx="52" cy="61" r="2" fill="#ffffff" />
+      <circle cx="84" cy="61" r="2" fill="#ffffff" />
+      <path d="M62 77c5 5 11 5 16 0" fill="none" stroke="#3f3a36" strokeWidth="4" strokeLinecap="round" />
+      <path d="M43 103c3-22 17-33 27-33s24 11 27 33l5 40H38z" fill={concept.body} stroke="#6f5a45" strokeWidth="4" />
+      <path d="M49 113h42l-5 26H54z" fill="#fff7f2" opacity="0.9" />
+      <path d="M45 109c-17 5-23 17-18 27 12 0 22-8 27-22z" fill={concept.accent} stroke="#6f5a45" strokeWidth="4" strokeLinecap="round" />
+      <path d="M95 109c17 5 23 17 18 27-12 0-22-8-27-22z" fill={concept.accent} stroke="#6f5a45" strokeWidth="4" strokeLinecap="round" />
+      <path d="M51 144c-8 4-8 12 1 15 8 0 13-4 15-12z" fill={concept.accent} stroke="#6f5a45" strokeWidth="4" strokeLinecap="round" />
+      <path d="M89 144c8 4 8 12-1 15-8 0-13-4-15-12z" fill={concept.accent} stroke="#6f5a45" strokeWidth="4" strokeLinecap="round" />
+    </svg>
+  )
+}
+
 export default PetAvatar

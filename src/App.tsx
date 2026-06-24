@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import './App.css'
-import PetAvatar from './components/PetAvatar'
+import PetAvatar, { PetCharacterConcepts } from './components/PetAvatar'
 import { decorItems, menus, seasonalIngredients, seasons } from './data'
 import type { DecorItem, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
 
@@ -13,6 +13,14 @@ const tossShoppingOptions = [
 const paymentOptions = ['토스페이', '카드 간편결제', '계좌 결제']
 const deliveryOptions = ['문 앞에 놓기', '직접 받을게요']
 const maxExp = 100
+
+const navEmojiDrafts = [
+  { id: 1, icons: ['🏠', '🧺', '🐾'] },
+  { id: 2, icons: ['🍽️', '🛒', '🐶'] },
+  { id: 3, icons: ['🥗', '🧾', '🏡'] },
+  { id: 4, icons: ['🍚', '🥕', '🐕'] },
+  { id: 5, icons: ['🌿', '🛍️', '💛'] },
+]
 
 type ShopStep = 'cart' | 'store' | 'checkout' | 'complete'
 
@@ -315,13 +323,33 @@ function HomeScreen({
             >
               <div>
                 <strong>{menu.name}</strong>
-                <p>{menu.ingredients.map((item) => item.name).join(', ')}</p>
               </div>
               <b>{menu.exp}xp</b>
             </button>
           )
         })}
       </div>
+
+      <section className="nav-emoji-drafts" aria-label="하단 네비바 이모지 시안">
+        <div className="section-title compact-draft-title">
+          <h2>하단 네비 이모지 시안</h2>
+        </div>
+        <div className="nav-emoji-draft-list">
+          {navEmojiDrafts.map((draft) => (
+            <div className="nav-emoji-draft" key={draft.id}>
+              <span>시안 {draft.id}</span>
+              <div>
+                {['홈', '장보기', '펫홈'].map((label, index) => (
+                  <i key={label}>
+                    <b aria-hidden="true">{draft.icons[index]}</b>
+                    <em>{label}</em>
+                  </i>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {selectedMenus.length > 0 && (
         <div className={`selected-menu-widget ${selectedMenuOpen ? 'open' : ''}`}>
@@ -619,22 +647,22 @@ function PetHomeScreen({
   const visibleItems = decorTab === 'all' ? decorItems : decorItems.filter((item) => item.type === decorTab)
   const feedMenus = selectedMenus.filter((menu) => !fedMenuIds.includes(menu.id))
   const decorTabs: { id: 'all' | DecorItem['type']; label: string; icon: string }[] = [
-    { id: 'all', label: '전체', icon: '▦' },
-    { id: 'background', label: '방', icon: '▭' },
-    { id: 'outfit', label: '옷', icon: '▱' },
-    { id: 'accessory', label: '소품', icon: '▤' },
+    { id: 'all', label: '전체', icon: '🧩' },
+    { id: 'background', label: '방', icon: '🏠' },
+    { id: 'outfit', label: '옷', icon: '👕' },
+    { id: 'accessory', label: '소품', icon: '🎒' },
   ]
 
   return (
     <section className="screen pet-home-screen" onScroll={onScrollActivity}>
       <div className={`pet-room-stage ${roomClass(background)}`}>
-        <button className="pet-share-button" aria-label="먹보 링크 복사" onClick={onShare} type="button">⤴</button>
+        <button className="pet-share-button" aria-label="먹보 링크 복사" onClick={onShare} type="button">🔗</button>
         <PetAvatar outfit={outfit} background={background} accessory={accessory} />
       </div>
 
       <div className="pet-action-tabs" aria-label="펫홈 작업">
         <button className={petTab === 'feed' ? 'active' : ''} onClick={() => setPetTab('feed')} type="button">
-          <span aria-hidden="true">♥</span>
+          <span aria-hidden="true">🍚</span>
           <b>밥먹이기</b>
         </button>
         {decorTabs.map((tab) => (
@@ -673,6 +701,7 @@ function PetHomeScreen({
               </button>
             ))}
           </div>
+          <PetCharacterConcepts />
         </section>
       )}
 
