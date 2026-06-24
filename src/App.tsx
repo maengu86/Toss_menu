@@ -29,6 +29,7 @@ function App() {
   const [screen, setScreen] = useState<Screen>('home')
   const [selectedMenuIds, setSelectedMenuIds] = useState<string[]>([])
   const [selectedMenuOpen, setSelectedMenuOpen] = useState(false)
+  const [selectedMenuVariant, setSelectedMenuVariant] = useState(1)
   const [selectedSeason, setSelectedSeason] = useState<SeasonKey>('summer')
   const [selectedSeasonalIngredientId, setSelectedSeasonalIngredientId] = useState(firstSummerIngredient.id)
   const [fedMenuIds, setFedMenuIds] = useState<string[]>([])
@@ -58,9 +59,11 @@ function App() {
   const seasonalMenus = menus.filter((menu) => menu.seasonalIngredientIds?.includes(selectedSeasonalIngredientId))
 
   const shoppingItems = selectedMenus.flatMap((menu) => menu.ingredients.map((ingredient) => ({ menuId: menu.id, ingredient })))
-  const totalPrice = shoppingItems.reduce((sum, item) => sum + item.ingredient.price, 0)
+  const checkedPrice = shoppingItems.reduce((sum, item) => (
+    checkedIngredients.includes(ingredientKey(item.menuId, item.ingredient.name)) ? sum + item.ingredient.price : sum
+  ), 0)
   const selectedDeliveryInfo = tossShoppingOptions.find((option) => option.name === selectedDeliveryType) ?? tossShoppingOptions[0]
-  const orderTotal = totalPrice + selectedDeliveryInfo.fee
+  const orderTotal = checkedPrice + selectedDeliveryInfo.fee
   const checkedTotal = shoppingItems.filter((item) => checkedIngredients.includes(ingredientKey(item.menuId, item.ingredient.name))).length
   function showToast(message: string) {
     setToast(message)
@@ -156,6 +159,8 @@ function App() {
             selectedMenuIds={selectedMenuIds}
             onRemoveMenu={removeMenu}
             onScrollActivity={handleScrollActivity}
+            selectedMenuVariant={selectedMenuVariant}
+            onSelectMenuVariant={setSelectedMenuVariant}
             onSelectSeason={changeSeason}
             onSelectSeasonalIngredient={setSelectedSeasonalIngredientId}
             onSetSelectedMenuOpen={setSelectedMenuOpen}
@@ -178,6 +183,7 @@ function App() {
             deliveryOption={deliveryOption}
             deliveryOptions={deliveryOptions}
             selectedMenus={selectedMenus}
+            checkedPrice={checkedPrice}
             deliveryType={selectedDeliveryType}
             deliveryTypeInfo={selectedDeliveryInfo}
             deliveryTypes={tossShoppingOptions}
@@ -185,7 +191,6 @@ function App() {
             paymentMethod={paymentMethod}
             paymentOptions={paymentOptions}
             step={shopStep}
-            totalPrice={totalPrice}
             onCompleteOrder={completeOrderFlow}
             onGoHome={() => setScreen('petHome')}
             onScrollActivity={handleScrollActivity}
@@ -233,8 +238,10 @@ function HomeScreen({
   selectedMenuOpen,
   selectedMenus,
   selectedMenuIds,
+  selectedMenuVariant,
   onRemoveMenu,
   onScrollActivity,
+  onSelectMenuVariant,
   onSelectSeason,
   onSelectSeasonalIngredient,
   onSetSelectedMenuOpen,
@@ -250,8 +257,10 @@ function HomeScreen({
   selectedMenuOpen: boolean
   selectedMenus: Menu[]
   selectedMenuIds: string[]
+  selectedMenuVariant: number
   onRemoveMenu: (id: string) => void
   onScrollActivity: () => void
+  onSelectMenuVariant: (variant: number) => void
   onSelectSeason: (season: SeasonKey) => void
   onSelectSeasonalIngredient: (id: string) => void
   onSetSelectedMenuOpen: (open: boolean) => void
@@ -326,11 +335,18 @@ function HomeScreen({
           {selectedMenuOpen && (
             <>
               <button className="selected-menu-backdrop" aria-label="선택 메뉴 닫기" onClick={() => onSetSelectedMenuOpen(false)} type="button" />
-              <div className="selected-menu-panel">
+              <div className={`selected-menu-panel variant-${selectedMenuVariant}`}>
                 <div className="fab-panel-variants" aria-label="구매 패널 색상 시안">
-                  <span>시안 1</span>
-                  <span>시안 2</span>
-                  <span>시안 3</span>
+                  {[1, 2, 3].map((variant) => (
+                    <button
+                      className={selectedMenuVariant === variant ? 'active' : ''}
+                      key={variant}
+                      onClick={() => onSelectMenuVariant(variant)}
+                      type="button"
+                    >
+                      시안 {variant}
+                    </button>
+                  ))}
                 </div>
                 {selectedMenus.map((menu) => (
                   <div className="selected-menu-chip" key={menu.id}>
@@ -355,7 +371,7 @@ function ShoppingScreen({
   selectedMenus,
   checkedIngredients,
   checkedTotal,
-  totalPrice,
+  checkedPrice,
   orderTotal,
   deliveryType,
   deliveryTypeInfo,
@@ -377,7 +393,7 @@ function ShoppingScreen({
   selectedMenus: Menu[]
   checkedIngredients: string[]
   checkedTotal: number
-  totalPrice: number
+  checkedPrice: number
   orderTotal: number
   deliveryType: string
   deliveryTypeInfo: (typeof tossShoppingOptions)[number]
@@ -397,7 +413,7 @@ function ShoppingScreen({
   onScrollActivity: () => void
 }) {
   const itemCount = selectedMenus.reduce((count, menu) => count + menu.ingredients.length, 0)
-  const canContinue = itemCount > 0
+  const canContinue = checkedTotal > 0
 
   return (
     <section className="screen toss-screen" onScroll={onScrollActivity}>
@@ -428,7 +444,7 @@ function ShoppingScreen({
         <>
           <div className="toss-summary-card">
             <span>예상 주문금액</span>
-            <strong>{formatWon(totalPrice)}</strong>
+            <strong>{formatWon(checkedPrice)}</strong>
             <p>구매 체크 {checkedTotal}/{itemCount}</p>
           </div>
           <div className="toss-menu-list">
@@ -451,8 +467,6 @@ function ShoppingScreen({
                         />
                         <strong>{menu.name}</strong>
                       </label>
-                      <span>오늘뭐먹지</span>
-                      <b>{formatWon(menu.ingredients.reduce((sum, item) => sum + item.price, 0))}</b>
                     </div>
                     <div className="ingredient-list toss-list toss-product-list">
                       {menu.ingredients.map((item) => {
@@ -462,7 +476,6 @@ function ShoppingScreen({
                             <input checked={checkedIngredients.includes(key)} onChange={() => onToggleIngredient(key)} type="checkbox" />
                             <em aria-hidden="true">{shoppingItemEmoji(item.name)}</em>
                             <span>
-                              <i>pay 혜택</i>
                               <strong>{item.name}</strong>
                               <small>{item.quantity}</small>
                             </span>
@@ -471,7 +484,6 @@ function ShoppingScreen({
                         )
                       })}
                     </div>
-                    <button className="toss-option-button" type="button">옵션 변경</button>
                   </article>
                 )
             })}
@@ -479,7 +491,7 @@ function ShoppingScreen({
           <div className="toss-cart-spacer" />
           <button className="toss-primary toss-cart-continue" disabled={!canContinue} onClick={() => onSetStep('store')} type="button">
             <span>토스쇼핑 주문서로 계속하기</span>
-            <b>{formatWon(totalPrice)}</b>
+            <b>{formatWon(checkedPrice)}</b>
           </button>
         </>
       )}
@@ -527,7 +539,7 @@ function ShoppingScreen({
             ))}
           </OptionGroup>
           <div className="price-sheet">
-            <div><span>상품 금액</span><b>{formatWon(totalPrice)}</b></div>
+            <div><span>상품 금액</span><b>{formatWon(checkedPrice)}</b></div>
             <div><span>배송비</span><b>{formatWon(deliveryTypeInfo.fee)}</b></div>
             <div className="total"><span>총 결제 금액</span><b>{formatWon(orderTotal)}</b></div>
           </div>
