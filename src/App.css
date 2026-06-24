@@ -11,7 +11,7 @@
   --surface: #ffffff;
   --surface-strong: #fff7f1;
   --line: #efd8b4;
-  --ink: #2f251d;
+  --ink: #3f3a36;
   --muted: #8d765e;
   --soft-text: #725f4b;
   --orange: #ff8a58;
@@ -36,16 +36,19 @@
   position: relative;
   padding: 26px 20px 110px;
   scrollbar-color: transparent transparent;
-  scrollbar-width: thin;
+  scrollbar-width: none;
 }
 
 .screen::-webkit-scrollbar {
-  width: 8px;
+  width: 4px;
 }
 
 .screen::-webkit-scrollbar-track,
 .screen::-webkit-scrollbar-button,
 .screen::-webkit-scrollbar-corner {
+  width: 0;
+  height: 0;
+  display: none;
   background: transparent;
 }
 
@@ -81,7 +84,7 @@
 .top-header h1,
 .compact-header h1 {
   margin: 4px 0 0;
-  color: #2f251d;
+  color: #3f3a36;
   font-size: 28px;
   line-height: 1.1;
 }
@@ -337,7 +340,7 @@
 
 .recommend-card h2 {
   margin: 6px 0;
-  color: #2f251d;
+  color: #3f3a36;
   font-size: 22px;
 }
 
@@ -372,7 +375,7 @@
 
 .section-title h2 {
   margin: 0;
-  color: #2f251d;
+  color: #3f3a36;
   font-size: 20px;
 }
 
@@ -419,9 +422,10 @@
   width: 74px;
   min-height: 42px;
   border: 0;
+  border-bottom: 1px solid rgba(226, 216, 195, 0.72);
   border-radius: 0;
   clip-path: none;
-  color: #8d765e;
+  color: #3f3a36;
   font-size: 12px;
   font-weight: 900;
   background: #ffffff;
@@ -430,51 +434,51 @@
 
 .season-tabs button span {
   display: inline-grid;
-  min-width: 50px;
-  min-height: 26px;
+  min-width: 46px;
+  min-height: 22px;
   place-items: center;
-  border-radius: 6px;
+  border-radius: 4px;
   background: transparent;
 }
 
 .season-tabs button[style*="7abf63"] {
-  color: var(--season-spring-ink);
+  color: #3f3a36;
   background: #ffffff;
 }
 
 .season-tabs button[style*="7abf63"] span {
-  background: color-mix(in srgb, var(--season-spring-surface) 60%, transparent);
+  background: transparent;
 }
 
 .season-tabs button[style*="ff9a62"] {
-  color: var(--season-summer-ink);
+  color: #3f3a36;
   background: #ffffff;
 }
 
 .season-tabs button[style*="ff9a62"] span {
-  background: color-mix(in srgb, var(--season-summer-surface) 60%, transparent);
+  background: transparent;
 }
 
 .season-tabs button[style*="d79555"] {
-  color: var(--season-autumn-ink);
+  color: #3f3a36;
   background: #ffffff;
 }
 
 .season-tabs button[style*="d79555"] span {
-  background: color-mix(in srgb, var(--season-autumn-surface) 60%, transparent);
+  background: transparent;
 }
 
 .season-tabs button[style*="70aeca"] {
-  color: var(--season-winter-ink);
+  color: #3f3a36;
   background: #ffffff;
 }
 
 .season-tabs button[style*="70aeca"] span {
-  background: color-mix(in srgb, var(--season-winter-surface) 60%, transparent);
+  background: transparent;
 }
 
 .season-tabs button.active {
-  color: #2f251d;
+  color: #3f3a36;
   min-height: 42px;
   position: relative;
   z-index: 2;
@@ -485,7 +489,7 @@
 }
 
 .season-tabs button.active span {
-  background: #ffffff;
+  background: color-mix(in srgb, var(--season-accent) 16%, #ffffff);
 }
 
 .season-panel-index {
@@ -614,7 +618,7 @@
 }
 
 .seasonal-tile strong {
-  color: #2f251d;
+  color: #3f3a36;
   font-size: 11px;
   line-height: 1.15;
   text-align: center;
@@ -744,7 +748,7 @@
 }
 
 .selected-menu-panel-head strong {
-  color: #2f251d;
+  color: #3f3a36;
 }
 
 .selected-menu-panel-head button,
@@ -770,15 +774,21 @@
 }
 
 .selected-menu-chip span {
-  color: #2f251d;
+  color: #3f3a36;
   font-size: 13px;
   font-weight: 900;
 }
 
 .selected-menu-chip button {
-  padding: 7px 9px;
-  color: #8d765e;
-  background: #f8f4ee;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: #adb3ba;
+  font-size: 18px;
+  line-height: 1;
+  background: #ffffff;
 }
 
 .selected-menu-shop {
@@ -822,7 +832,7 @@
 .menu-card strong {
   display: block;
   margin: 3px 0;
-  color: #2f251d;
+  color: #3f3a36;
   font-size: 17px;
 }
 
@@ -990,7 +1000,7 @@
 .level-card strong,
 .shopping-summary strong,
 .reward-card strong {
-  color: #2f251d;
+  color: #3f3a36;
 }
 
 .progress-track {
@@ -1016,7 +1026,7 @@
   padding: 15px 16px;
   border: 1px solid #efd8b4;
   border-radius: 18px;
-  color: #2f251d;
+  color: #3f3a36;
   background: #fffdf4;
 }
 
@@ -1054,7 +1064,7 @@
 }
 
 .ingredient-row b {
-  color: #2f251d;
+  color: #3f3a36;
 }
 
 .market-group {
@@ -1129,7 +1139,7 @@
 .decor-card strong {
   display: block;
   margin: 0;
-  color: #2f251d;
+  color: #3f3a36;
   font-size: 12px;
   line-height: 1.2;
 }
@@ -1254,7 +1264,7 @@
   grid-template-columns: 44px 1fr 44px;
   align-items: center;
   margin: -10px -4px 10px;
-  color: #191f28;
+  color: #363a40;
 }
 
 .toss-shopping-header button {
@@ -1262,7 +1272,7 @@
   height: 38px;
   border: 0;
   border-radius: 50%;
-  color: #191f28;
+  color: #363a40;
   font-size: 30px;
   line-height: 1;
   background: transparent;
@@ -1282,7 +1292,7 @@
 }
 
 .toss-header h1 {
-  color: #191f28;
+  color: #363a40;
   font-size: 30px;
   letter-spacing: 0;
 }
@@ -1322,7 +1332,7 @@
 }
 
 .toss-steps div.active {
-  color: #191f28;
+  color: #363a40;
 }
 
 .toss-steps div.active span {
@@ -1359,7 +1369,7 @@
 .toss-summary-card strong {
   display: block;
   margin-top: 6px;
-  color: #191f28;
+  color: #363a40;
   font-size: 28px;
   line-height: 1.1;
 }
@@ -1412,12 +1422,12 @@
 }
 
 .toss-menu-box-head strong {
-  color: #191f28;
+  color: #363a40;
   font-size: 16px;
 }
 
 .toss-menu-box-head b {
-  color: #191f28;
+  color: #363a40;
 }
 
 .toss-list {
@@ -1444,7 +1454,7 @@
 .checkout-card strong,
 .complete-card h2,
 .option-group h2 {
-  color: #191f28;
+  color: #363a40;
 }
 
 .toss-primary,
@@ -1489,7 +1499,7 @@
 }
 
 .toss-copy strong {
-  color: #191f28;
+  color: #363a40;
   font-size: 21px;
 }
 
@@ -1504,7 +1514,7 @@
   padding: 17px;
   border: 1px solid #edf0f3;
   border-radius: 20px;
-  color: #191f28;
+  color: #363a40;
   text-align: left;
   background: #ffffff;
   transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
@@ -1578,7 +1588,7 @@
 }
 
 .checkout-card b {
-  color: #191f28;
+  color: #363a40;
   font-size: 20px;
 }
 
@@ -1627,7 +1637,7 @@
 
 .price-sheet b,
 .receipt-mini b {
-  color: #191f28;
+  color: #363a40;
 }
 
 .price-sheet .total {
@@ -1638,7 +1648,7 @@
 
 .price-sheet .total span,
 .price-sheet .total b {
-  color: #191f28;
+  color: #363a40;
   font-size: 17px;
   font-weight: 900;
 }
@@ -1737,7 +1747,7 @@
 }
 
 .toss-menu-box-head span {
-  color: #191f28;
+  color: #363a40;
   font-size: 13px;
 }
 
@@ -1837,7 +1847,7 @@
 }
 
 .pet-mode-tabs button.active {
-  color: #2f251d;
+  color: #3f3a36;
   background: #fff7f1;
 }
 
@@ -1883,7 +1893,7 @@
 }
 
 .pet-inventory .decor-tabs button.active {
-  color: #2f251d;
+  color: #3f3a36;
   background: #fff7f1;
 }
 
@@ -1955,4 +1965,5 @@
     padding-left: 16px;
   }
 }
+
 

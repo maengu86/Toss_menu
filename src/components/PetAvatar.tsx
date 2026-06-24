@@ -1,4 +1,4 @@
-type PetAvatarProps = {
+﻿type PetAvatarProps = {
   mood?: 'idle' | 'happy'
   outfit?: string
   background?: string
@@ -85,14 +85,14 @@ function PetAvatar({
         <path d="M100 225c-10 8-8 17 5 19 9-2 15-8 16-17z" fill="#ffd789" stroke="#8b6038" strokeWidth="5" />
         <path d="M160 225c10 8 8 17-5 19-9-2-15-8-16-17z" fill="#ffd789" stroke="#8b6038" strokeWidth="5" />
 
-        <circle cx="104" cy="104" r="10" fill="#29384a" />
-        <circle cx="156" cy="104" r="10" fill="#29384a" />
+        <circle cx="104" cy="104" r="10" fill="#3f4652" />
+        <circle cx="156" cy="104" r="10" fill="#3f4652" />
         <circle cx="101" cy="100" r="3" fill="#ffffff" />
         <circle cx="153" cy="100" r="3" fill="#ffffff" />
         <circle cx="88" cy="123" r="12" fill="#f29aa0" opacity="0.74" />
         <circle cx="172" cy="123" r="12" fill="#f29aa0" opacity="0.74" />
         <path d="M124 116c4 4 8 4 12 0" fill="none" stroke="#d7a131" strokeWidth="5" strokeLinecap="round" />
-        <path d={isHappy ? 'M106 135c15 15 33 15 48 0' : 'M112 138c11 7 25 7 36 0'} fill="none" stroke="#29384a" strokeWidth="5" strokeLinecap="round" />
+        <path d={isHappy ? 'M106 135c15 15 33 15 48 0' : 'M112 138c11 7 25 7 36 0'} fill="none" stroke="#3f4652" strokeWidth="5" strokeLinecap="round" />
         {isHappy && (
           <g className="munch-bites">
             <circle cx="94" cy="141" r="5" fill="#ff8a58" />
@@ -103,9 +103,9 @@ function PetAvatar({
 
         {hasGlasses && (
           <g>
-            <rect x="86" y="95" width="34" height="20" rx="10" fill="#29384a" />
-            <rect x="140" y="95" width="34" height="20" rx="10" fill="#29384a" />
-            <path d="M120 105h20" stroke="#29384a" strokeWidth="5" />
+            <rect x="86" y="95" width="34" height="20" rx="10" fill="#3f4652" />
+            <rect x="140" y="95" width="34" height="20" rx="10" fill="#3f4652" />
+            <path d="M120 105h20" stroke="#3f4652" strokeWidth="5" />
             <path d="M92 101h22M146 101h22" stroke="#ffcf57" strokeWidth="3" strokeLinecap="round" />
           </g>
         )}
@@ -153,7 +153,7 @@ function PetAvatar({
           <g transform="translate(35 169)">
             <path d="M8 10c0-8 7-14 15-14s15 6 15 14" fill="none" stroke="#5b6f82" strokeWidth="4" />
             <rect x="2" y="10" width="42" height="42" rx="14" fill="#ffb25f" stroke="#8b6038" strokeWidth="4" />
-            <circle cx="23" cy="31" r="12" fill="#29384a" />
+            <circle cx="23" cy="31" r="12" fill="#3f4652" />
             <path d="M17 37c4 4 8 4 12 0" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
           </g>
         )}
@@ -175,7 +175,7 @@ function PetAvatar({
             <path d="M9 4h36l-5 54H14z" fill="#ff6f63" stroke="#9e3735" strokeWidth="4" />
             <path d="M15 18h24" stroke="#fff7df" strokeWidth="5" strokeLinecap="round" opacity="0.82" />
             <path d="M31 3l9-17" stroke="#75b84f" strokeWidth="5" strokeLinecap="round" />
-            <circle cx="28" cy="36" r="4" fill="#29384a" opacity="0.5" />
+            <circle cx="28" cy="36" r="4" fill="#3f4652" opacity="0.5" />
           </g>
         )}
         {hasSweetPotato && (
@@ -200,3 +200,4 @@ function PetAvatar({
 }
 
 export default PetAvatar
+

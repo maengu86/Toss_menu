@@ -334,7 +334,7 @@ function HomeScreen({
                 {selectedMenus.map((menu) => (
                   <div className="selected-menu-chip" key={menu.id}>
                     <span>{menu.name}</span>
-                    <button aria-label={`${menu.name} 삭제`} onClick={() => onRemoveMenu(menu.id)} type="button">삭제</button>
+                    <button aria-label={`${menu.name} 삭제`} onClick={() => onRemoveMenu(menu.id)} type="button">×</button>
                   </div>
                 ))}
                 <button className="selected-menu-shop" onClick={onStartShopping} type="button">구매하기</button>
