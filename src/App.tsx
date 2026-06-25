@@ -30,10 +30,6 @@ const receiptDrafts = [
   { id: 1, title: '라인형 영수증' },
 ]
 
-const checkoutDrafts = [
-  { id: 1, title: '기본 주문서' },
-]
-
 const decorBoxDrafts = [
   { id: 1, title: '기본 격자형' },
   { id: 2, title: '선택 강조형' },
@@ -232,7 +228,7 @@ function App() {
     setSelectedMenuIds((current) => current.filter((menuId) => !orderedMenuIds.has(menuId)))
     setCheckedIngredients([])
     setShopStep('cart')
-    setScreen('home')
+    setScreen('shopping')
   }
 
   function selectDecor(item: DecorItem) {
@@ -590,26 +586,6 @@ function ShoppingScreen({
             <div><span>배송비</span><b>{formatWon(deliveryTypeInfo.fee)}</b></div>
             <div className="total"><span>총 결제 금액</span><b>{formatWon(orderTotal)}</b></div>
           </div>
-          <div className="checkout-drafts" aria-label="장보기 주문 페이지 시안">
-            {checkoutDrafts.map((draft) => (
-              <article className={`checkout-draft checkout-draft-${draft.id}`} key={draft.id}>
-                {/* 작업: 장보기 주문 페이지에서 실제 결제 정보가 들어간 시안을 비교합니다.
-                    개인 수정 가능: 시안 제목과 항목 배치는 자유롭게 바꿔도 됩니다.
-                    적용 위치: 장보기 > 주문/결제 단계. */}
-                <div className="checkout-draft-head">
-                  <strong>시안 {draft.id}</strong>
-                  <span>{draft.title}</span>
-                </div>
-                <dl>
-                  <div><dt>상품 금액</dt><dd>{formatWon(checkedPrice)}</dd></div>
-                  <div><dt>배송</dt><dd>{deliveryTypeInfo.name}</dd></div>
-                  <div><dt>요청</dt><dd>{deliveryOption}</dd></div>
-                  <div><dt>결제</dt><dd>{paymentMethod}</dd></div>
-                  <div><dt>총액</dt><dd>{formatWon(orderTotal)}</dd></div>
-                </dl>
-              </article>
-            ))}
-          </div>
           <div className="toss-button-row">
             <button className="toss-secondary" onClick={() => onSetStep('cart')} type="button">이전</button>
             <button className="toss-primary" onClick={onCompleteOrder} type="button">{formatWon(orderTotal)} 결제하기</button>
@@ -627,14 +603,14 @@ function ShoppingScreen({
             <div><span>배송 요청</span><b>{deliveryOption}</b></div>
             <div><span>총액</span><b>{formatWon(orderTotal)}</b></div>
           </div>
-          <div className="receipt-drafts" aria-label="주문 완료 정보 시안">
+          <div className="receipt-drafts receipt-main" aria-label="주문 완료 영수증">
             {receiptDrafts.map((draft) => (
               <article className={`receipt-draft receipt-draft-${draft.id}`} key={draft.id}>
-                {/* 작업: 주문완료 시안에 실제 적용될 주문 데이터를 넣어 디자인 판단이 가능하게 합니다.
-                    개인 수정 가능: title/description이나 필드 순서는 자유롭게 바꿔도 됩니다.
-                    적용 위치: 장보기 > 주문완료 화면의 영수증 시안 목록. */}
+                {/* 작업: 선택된 라인형 영수증을 주문완료 메인 UI로 적용합니다.
+                    개인 수정 가능: 항목 순서는 바꿔도 되지만 실제 주문값 바인딩은 유지해야 합니다.
+                    적용 위치: 장보기 > 주문완료 화면의 메인 영수증. */}
                 <div className="receipt-draft-head">
-                  <strong>시안 {draft.id}</strong>
+                  <strong>적용 영수증</strong>
                   <span>{draft.title}</span>
                 </div>
                 <dl>
@@ -730,6 +706,9 @@ function PetHomeScreen({
   const nextLevelThreshold = getNextLevelThreshold(level)
   const levelProgress = getLevelProgress(exp, level)
   const expLabel = nextLevelThreshold ? `${exp}/${nextLevelThreshold.minExp} xp` : `${exp} xp`
+  const previewFeedIngredient = feedIngredients[0]
+  const previewFeedText = previewFeedIngredient ? previewFeedIngredient.name : '주문한 재료 없음'
+  const previewFeedExp = previewFeedIngredient ? `+${getIngredientExp(previewFeedIngredient)} xp` : '0 xp'
   const decorTabs: { id: 'all' | DecorItem['type']; label: string; icon: string }[] = [
     { id: 'all', label: '전체', icon: '🧩' },
     { id: 'background', label: '방', icon: '🏠' },
@@ -770,8 +749,9 @@ function PetHomeScreen({
           <div className="level-box-drafts" aria-label="레벨 상자 시안">
             {levelBoxDrafts.map((draft) => (
               <article className={`level-box-draft level-box-draft-${draft.id}`} key={draft.id}>
-                <strong>시안 {draft.id}</strong>
-                <span>{draft.title}</span>
+                <strong>{draft.title}</strong>
+                <span>Lv. {level}</span>
+                <b>{expLabel}</b>
               </article>
             ))}
           </div>
@@ -787,8 +767,9 @@ function PetHomeScreen({
           <div className="feed-box-drafts" aria-label="밥먹이기 상자 시안">
             {feedBoxDrafts.map((draft) => (
               <article className={`feed-box-draft feed-box-draft-${draft.id}`} key={draft.id}>
-                <strong>시안 {draft.id}</strong>
-                <span>{draft.title}</span>
+                <strong>{draft.title}</strong>
+                <span>{previewFeedText}</span>
+                <b>{previewFeedExp}</b>
               </article>
             ))}
           </div>
@@ -823,10 +804,15 @@ function PetHomeScreen({
             {decorBoxDrafts.map((draft) => (
               <article className={`decor-box-draft decor-box-draft-${draft.id}`} key={draft.id}>
                 {/* 작업: 꾸미기 박스의 적용 방향을 5개 시안으로 비교합니다.
-                    개인 수정 가능: 시안 문구와 강조 색상은 자유롭게 조정해도 됩니다.
+                    개인 수정 가능: 시안 문구와 표시 항목은 자유롭게 조정해도 됩니다.
                     적용 위치: 펫홈 > 꾸미기 탭 상단. */}
                 <strong>시안 {draft.id}</strong>
                 <span>{draft.title}</span>
+                <dl>
+                  <div><dt>방</dt><dd>{background}</dd></div>
+                  <div><dt>옷</dt><dd>{outfit}</dd></div>
+                  <div><dt>소품</dt><dd>{accessory}</dd></div>
+                </dl>
               </article>
             ))}
           </div>
