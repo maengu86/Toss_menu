@@ -27,23 +27,35 @@ const petLevelThresholds = [
 const wonPerPetExp = 10
 
 const receiptDrafts = [
-  { id: 1, title: '라인형 영수증', description: '결제, 배송, 요청, 총액을 한 줄씩 고정 노출합니다.' },
+  { id: 1, title: '라인형 영수증' },
 ]
 
 const checkoutDrafts = [
-  { id: 1, title: '기본 주문서', description: '배송과 결제 정보를 위에서 아래로 차분하게 확인합니다.' },
-  { id: 2, title: '요약 카드형', description: '총액을 강조하고 옵션을 카드 안에 묶어서 보여줍니다.' },
-  { id: 3, title: '체크리스트형', description: '결제 전 확인할 항목을 체크리스트처럼 정리합니다.' },
-  { id: 4, title: '분리 블록형', description: '상품, 배송, 결제 정보를 독립된 블록으로 나눕니다.' },
-  { id: 5, title: '하단 결제형', description: '결제 버튼 직전 최종 확인용으로 압축해서 보여줍니다.' },
+  { id: 1, title: '기본 주문서' },
 ]
 
 const decorBoxDrafts = [
-  { id: 1, title: '기본 격자형', description: '아이템을 같은 크기 카드로 정리합니다.' },
-  { id: 2, title: '선택 강조형', description: '현재 착용 중인 아이템을 더 강하게 표시합니다.' },
-  { id: 3, title: '잠금 정보형', description: '레벨과 장보기 해금 조건을 먼저 보여줍니다.' },
-  { id: 4, title: '작은 버튼형', description: '많은 꾸미기 아이템을 촘촘하게 보여줍니다.' },
-  { id: 5, title: '미리보기형', description: '캐릭터에 적용될 느낌을 설명과 함께 보여줍니다.' },
+  { id: 1, title: '기본 격자형' },
+  { id: 2, title: '선택 강조형' },
+  { id: 3, title: '잠금 정보형' },
+  { id: 4, title: '작은 버튼형' },
+  { id: 5, title: '미리보기형' },
+]
+
+const levelBoxDrafts = [
+  { id: 1, title: '기본 레벨바' },
+  { id: 2, title: '숫자 강조형' },
+  { id: 3, title: '진행률 카드형' },
+  { id: 4, title: '미니 상태형' },
+  { id: 5, title: '넓은 게이지형' },
+]
+
+const feedBoxDrafts = [
+  { id: 1, title: '기본 재료 카드' },
+  { id: 2, title: 'XP 강조형' },
+  { id: 3, title: '작은 목록형' },
+  { id: 4, title: '버튼 강조형' },
+  { id: 5, title: '상자형 목록' },
 ]
 
 const emptyFeedDrafts = [
@@ -211,6 +223,18 @@ function App() {
     setShopStep('complete')
   }
 
+  function restartShoppingAfterOrder() {
+    const orderedMenuIds = new Set(
+      shoppingItems
+        .filter((item) => checkedIngredients.includes(ingredientKey(item.menuId, item.ingredient.name)))
+        .map((item) => item.menuId),
+    )
+    setSelectedMenuIds((current) => current.filter((menuId) => !orderedMenuIds.has(menuId)))
+    setCheckedIngredients([])
+    setShopStep('cart')
+    setScreen('home')
+  }
+
   function selectDecor(item: DecorItem) {
     if (!isDecorUnlocked(item, level, shoppingRewardUnlocked)) {
       showToast(item.unlockByShopping ? '장보기 플로우를 완료하면 해금돼요.' : `레벨 ${item.unlockLevel}에 해금돼요.`)
@@ -279,6 +303,7 @@ function App() {
             onBackHome={() => setScreen('home')}
             onCompleteOrder={completeOrderFlow}
             onGoHome={() => setScreen('petHome')}
+            onRestartShopping={restartShoppingAfterOrder}
             onScrollActivity={handleScrollActivity}
             onSelectDelivery={setDeliveryOption}
             onSelectPayment={setPaymentMethod}
@@ -453,6 +478,7 @@ function ShoppingScreen({
   onBackHome,
   onCompleteOrder,
   onGoHome,
+  onRestartShopping,
   onScrollActivity,
 }: {
   selectedMenus: Menu[]
@@ -473,6 +499,7 @@ function ShoppingScreen({
   onBackHome: () => void
   onCompleteOrder: () => void
   onGoHome: () => void
+  onRestartShopping: () => void
   onScrollActivity: () => void
 }) {
   const canContinue = checkedTotal > 0
@@ -573,7 +600,6 @@ function ShoppingScreen({
                   <strong>시안 {draft.id}</strong>
                   <span>{draft.title}</span>
                 </div>
-                <p>{draft.description}</p>
                 <dl>
                   <div><dt>상품 금액</dt><dd>{formatWon(checkedPrice)}</dd></div>
                   <div><dt>배송</dt><dd>{deliveryTypeInfo.name}</dd></div>
@@ -611,7 +637,6 @@ function ShoppingScreen({
                   <strong>시안 {draft.id}</strong>
                   <span>{draft.title}</span>
                 </div>
-                <p>{draft.description}</p>
                 <dl>
                   <div>
                     <dt>결제 수단</dt>
@@ -634,7 +659,7 @@ function ShoppingScreen({
             ))}
           </div>
           <button className="toss-primary" onClick={onGoHome} type="button">밥주러 가기</button>
-          <button className="toss-secondary wide" onClick={() => onSetStep('cart')} type="button">장보러 가기</button>
+          <button className="toss-secondary wide" onClick={onRestartShopping} type="button">장보러 가기</button>
         </div>
       )}
     </section>
@@ -722,7 +747,7 @@ function PetHomeScreen({
       <div className="pet-action-tabs" aria-label="펫홈 작업">
         <button className={petTab === 'feed' ? 'active' : ''} onClick={() => setPetTab('feed')} type="button">
           <span aria-hidden="true">🍚</span>
-          <b>밥주러 가기</b>
+          <b>밥먹기</b>
         </button>
         {decorTabs.map((tab) => (
           <button
@@ -742,6 +767,14 @@ function PetHomeScreen({
 
       {petTab === 'feed' && (
         <section className="pet-feed-panel">
+          <div className="level-box-drafts" aria-label="레벨 상자 시안">
+            {levelBoxDrafts.map((draft) => (
+              <article className={`level-box-draft level-box-draft-${draft.id}`} key={draft.id}>
+                <strong>시안 {draft.id}</strong>
+                <span>{draft.title}</span>
+              </article>
+            ))}
+          </div>
           <div className="level-card">
             <div>
               <strong>Lv. {level}</strong>
@@ -750,6 +783,14 @@ function PetHomeScreen({
             <div className="progress-track">
               <div className="progress-fill" style={{ width: `${levelProgress}%` }} />
             </div>
+          </div>
+          <div className="feed-box-drafts" aria-label="밥먹이기 상자 시안">
+            {feedBoxDrafts.map((draft) => (
+              <article className={`feed-box-draft feed-box-draft-${draft.id}`} key={draft.id}>
+                <strong>시안 {draft.id}</strong>
+                <span>{draft.title}</span>
+              </article>
+            ))}
           </div>
           <div className="feed-list compact-feed-list">
             {feedIngredients.length === 0 && (
@@ -768,7 +809,6 @@ function PetHomeScreen({
               <button className="feed-card" key={ingredient.id} onClick={() => onFeed(ingredient)} type="button">
                 <span>
                   <strong>{ingredient.name}</strong>
-                  <small>{ingredient.menuName} · {ingredient.quantity}</small>
                 </span>
                 <b>+{getIngredientExp(ingredient)} xp</b>
               </button>
@@ -787,7 +827,6 @@ function PetHomeScreen({
                     적용 위치: 펫홈 > 꾸미기 탭 상단. */}
                 <strong>시안 {draft.id}</strong>
                 <span>{draft.title}</span>
-                <p>{draft.description}</p>
               </article>
             ))}
           </div>

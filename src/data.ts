@@ -19,6 +19,9 @@ export const seasonalIngredients: SeasonalIngredient[] = [
   { id: 'spring-cabbage', name: '봄동', season: '봄', seasonKey: 'spring', emoji: '🥬' },
   { id: 'dureup', name: '두릅', season: '봄', seasonKey: 'spring', emoji: '🌱' },
   { id: 'minari', name: '미나리', season: '봄', seasonKey: 'spring', emoji: '🌿' },
+  { id: 'mugwort', name: '쑥', season: '봄', seasonKey: 'spring', emoji: '🌿' },
+  { id: 'bamboo-shoot', name: '죽순', season: '봄', seasonKey: 'spring', emoji: '🎍' },
+  { id: 'clam', name: '바지락', season: '봄', seasonKey: 'spring', emoji: '🦪' },
   { id: 'watermelon', name: '수박', season: '여름', seasonKey: 'summer', emoji: '🍉' },
   { id: 'peach', name: '복숭아', season: '여름', seasonKey: 'summer', emoji: '🍑' },
   { id: 'corn', name: '초당옥수수', season: '여름', seasonKey: 'summer', emoji: '🌽' },
@@ -31,6 +34,9 @@ export const seasonalIngredients: SeasonalIngredient[] = [
   { id: 'perilla-leaf', name: '깻잎', season: '여름', seasonKey: 'summer', emoji: '🌿' },
   { id: 'potato', name: '감자', season: '여름', seasonKey: 'summer', emoji: '🥔' },
   { id: 'young-radish', name: '열무', season: '여름', seasonKey: 'summer', emoji: '🥬' },
+  { id: 'plum', name: '자두', season: '여름', seasonKey: 'summer', emoji: '🍑' },
+  { id: 'grape', name: '포도', season: '여름', seasonKey: 'summer', emoji: '🍇' },
+  { id: 'eel', name: '장어', season: '여름', seasonKey: 'summer', emoji: '🐟' },
   { id: 'gizzard-shad', name: '전어', season: '가을', seasonKey: 'autumn', emoji: '🐟' },
   { id: 'sweet-potato', name: '고구마', season: '가을', seasonKey: 'autumn', emoji: '🍠' },
   { id: 'mushroom', name: '버섯', season: '가을', seasonKey: 'autumn', emoji: '🍄' },
@@ -39,6 +45,9 @@ export const seasonalIngredients: SeasonalIngredient[] = [
   { id: 'pumpkin', name: '단호박', season: '가을', seasonKey: 'autumn', emoji: '🎃' },
   { id: 'apple', name: '사과', season: '가을', seasonKey: 'autumn', emoji: '🍎' },
   { id: 'shrimp', name: '대하', season: '가을', seasonKey: 'autumn', emoji: '🦐' },
+  { id: 'persimmon', name: '감', season: '가을', seasonKey: 'autumn', emoji: '🟠' },
+  { id: 'fig', name: '무화과', season: '가을', seasonKey: 'autumn', emoji: '🫐' },
+  { id: 'mackerel', name: '고등어', season: '가을', seasonKey: 'autumn', emoji: '🐟' },
   { id: 'oyster', name: '굴', season: '겨울', seasonKey: 'winter', emoji: '🦪' },
   { id: 'radish', name: '무', season: '겨울', seasonKey: 'winter', emoji: '🥬' },
   { id: 'cabbage', name: '배추', season: '겨울', seasonKey: 'winter', emoji: '🥬' },
@@ -47,6 +56,9 @@ export const seasonalIngredients: SeasonalIngredient[] = [
   { id: 'spinach', name: '시금치', season: '겨울', seasonKey: 'winter', emoji: '🥬' },
   { id: 'cockle', name: '꼬막', season: '겨울', seasonKey: 'winter', emoji: '🦪' },
   { id: 'lotus-root', name: '연근', season: '겨울', seasonKey: 'winter', emoji: '🪷' },
+  { id: 'burdock', name: '우엉', season: '겨울', seasonKey: 'winter', emoji: '🥕' },
+  { id: 'hallabong', name: '한라봉', season: '겨울', seasonKey: 'winter', emoji: '🍊' },
+  { id: 'yellowtail', name: '방어', season: '겨울', seasonKey: 'winter', emoji: '🐟' },
 ]
 
 const base = { image: '', imageFallback: '🍽️' }
@@ -84,6 +96,15 @@ export const menus: Menu[] = [
   ]),
   menu('minari-pancake', '미나리전', '봄', '향긋한 날', 28, '#52a064', ['minari'], [
     ['미나리', '1단', 3600], ['부침가루', '1봉', 3300], ['오징어', '1팩', 6900],
+  ]),
+  menu('mugwort-soup', '쑥국', '봄', '향긋한 국물', 26, '#6ca45c', ['mugwort'], [
+    ['쑥', '1봉', 2800], ['된장', '1통', 4200], ['두부', '1모', 2500],
+  ]),
+  menu('bamboo-shoot-rice', '죽순 솥밥', '봄', '아삭한 날', 34, '#8abf63', ['bamboo-shoot'], [
+    ['죽순', '1팩', 6200], ['쌀', '2컵', 1800], ['간장', '1병', 3100],
+  ]),
+  menu('clam-kalguksu', '바지락 칼국수', '봄', '시원한 국물', 39, '#5c9ab8', ['clam'], [
+    ['바지락', '300g', 7600], ['칼국수면', '1봉', 3300], ['애호박', '1개', 1800],
   ]),
   menu('watermelon-kongguksu', '수박 콩국수', '여름', '더운 날', 34, '#ff8a58', ['watermelon'], [
     ['콩국수면', '1인분', 3200], ['수박', '1/6통', 5800], ['콩국물', '500ml', 4200],
@@ -136,6 +157,15 @@ export const menus: Menu[] = [
   menu('young-radish-noodle', '열무 비빔국수', '여름', '시원한 날', 31, '#67aa54', ['young-radish'], [
     ['열무김치', '1팩', 5600], ['소면', '1봉', 3200], ['고추장', '1통', 3500],
   ]),
+  menu('plum-ade', '자두 에이드', '여름', '새콤한 간식', 22, '#d85f7a', ['plum'], [
+    ['자두', '5개', 5800], ['탄산수', '1병', 1800], ['꿀', '1병', 4300],
+  ]),
+  menu('grape-yogurt', '포도 요거트볼', '여름', '달콤한 간식', 24, '#7656a8', ['grape'], [
+    ['포도', '1송이', 6200], ['그릭요거트', '1컵', 4200], ['그래놀라', '1봉', 3900],
+  ]),
+  menu('eel-rice-bowl', '장어 덮밥', '여름', '든든한 보양식', 46, '#9a6a42', ['eel'], [
+    ['장어', '1팩', 14800], ['밥', '1공기', 1200], ['데리야키소스', '1병', 3900],
+  ]),
   menu('gizzard-shad-salad', '전어 무침', '가을', '신선한 날', 42, '#5f9f68', ['gizzard-shad'], [
     ['전어', '300g', 9800], ['쪽파', '1줌', 1800], ['고추장', '1통', 3500],
   ]),
@@ -160,6 +190,15 @@ export const menus: Menu[] = [
   menu('shrimp-salt-grill', '대하 소금구이', '가을', '고소한 날', 44, '#d98b55', ['shrimp'], [
     ['대하', '300g', 12000], ['굵은소금', '1봉', 1800], ['레몬', '1개', 1500],
   ]),
+  menu('persimmon-salad', '감 샐러드', '가을', '달콤한 날', 25, '#d9893c', ['persimmon'], [
+    ['감', '2개', 4300], ['루꼴라', '1팩', 3300], ['견과류', '1봉', 4500],
+  ]),
+  menu('fig-toast', '무화과 토스트', '가을', '브런치 날', 30, '#9b5f7b', ['fig'], [
+    ['무화과', '4개', 7200], ['식빵', '1봉', 3200], ['크림치즈', '1통', 5200],
+  ]),
+  menu('mackerel-grill', '고등어구이', '가을', '집밥 먹는 날', 36, '#4f7890', ['mackerel'], [
+    ['고등어', '1마리', 6800], ['무', '1/4개', 1500], ['레몬', '1개', 1500],
+  ]),
   menu('oyster-gukbap', '굴국밥', '겨울', '따뜻한 날', 48, '#4f97b8', ['oyster'], [
     ['생굴', '200g', 7600], ['대파', '1대', 1200], ['쌀', '1공기', 1200],
   ]),
@@ -183,6 +222,15 @@ export const menus: Menu[] = [
   ]),
   menu('lotus-root-jorim', '연근 조림', '겨울', '아삭한 반찬', 27, '#b48a64', ['lotus-root'], [
     ['연근', '1팩', 4200], ['간장', '1병', 3100], ['올리고당', '1병', 3600],
+  ]),
+  menu('burdock-gimbap', '우엉 김밥', '겨울', '든든한 도시락', 32, '#9c744c', ['burdock'], [
+    ['우엉', '1팩', 3600], ['김', '1봉', 2800], ['밥', '2공기', 2400],
+  ]),
+  menu('hallabong-salad', '한라봉 샐러드', '겨울', '상큼한 날', 26, '#f29a3b', ['hallabong'], [
+    ['한라봉', '2개', 7800], ['샐러드 채소', '1팩', 3200], ['리코타', '1팩', 5200],
+  ]),
+  menu('yellowtail-sashimi-bowl', '방어 덮밥', '겨울', '기름진 제철', 44, '#4f8faf', ['yellowtail'], [
+    ['방어', '200g', 13800], ['밥', '1공기', 1200], ['무순', '1팩', 1800],
   ]),
 ]
 

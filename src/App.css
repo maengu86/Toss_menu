@@ -1040,6 +1040,16 @@
   line-height: 1.25;
 }
 
+.menu-card > div,
+.feed-card > span,
+.toss-cart-orderbar > div,
+.price-sheet div,
+.receipt-mini div,
+.checkout-draft dl div,
+.receipt-draft dl div {
+  align-self: center;
+}
+
 .menu-card p {
   margin: 0;
   color: #725f4b;
@@ -1254,6 +1264,50 @@
   font-size: 11px;
   font-weight: 800;
   line-height: 1.2;
+}
+
+.level-box-drafts,
+.feed-box-drafts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.level-box-draft,
+.feed-box-draft {
+  display: flex;
+  min-height: 54px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #f7f8fa;
+}
+
+.level-box-draft strong,
+.level-box-draft span,
+.feed-box-draft strong,
+.feed-box-draft span {
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.level-box-draft span,
+.feed-box-draft span {
+  color: #363a40;
+  text-align: right;
+}
+
+.level-box-draft-2,
+.feed-box-draft-2 {
+  background: #fff8f5;
+}
+
+.level-box-draft-5,
+.feed-box-draft-5 {
+  grid-column: 1 / -1;
 }
 
 .feed-card:disabled {
@@ -1500,21 +1554,21 @@
 }
 
 .toss-back-row {
-  min-height: 42px;
+  min-height: 56px;
   display: flex;
   align-items: center;
-  margin: -8px 0 8px;
+  margin: -4px 0 8px;
 }
 
 .toss-back-row button {
-  width: 38px;
-  height: 38px;
+  width: 52px;
+  height: 52px;
   display: grid;
   place-items: center;
   border: 0;
   border-radius: 50%;
   color: #363a40;
-  font-size: 30px;
+  font-size: 34px;
   line-height: 1;
   background: #ffffff;
 }
@@ -1883,10 +1937,7 @@
 }
 
 .checkout-draft p {
-  margin: 0;
-  font-size: 11px;
-  font-weight: 800;
-  line-height: 1.35;
+  display: none;
 }
 
 /* 작업: 장보기 주문 페이지 시안 5개에 실제 주문 값을 배치합니다.
@@ -2073,10 +2124,7 @@
 }
 
 .receipt-draft p {
-  margin: 0;
-  font-size: 11px;
-  font-weight: 800;
-  line-height: 1.35;
+  display: none;
 }
 
 /* 작업: 주문완료 시안 내부에 실제 주문 데이터를 영수증 항목으로 배치합니다.
