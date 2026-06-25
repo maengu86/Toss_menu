@@ -3,7 +3,7 @@ import type { CSSProperties, ReactNode } from 'react'
 import './App.css'
 import PetAvatar from './components/PetAvatar'
 import { decorItems, menus, seasonalIngredients, seasons } from './data'
-import type { DecorItem, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
+import type { DecorItem, Ingredient, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
 
 const tossShoppingOptions = [
   { name: '바로배송', eta: '오늘 밤 도착', fee: 3000, perk: '빠른 추천' },
@@ -12,9 +12,67 @@ const tossShoppingOptions = [
 ]
 const paymentOptions = ['토스페이', '카드 간편결제', '계좌 결제']
 const deliveryOptions = ['문 앞에 놓기', '직접 받을게요']
-const maxExp = 100
+// 작업: 펫 레벨업 기준을 누적 XP로 관리합니다.
+// 개인 수정 가능: 2레벨/3레벨 기준을 바꾸고 싶으면 아래 숫자만 조정하면 됩니다.
+// 적용 위치: 펫홈 레벨 표시, 경험치 바, 꾸미기 아이템 잠금 해제 조건.
+const petLevelThresholds = [
+  { level: 1, minExp: 0 },
+  { level: 2, minExp: 10000 },
+  { level: 3, minExp: 30000 },
+] as const
 
-type ShopStep = 'cart' | 'store' | 'checkout' | 'complete'
+// 작업: 메뉴 가격을 XP로 변환합니다. 10원당 1xp 규칙을 한 곳에서 관리합니다.
+// 개인 수정 가능: 환산 비율을 바꾸려면 10을 원하는 금액 기준으로 변경하면 됩니다.
+// 적용 위치: 메뉴 카드 XP 표시, 밥먹이기 버튼, 실제 펫 경험치 증가량.
+const wonPerPetExp = 10
+
+const receiptDrafts = [
+  { id: 1, title: '라인형 영수증' },
+]
+
+const decorBoxDrafts = [
+  { id: 1, title: '기본 격자형' },
+  { id: 2, title: '선택 강조형' },
+  { id: 3, title: '잠금 정보형' },
+  { id: 4, title: '작은 버튼형' },
+  { id: 5, title: '미리보기형' },
+]
+
+const levelBoxDrafts = [
+  { id: 1, title: '기본 레벨바' },
+  { id: 2, title: '숫자 강조형' },
+  { id: 3, title: '진행률 카드형' },
+  { id: 4, title: '미니 상태형' },
+  { id: 5, title: '넓은 게이지형' },
+]
+
+const feedBoxDrafts = [
+  { id: 1, title: '기본 재료 카드' },
+  { id: 2, title: 'XP 강조형' },
+  { id: 3, title: '작은 목록형' },
+  { id: 4, title: '버튼 강조형' },
+  { id: 5, title: '상자형 목록' },
+]
+
+const emptyFeedDrafts = [
+  { id: 1, tone: '#fff4ef' },
+  { id: 2, tone: '#f2f7ff' },
+  { id: 3, tone: '#f4fbf5' },
+  { id: 4, tone: '#faf5ff' },
+  { id: 5, tone: '#fff9e8' },
+]
+
+type ShopStep = 'cart' | 'checkout' | 'complete'
+
+type FeedIngredient = Ingredient & {
+  id: string
+  menuName: string
+}
+
+type OrderSnapshot = {
+  checkedPrice: number
+  orderTotal: number
+}
 
 function formatWon(value: number) {
   return value.toLocaleString('ko-KR') + '원'
@@ -24,6 +82,41 @@ function ingredientKey(menuId: string, ingredientName: string) {
   return `${menuId}:${ingredientName}`
 }
 
+function getIngredientExp(ingredient: Ingredient) {
+  return Math.floor(ingredient.price / wonPerPetExp)
+}
+
+function getMenuExp(menu: Menu) {
+  return menu.ingredients.reduce((sum, ingredient) => sum + getIngredientExp(ingredient), 0)
+}
+
+function getPetLevel(totalExp: number) {
+  return petLevelThresholds.reduce((currentLevel, threshold) => (
+    totalExp >= threshold.minExp ? threshold.level : currentLevel
+  ), 1)
+}
+
+function getNextLevelThreshold(level: number) {
+  return petLevelThresholds.find((threshold) => threshold.level > level)
+}
+
+function getCurrentLevelThreshold(level: number) {
+  let currentThreshold = 0
+  for (const threshold of petLevelThresholds) {
+    if (threshold.level <= level) currentThreshold = threshold.minExp
+  }
+  return currentThreshold
+}
+
+function getLevelProgress(totalExp: number, level: number) {
+  const nextThreshold = getNextLevelThreshold(level)
+  if (!nextThreshold) return 100
+
+  const currentThreshold = getCurrentLevelThreshold(level)
+  const levelRange = nextThreshold.minExp - currentThreshold
+  return Math.min(100, Math.max(0, ((totalExp - currentThreshold) / levelRange) * 100))
+}
+
 function App() {
   const firstSummerIngredient = seasonalIngredients.find((item) => item.seasonKey === 'summer') ?? seasonalIngredients[0]
   const [screen, setScreen] = useState<Screen>('home')
@@ -31,11 +124,17 @@ function App() {
   const [selectedMenuOpen, setSelectedMenuOpen] = useState(false)
   const [selectedSeason, setSelectedSeason] = useState<SeasonKey>('summer')
   const [selectedSeasonalIngredientId, setSelectedSeasonalIngredientId] = useState(firstSummerIngredient.id)
-  const [fedMenuIds, setFedMenuIds] = useState<string[]>([])
+  // 작업: 결제 완료된 식재료를 펫에게 먹일 수 있는 재고로 저장합니다.
+  // 개인 수정 가능: 재료 카드에 더 많은 정보를 보여주고 싶으면 FeedIngredient 타입에 필드를 추가하면 됩니다.
+  // 적용 위치: 주문 완료 후 펫홈 > 밥먹이기 목록.
+  const [feedIngredients, setFeedIngredients] = useState<FeedIngredient[]>([])
   const [checkedIngredients, setCheckedIngredients] = useState<string[]>([])
-  const [level, setLevel] = useState(1)
-  const [exp, setExp] = useState(18)
-  const [selectedDeliveryType, setSelectedDeliveryType] = useState(tossShoppingOptions[0].name)
+  const [removedCartIngredientKeys, setRemovedCartIngredientKeys] = useState<string[]>([])
+  const [lastOrder, setLastOrder] = useState<OrderSnapshot | null>(null)
+  // 작업: 펫 경험치는 레벨별 잔여치가 아니라 누적 XP로 저장합니다.
+  // 개인 수정 가능: 기본 시작 XP를 바꾸고 싶으면 0을 원하는 값으로 변경해도 됩니다.
+  // 적용 위치: 펫홈 레벨 카드와 밥먹이기 후 성장 상태.
+  const [exp, setExp] = useState(0)
   const [shopStep, setShopStep] = useState<ShopStep>('cart')
   const [paymentMethod, setPaymentMethod] = useState(paymentOptions[0])
   const [deliveryOption, setDeliveryOption] = useState(deliveryOptions[0])
@@ -44,9 +143,9 @@ function App() {
   const [selectedOutfit, setSelectedOutfit] = useState('기본 앞치마')
   const [selectedAccessory, setSelectedAccessory] = useState('장바구니')
   const [toast, setToast] = useState('')
-  const [petMood, setPetMood] = useState<'idle' | 'happy'>('idle')
   const [isScrolling, setIsScrolling] = useState(false)
   const scrollTimerRef = useRef<number | undefined>(undefined)
+  const orderSequenceRef = useRef(0)
 
   const today = new Intl.DateTimeFormat('ko-KR', {
     month: 'long',
@@ -55,16 +154,25 @@ function App() {
   }).format(new Date())
 
   const selectedMenus = menus.filter((menu) => selectedMenuIds.includes(menu.id))
+  const cartMenus = selectedMenus
+    .map((menu) => ({
+      ...menu,
+      ingredients: menu.ingredients.filter((ingredient) => !removedCartIngredientKeys.includes(ingredientKey(menu.id, ingredient.name))),
+    }))
+    .filter((menu) => menu.ingredients.length > 0)
   const seasonIngredients = seasonalIngredients.filter((ingredient) => ingredient.seasonKey === selectedSeason)
   const seasonalMenus = menus.filter((menu) => menu.seasonalIngredientIds?.includes(selectedSeasonalIngredientId))
 
-  const shoppingItems = selectedMenus.flatMap((menu) => menu.ingredients.map((ingredient) => ({ menuId: menu.id, ingredient })))
-  const totalPrice = shoppingItems.reduce((sum, item) => sum + item.ingredient.price, 0)
-  const selectedDeliveryInfo = tossShoppingOptions.find((option) => option.name === selectedDeliveryType) ?? tossShoppingOptions[0]
-  const orderTotal = totalPrice + selectedDeliveryInfo.fee
+  const shoppingItems = cartMenus.flatMap((menu) => menu.ingredients.map((ingredient) => ({ menuId: menu.id, ingredient })))
+  const checkedPrice = shoppingItems.reduce((sum, item) => (
+    checkedIngredients.includes(ingredientKey(item.menuId, item.ingredient.name)) ? sum + item.ingredient.price : sum
+  ), 0)
+  const selectedDeliveryInfo = tossShoppingOptions[0]
+  const orderTotal = checkedPrice + selectedDeliveryInfo.fee
+  const displayCheckedPrice = shopStep === 'complete' ? lastOrder?.checkedPrice ?? checkedPrice : checkedPrice
+  const displayOrderTotal = shopStep === 'complete' ? lastOrder?.orderTotal ?? orderTotal : orderTotal
   const checkedTotal = shoppingItems.filter((item) => checkedIngredients.includes(ingredientKey(item.menuId, item.ingredient.name))).length
-  const unlockedItems = decorItems.filter((item) => isDecorUnlocked(item, level, shoppingRewardUnlocked))
-
+  const level = getPetLevel(exp)
   function showToast(message: string) {
     setToast(message)
     window.setTimeout(() => setToast(''), 2200)
@@ -85,6 +193,7 @@ function App() {
   function toggleMenu(menuId: string) {
     setSelectedMenuIds((current) => {
       if (current.includes(menuId)) return current.filter((id) => id !== menuId)
+      setRemovedCartIngredientKeys((keys) => keys.filter((key) => !key.startsWith(`${menuId}:`)))
       const next = [...current, menuId]
       setSelectedMenuOpen(false)
       return next
@@ -93,23 +202,13 @@ function App() {
 
   function removeMenu(menuId: string) {
     setSelectedMenuIds((current) => current.filter((id) => id !== menuId))
-    setFedMenuIds((current) => current.filter((id) => id !== menuId))
+    setCheckedIngredients((current) => current.filter((key) => !key.startsWith(`${menuId}:`)))
+    setRemovedCartIngredientKeys((current) => current.filter((key) => !key.startsWith(`${menuId}:`)))
   }
 
-  function feedPet(menu: Menu) {
-    if (fedMenuIds.includes(menu.id)) {
-      showToast('이미 먹인 메뉴예요.')
-      return
-    }
-
-    const next = exp + menu.exp
-    const gainedLevel = Math.floor(next / maxExp)
-    setLevel((current) => current + gainedLevel)
-    setExp(next % maxExp)
-    setFedMenuIds((current) => [...current, menu.id])
-    setPetMood('happy')
-    window.setTimeout(() => setPetMood('idle'), 1200)
-    showToast(gainedLevel > 0 ? '먹보가 레벨업했어요!' : `${menu.name} 먹고 경험치 +${menu.exp}`)
+  function feedPet(ingredient: FeedIngredient) {
+    setExp((current) => current + getIngredientExp(ingredient))
+    setFeedIngredients((current) => current.filter((item) => item.id !== ingredient.id))
   }
 
   function toggleIngredient(key: string) {
@@ -119,9 +218,40 @@ function App() {
   }
 
   function completeOrderFlow() {
+    const checkedItems = shoppingItems.filter((item) => checkedIngredients.includes(ingredientKey(item.menuId, item.ingredient.name)))
+    if (checkedItems.length === 0) {
+      showToast('구매할 상품을 선택해주세요.')
+      setShopStep('cart')
+      return
+    }
+    const orderedKeys = checkedItems.map((item) => ingredientKey(item.menuId, item.ingredient.name))
+    orderSequenceRef.current += 1
+    const orderId = orderSequenceRef.current
+
+    setLastOrder({ checkedPrice, orderTotal })
+    setRemovedCartIngredientKeys((current) => Array.from(new Set([...current, ...orderedKeys])))
+    setFeedIngredients((current) => [
+      ...current,
+      ...checkedItems.map((item, index) => {
+        const menu = selectedMenus.find((selectedMenu) => selectedMenu.id === item.menuId)
+        return {
+          ...item.ingredient,
+          id: `${orderId}:${index}:${item.menuId}:${item.ingredient.name}`,
+          menuName: menu?.name ?? '주문 메뉴',
+        }
+      }),
+    ])
+    setCheckedIngredients((current) => current.filter((key) => !orderedKeys.includes(key)))
+    setSelectedMenuIds([])
+    setSelectedMenuOpen(false)
     setShoppingRewardUnlocked(true)
     setShopStep('complete')
-    showToast('주문 플로우 완료! 실제 결제는 진행되지 않았어요.')
+  }
+
+  function restartShoppingAfterOrder() {
+    setLastOrder(null)
+    setShopStep('cart')
+    setScreen('shopping')
   }
 
   function selectDecor(item: DecorItem) {
@@ -178,24 +308,31 @@ function App() {
 
         {screen === 'shopping' && (
           <ShoppingScreen
+            background={selectedBackground}
+            accessory={selectedAccessory}
             checkedIngredients={checkedIngredients}
             checkedTotal={checkedTotal}
             deliveryOption={deliveryOption}
             deliveryOptions={deliveryOptions}
-            selectedMenus={selectedMenus}
-            deliveryType={selectedDeliveryType}
+            selectedMenus={cartMenus}
+            checkedPrice={displayCheckedPrice}
             deliveryTypeInfo={selectedDeliveryInfo}
-            deliveryTypes={tossShoppingOptions}
-            orderTotal={orderTotal}
+            orderTotal={displayOrderTotal}
             paymentMethod={paymentMethod}
             paymentOptions={paymentOptions}
+            outfit={selectedOutfit}
             step={shopStep}
-            totalPrice={totalPrice}
+            onBackHome={() => setScreen('home')}
             onCompleteOrder={completeOrderFlow}
-            onGoHome={() => setScreen('home')}
+            onGoHome={() => {
+              setLastOrder(null)
+              setShopStep('cart')
+              setScreen('petHome')
+            }}
+            onRestartShopping={restartShoppingAfterOrder}
+            onRemoveMenu={removeMenu}
             onScrollActivity={handleScrollActivity}
             onSelectDelivery={setDeliveryOption}
-            onSelectDeliveryType={setSelectedDeliveryType}
             onSelectPayment={setPaymentMethod}
             onSetStep={setShopStep}
             onToggleIngredient={toggleIngredient}
@@ -208,13 +345,10 @@ function App() {
             accessory={selectedAccessory}
             decorItems={decorItems}
             exp={exp}
-            fedMenuIds={fedMenuIds}
+            feedIngredients={feedIngredients}
             level={level}
             outfit={selectedOutfit}
-            petMood={petMood}
-            selectedMenus={selectedMenus}
             shoppingRewardUnlocked={shoppingRewardUnlocked}
-            unlockedCount={unlockedItems.length}
             onFeed={feedPet}
             onSelectDecor={selectDecor}
             onShare={copyShareLink}
@@ -269,20 +403,10 @@ function HomeScreen({
     <section className="screen" onScroll={onScrollActivity}>
       <header className="top-header">
         <p>{today}</p>
-        <h1>오늘의 제철 음식 추천</h1>
+        <h1>제철음식 뭐가있을까?</h1>
       </header>
 
-      <TabDrafts
-        seasons={seasons}
-        seasonIngredients={seasonIngredients}
-        selectedSeason={selectedSeason}
-        selectedSeasonalIngredientId={selectedSeasonalIngredientId}
-        onScrollActivity={onScrollActivity}
-        onSelectSeason={onSelectSeason}
-        onSelectSeasonalIngredient={onSelectSeasonalIngredient}
-      />
-
-      <div className="season-panel">
+      <div className={`season-panel season-panel-index season-${selectedSeason}`}>
         <div className="season-tabs" aria-label="계절 선택">
           {seasons.map((season) => (
             <button
@@ -292,7 +416,7 @@ function HomeScreen({
               style={{ '--season-accent': season.accent } as CSSProperties}
               type="button"
             >
-              {season.label}
+              <span>{season.label}</span>
             </button>
           ))}
         </div>
@@ -330,239 +454,178 @@ function HomeScreen({
             >
               <div>
                 <strong>{menu.name}</strong>
-                <p>{menu.ingredients.map((item) => item.name).join(', ')}</p>
               </div>
-              <b>{menu.exp}xp</b>
+              <b>{getMenuExp(menu)}xp</b>
             </button>
           )
         })}
       </div>
 
-      <button className="primary-action" onClick={onStartShopping} type="button">
-        구매하기
-      </button>
-
       {selectedMenus.length > 0 && (
         <div className={`selected-menu-widget ${selectedMenuOpen ? 'open' : ''}`}>
           {selectedMenuOpen && (
-            <div className="selected-menu-panel">
-              <div className="selected-menu-panel-head">
-                <strong>선택한 메뉴</strong>
-                <button aria-label="선택 메뉴 닫기" onClick={() => onSetSelectedMenuOpen(false)} type="button">×</button>
+            <>
+              <button className="selected-menu-backdrop" aria-label="선택 메뉴 닫기" onClick={() => onSetSelectedMenuOpen(false)} type="button" />
+              <div className="selected-menu-panel variant-2">
+                {selectedMenus.map((menu) => (
+                  <div className="selected-menu-chip" key={menu.id}>
+                    <span>{menu.name}</span>
+                    <button aria-label={`${menu.name} 삭제`} onClick={() => onRemoveMenu(menu.id)} type="button">×</button>
+                  </div>
+                ))}
+                <button className="selected-menu-shop" onClick={onStartShopping} type="button">구매하기</button>
               </div>
-              {selectedMenus.map((menu) => (
-                <div className="selected-menu-chip" key={menu.id}>
-                  <span>{menu.name}</span>
-                  <button aria-label={`${menu.name} 삭제`} onClick={() => onRemoveMenu(menu.id)} type="button">삭제</button>
-                </div>
-              ))}
-              <button className="selected-menu-shop" onClick={onStartShopping} type="button">장보기로 이동</button>
-            </div>
+            </>
           )}
-          <button className="selected-menu-fab" onClick={() => onSetSelectedMenuOpen(!selectedMenuOpen)} type="button">
+          <button className="selected-menu-fab" aria-label="선택 메뉴 열기" onClick={() => onSetSelectedMenuOpen(!selectedMenuOpen)} type="button">
             <span>{selectedMenus.length}</span>
-            🛒
           </button>
         </div>
       )}
-    </section>
-  )
-}
-
-function TabDrafts({
-  seasons,
-  seasonIngredients,
-  selectedSeason,
-  selectedSeasonalIngredientId,
-  onScrollActivity,
-  onSelectSeason,
-  onSelectSeasonalIngredient,
-}: {
-  seasons: { key: SeasonKey; label: string; accent: string }[]
-  seasonIngredients: SeasonalIngredient[]
-  selectedSeason: SeasonKey
-  selectedSeasonalIngredientId: string
-  onScrollActivity: () => void
-  onSelectSeason: (season: SeasonKey) => void
-  onSelectSeasonalIngredient: (id: string) => void
-}) {
-  const drafts = [
-    { id: 1, label: '시안 1', className: 'draft-clip' },
-    { id: 2, label: '시안 2', className: 'draft-folder' },
-    { id: 3, label: '시안 3', className: 'draft-notebook' },
-  ]
-
-  return (
-    <section className="tab-drafts" aria-label="홈 탭 시안">
-      <div className="section-title">
-        <h2>홈 탭 시안</h2>
-        <span>탭 + 식재료 박스</span>
-      </div>
-      {drafts.map((draft) => (
-        <div className={`tab-draft ${draft.className}`} key={draft.id}>
-          <strong className="draft-label">{draft.label}</strong>
-          <div className="draft-tabs">
-            {seasons.map((season) => (
-              <button
-                className={selectedSeason === season.key ? 'active' : ''}
-                key={season.key}
-                onClick={() => onSelectSeason(season.key)}
-                type="button"
-              >
-                {season.label}
-              </button>
-            ))}
-          </div>
-          <div className="draft-ingredient-box" onScroll={onScrollActivity}>
-            {seasonIngredients.map((ingredient) => (
-              <button
-                className={selectedSeasonalIngredientId === ingredient.id ? 'active' : ''}
-                key={`${draft.id}-${ingredient.id}`}
-                onClick={() => onSelectSeasonalIngredient(ingredient.id)}
-                type="button"
-              >
-                <span aria-hidden="true">{ingredient.emoji}</span>
-                <b>{ingredient.name}</b>
-              </button>
-            ))}
-          </div>
-        </div>
-      ))}
     </section>
   )
 }
 
 function ShoppingScreen({
+  background,
+  accessory,
   selectedMenus,
   checkedIngredients,
   checkedTotal,
-  totalPrice,
+  checkedPrice,
   orderTotal,
-  deliveryType,
   deliveryTypeInfo,
-  deliveryTypes,
   step,
   paymentMethod,
   paymentOptions,
+  outfit,
   deliveryOption,
   deliveryOptions,
   onToggleIngredient,
-  onSelectDeliveryType,
   onSelectPayment,
   onSelectDelivery,
   onSetStep,
+  onBackHome,
   onCompleteOrder,
   onGoHome,
+  onRestartShopping,
+  onRemoveMenu,
   onScrollActivity,
 }: {
+  background: string
+  accessory: string
   selectedMenus: Menu[]
   checkedIngredients: string[]
   checkedTotal: number
-  totalPrice: number
+  checkedPrice: number
   orderTotal: number
-  deliveryType: string
   deliveryTypeInfo: (typeof tossShoppingOptions)[number]
-  deliveryTypes: typeof tossShoppingOptions
   step: ShopStep
   paymentMethod: string
   paymentOptions: string[]
+  outfit: string
   deliveryOption: string
   deliveryOptions: string[]
   onToggleIngredient: (name: string) => void
-  onSelectDeliveryType: (deliveryType: string) => void
   onSelectPayment: (method: string) => void
   onSelectDelivery: (option: string) => void
   onSetStep: (step: ShopStep) => void
+  onBackHome: () => void
   onCompleteOrder: () => void
   onGoHome: () => void
+  onRestartShopping: () => void
+  onRemoveMenu: (menuId: string) => void
   onScrollActivity: () => void
 }) {
-  const itemCount = selectedMenus.reduce((count, menu) => count + menu.ingredients.length, 0)
-  const canContinue = itemCount > 0
+  const canContinue = checkedTotal > 0
+  const allIngredientKeys = selectedMenus.flatMap((menu) => menu.ingredients.map((item) => ingredientKey(menu.id, item.name)))
+  const allChecked = allIngredientKeys.length > 0 && allIngredientKeys.every((key) => checkedIngredients.includes(key))
 
   return (
     <section className="screen toss-screen" onScroll={onScrollActivity}>
-      <header className="toss-shopping-header">
-        <button aria-label="뒤로" type="button">‹</button>
-        <strong>토스쇼핑</strong>
-        <span>주문</span>
-      </header>
-
-      <header className="compact-header toss-header">
-        <span>오늘 뭐 먹지? 장보기</span>
-        <h1>{step === 'complete' ? '주문 체험 완료' : '토스쇼핑에서 재료를 담아요'}</h1>
-      </header>
-
-      <div className="toss-steps" aria-label="쇼핑 진행 단계">
-        {['상품', '배송', '결제'].map((label, index) => {
-          const activeIndex = step === 'cart' ? 0 : step === 'store' ? 1 : 2
-          return (
-            <div className={index <= activeIndex ? 'active' : ''} key={label}>
-              <span>{index + 1}</span>
-              {label}
-            </div>
-          )
-        })}
+      <div className="toss-back-row">
+        <button aria-label="홈으로 돌아가기" onClick={onBackHome} type="button">‹</button>
       </div>
 
       {step === 'cart' && (
         <>
-          <div className="toss-summary-card">
-            <span>선택 메뉴 재료</span>
-            <strong>{formatWon(totalPrice)}</strong>
-            <p>구매 체크 {checkedTotal}/{itemCount}</p>
-          </div>
           <div className="toss-menu-list">
-            {selectedMenus.length === 0 && <p className="empty">홈에서 메뉴를 먼저 선택해주세요.</p>}
-            {selectedMenus.map((menu) => (
-              <article className="toss-menu-box" key={menu.id}>
-                <div className="toss-menu-box-head">
-                  <span>메뉴</span>
-                  <strong>{menu.name}</strong>
-                  <b>{formatWon(menu.ingredients.reduce((sum, item) => sum + item.price, 0))}</b>
+            {selectedMenus.length === 0 && (
+              <div className="empty-cart-pet">
+                <PetAvatar outfit={outfit} background={background} accessory={accessory} />
+                <h2>배고파요...</h2>
+                <p>오늘은 뭐 먹을래요?</p>
+                <div>
+                  <button className="toss-primary" onClick={onBackHome} type="button">장보러가기</button>
+                  <button className="toss-secondary" onClick={onGoHome} type="button">펫 관리하기</button>
                 </div>
-                <div className="ingredient-list toss-list">
-                  {menu.ingredients.map((item) => {
-                    const key = ingredientKey(menu.id, item.name)
-                    return (
-                      <label className="ingredient-row toss-row" key={key}>
-                        <input checked={checkedIngredients.includes(key)} onChange={() => onToggleIngredient(key)} type="checkbox" />
-                        <span>
-                          <strong>{item.name}</strong>
-                        </span>
-                        <b>{formatWon(item.price)}</b>
+              </div>
+            )}
+            {selectedMenus.length > 0 && (
+              <label className="toss-select-all">
+                <input
+                  checked={allChecked}
+                  onChange={() => {
+                    allIngredientKeys.forEach((key) => {
+                      if (allChecked === checkedIngredients.includes(key)) onToggleIngredient(key)
+                    })
+                  }}
+                  type="checkbox"
+                />
+                <span>전체 선택</span>
+                <b>{checkedTotal}/{allIngredientKeys.length}</b>
+              </label>
+            )}
+            {selectedMenus.map((menu) => {
+                const menuKeys = menu.ingredients.map((item) => ingredientKey(menu.id, item.name))
+                const menuChecked = menuKeys.every((key) => checkedIngredients.includes(key))
+                return (
+                  <article className="toss-menu-box" key={menu.id}>
+                    <div className="toss-menu-box-head">
+                      <label>
+                        <input
+                          checked={menuChecked}
+                          onChange={() => {
+                            menuKeys.forEach((key) => {
+                              if (menuChecked === checkedIngredients.includes(key)) onToggleIngredient(key)
+                            })
+                          }}
+                          type="checkbox"
+                        />
+                        <strong>{menu.name}</strong>
                       </label>
-                    )
-                  })}
-                </div>
-              </article>
-            ))}
+                      <button className="toss-menu-remove" onClick={() => onRemoveMenu(menu.id)} type="button">
+                        메뉴 빼기
+                      </button>
+                    </div>
+                    <div className="ingredient-list toss-list toss-product-list">
+                      {menu.ingredients.map((item) => {
+                        const key = ingredientKey(menu.id, item.name)
+                        return (
+                          <label className="ingredient-row toss-row" key={key}>
+                            <input checked={checkedIngredients.includes(key)} onChange={() => onToggleIngredient(key)} type="checkbox" />
+                            <em aria-hidden="true">{shoppingItemEmoji(item.name)}</em>
+                            <span>
+                              <strong>{item.name}</strong>
+                            </span>
+                            <b>{formatWon(item.price)}</b>
+                          </label>
+                        )
+                      })}
+                    </div>
+                  </article>
+                )
+            })}
           </div>
           <div className="toss-cart-spacer" />
-          <button className="toss-primary toss-cart-continue" disabled={!canContinue} onClick={() => onSetStep('store')} type="button">
-            토스쇼핑 주문서로 계속하기
-          </button>
-        </>
-      )}
-
-      {step === 'store' && (
-        <>
-          <div className="toss-copy">
-            <strong>배송 방식을 선택해주세요</strong>
-            <p>토스쇼핑 주문서에 붙일 배송 옵션만 고르는 체험 화면이에요.</p>
-          </div>
-          <div className="store-list">
-            {deliveryTypes.map((option) => (
-              <button className={`store-card ${deliveryType === option.name ? 'selected' : ''}`} key={option.name} onClick={() => onSelectDeliveryType(option.name)} type="button">
-                <span>{option.perk}</span>
-                <strong>{option.name}</strong>
-                <p>{option.eta} · 배송비 {formatWon(option.fee)}</p>
-              </button>
-            ))}
-          </div>
-          <div className="toss-button-row">
-            <button className="toss-secondary" onClick={() => onSetStep('cart')} type="button">이전</button>
-            <button className="toss-primary" onClick={() => onSetStep('checkout')} type="button">결제 화면으로</button>
+          <div className="toss-cart-orderbar" aria-label="주문 예상 금액">
+            <div>
+              <span>총 주문 예상금액</span>
+              <strong>{formatWon(checkedPrice)}</strong>
+            </div>
+            <button className="toss-primary toss-cart-continue" disabled={!canContinue} onClick={() => onSetStep('checkout')} type="button">
+              주문하기
+            </button>
           </div>
         </>
       )}
@@ -588,12 +651,12 @@ function ShoppingScreen({
             ))}
           </OptionGroup>
           <div className="price-sheet">
-            <div><span>상품 금액</span><b>{formatWon(totalPrice)}</b></div>
+            <div><span>상품 금액</span><b>{formatWon(checkedPrice)}</b></div>
             <div><span>배송비</span><b>{formatWon(deliveryTypeInfo.fee)}</b></div>
             <div className="total"><span>총 결제 금액</span><b>{formatWon(orderTotal)}</b></div>
           </div>
           <div className="toss-button-row">
-            <button className="toss-secondary" onClick={() => onSetStep('store')} type="button">이전</button>
+            <button className="toss-secondary" onClick={() => onSetStep('cart')} type="button">이전</button>
             <button className="toss-primary" onClick={onCompleteOrder} type="button">{formatWon(orderTotal)} 결제하기</button>
           </div>
         </>
@@ -601,17 +664,47 @@ function ShoppingScreen({
 
       {step === 'complete' && (
         <div className="complete-card">
-          <span>결제 기능 없음</span>
           <h2>주문 체험이 완료됐어요</h2>
-          <p>토스쇼핑에서 {itemCount}개 재료를 주문한 것처럼 처리했어요. 실제 결제와 주문은 발생하지 않습니다.</p>
+          <p>실제 결제와 주문은 발생하지 않습니다.</p>
           <div className="receipt-mini">
             <div><span>결제 수단</span><b>{paymentMethod}</b></div>
             <div><span>배송 방식</span><b>{deliveryTypeInfo.name}</b></div>
             <div><span>배송 요청</span><b>{deliveryOption}</b></div>
             <div><span>총액</span><b>{formatWon(orderTotal)}</b></div>
           </div>
-          <button className="toss-primary" onClick={onGoHome} type="button">홈에서 펫에게 밥 먹이기</button>
-          <button className="toss-secondary wide" onClick={() => onSetStep('cart')} type="button">다시 장보기 보기</button>
+          <div className="receipt-drafts receipt-main" aria-label="주문 완료 영수증">
+            {receiptDrafts.map((draft) => (
+              <article className={`receipt-draft receipt-draft-${draft.id}`} key={draft.id}>
+                {/* 작업: 선택된 라인형 영수증을 주문완료 메인 UI로 적용합니다.
+                    개인 수정 가능: 항목 순서는 바꿔도 되지만 실제 주문값 바인딩은 유지해야 합니다.
+                    적용 위치: 장보기 > 주문완료 화면의 메인 영수증. */}
+                <div className="receipt-draft-head">
+                  <strong>적용 영수증</strong>
+                  <span>{draft.title}</span>
+                </div>
+                <dl>
+                  <div>
+                    <dt>결제 수단</dt>
+                    <dd>{paymentMethod}</dd>
+                  </div>
+                  <div>
+                    <dt>배송 방식</dt>
+                    <dd>{deliveryTypeInfo.name}</dd>
+                  </div>
+                  <div>
+                    <dt>배송 요청</dt>
+                    <dd>{deliveryOption}</dd>
+                  </div>
+                  <div>
+                    <dt>총 결제금액</dt>
+                    <dd>{formatWon(orderTotal)}</dd>
+                  </div>
+                </dl>
+              </article>
+            ))}
+          </div>
+          <button className="toss-primary" onClick={onGoHome} type="button">밥주러 가기</button>
+          <button className="toss-secondary wide" onClick={onRestartShopping} type="button">장보러 가기</button>
         </div>
       )}
     </section>
@@ -627,18 +720,37 @@ function OptionGroup({ title, children }: { title: string; children: ReactNode }
   )
 }
 
+function shoppingItemEmoji(name: string) {
+  if (name.includes('수박')) return '🍉'
+  if (name.includes('콩국수') || name.includes('소면') || name.includes('파스타')) return '🍜'
+  if (name.includes('콩국물') || name.includes('우유') || name.includes('요거트')) return '🥛'
+  if (name.includes('복숭아')) return '🍑'
+  if (name.includes('옥수수')) return '🌽'
+  if (name.includes('토마토')) return '🍅'
+  if (name.includes('오이')) return '🥒'
+  if (name.includes('가지')) return '🍆'
+  if (name.includes('귤')) return '🍊'
+  if (name.includes('배추')) return '🥬'
+  if (name.includes('굴')) return '🦪'
+  if (name.includes('무')) return '⚪'
+  if (name.includes('고구마')) return '🍠'
+  if (name.includes('버섯')) return '🍄'
+  if (name.includes('딸기')) return '🍓'
+  if (name.includes('샐러드')) return '🥗'
+  if (name.includes('치즈')) return '🧀'
+  if (name.includes('쌀') || name.includes('밥')) return '🍚'
+  return '🛒'
+}
+
 function PetHomeScreen({
   level,
   exp,
   background,
   outfit,
   accessory,
-  selectedMenus,
-  fedMenuIds,
-  petMood,
+  feedIngredients,
   decorItems,
   shoppingRewardUnlocked,
-  unlockedCount,
   onFeed,
   onSelectDecor,
   onShare,
@@ -649,136 +761,147 @@ function PetHomeScreen({
   background: string
   outfit: string
   accessory: string
-  selectedMenus: Menu[]
-  fedMenuIds: string[]
-  petMood: 'idle' | 'happy'
+  feedIngredients: FeedIngredient[]
   decorItems: DecorItem[]
   shoppingRewardUnlocked: boolean
-  unlockedCount: number
-  onFeed: (menu: Menu) => void
+  onFeed: (ingredient: FeedIngredient) => void
   onSelectDecor: (item: DecorItem) => void
   onShare: () => void
   onScrollActivity: () => void
 }) {
   const [decorTab, setDecorTab] = useState<'all' | DecorItem['type']>('all')
+  const [petTab, setPetTab] = useState<'feed' | 'decor'>('feed')
   const visibleItems = decorTab === 'all' ? decorItems : decorItems.filter((item) => item.type === decorTab)
-  const nextReward = getClosestReward(level, shoppingRewardUnlocked)
+  const nextLevelThreshold = getNextLevelThreshold(level)
+  const levelProgress = getLevelProgress(exp, level)
+  const expLabel = nextLevelThreshold ? `${exp}/${nextLevelThreshold.minExp} xp` : `${exp} xp`
+  const previewFeedIngredient = feedIngredients[0]
+  const previewFeedText = previewFeedIngredient ? previewFeedIngredient.name : '주문한 재료 없음'
+  const previewFeedExp = previewFeedIngredient ? `+${getIngredientExp(previewFeedIngredient)} xp` : '0 xp'
+  const decorTabs: { id: 'all' | DecorItem['type']; label: string; icon: string }[] = [
+    { id: 'all', label: '전체', icon: '🧩' },
+    { id: 'background', label: '방', icon: '🏠' },
+    { id: 'outfit', label: '옷', icon: '👕' },
+    { id: 'accessory', label: '소품', icon: '🎒' },
+  ]
 
   return (
     <section className="screen pet-home-screen" onScroll={onScrollActivity}>
-      <header className="compact-header pet-home-header">
-        <div>
-          <span>먹보</span>
-          <h1>먹보의 방 꾸미기</h1>
-        </div>
-        <button aria-label="먹보 링크 복사" onClick={onShare} type="button">↗</button>
-      </header>
-
       <div className={`pet-room-stage ${roomClass(background)}`}>
-        <SeasonRoomDecor background={background} />
-        <PetAvatar mood={petMood} outfit={outfit} background={background} accessory={accessory} />
-        <div className="pet-room-status">
-          <div>
-            <span>해금 {unlockedCount}/{decorItems.length}</span>
-            <strong>{nextReward.title}</strong>
-          </div>
-          <small>{nextReward.reward}</small>
-        </div>
+        <button className="pet-share-button" aria-label="먹보 링크 복사" onClick={onShare} type="button">📤</button>
+        <PetAvatar outfit={outfit} background={background} accessory={accessory} />
       </div>
 
-      <section className="pet-feed-panel">
-        <div className="section-title">
-          <h2>먹보에게 먹이기</h2>
-          <span>Lv. {level}</span>
-        </div>
-        <div className="level-card">
-          <div>
-            <strong>Lv. {level}</strong>
-            <span>{exp}/{maxExp} xp</span>
-          </div>
-          <div className="progress-track">
-            <div className="progress-fill" style={{ width: `${exp}%` }} />
-          </div>
-        </div>
-        <div className="feed-list compact-feed-list">
-          {selectedMenus.length === 0 && <p className="empty">홈에서 메뉴를 고르면 먹보에게 먹일 수 있어요.</p>}
-          {selectedMenus.map((menu) => {
-            const fed = fedMenuIds.includes(menu.id)
-            return (
-              <button className="feed-card" disabled={fed} key={menu.id} onClick={() => onFeed(menu)} type="button">
-                <span>{menu.name}</span>
-                <b>{fed ? '먹었어요' : `+${menu.exp} xp`}</b>
-              </button>
-            )
-          })}
-        </div>
-      </section>
-
-      <div className="pet-inventory">
-        <div className="decor-tabs" aria-label="꾸미기 분류">
-          <button className={decorTab === 'all' ? 'active' : ''} onClick={() => setDecorTab('all')} type="button">♥</button>
-          <button className={decorTab === 'background' ? 'active' : ''} onClick={() => setDecorTab('background')} type="button">▦</button>
-          <button className={decorTab === 'outfit' ? 'active' : ''} onClick={() => setDecorTab('outfit')} type="button">👕</button>
-          <button className={decorTab === 'accessory' ? 'active' : ''} onClick={() => setDecorTab('accessory')} type="button">☕</button>
-        </div>
-
-        <div className="decor-grid">
-          {visibleItems.map((item) => {
-            const unlocked = isDecorUnlocked(item, level, shoppingRewardUnlocked)
-            const selected = item.name === background || item.name === outfit || item.name === accessory
-            return (
-              <button className={`decor-card ${selected ? 'selected' : ''} ${unlocked ? '' : 'locked'}`} key={item.id} onClick={() => onSelectDecor(item)} type="button">
-                <span>{decorIcon(item)}</span>
-                <strong>{item.name}</strong>
-                <small>{unlocked ? (selected ? '착용중' : '해금됨') : item.unlockByShopping ? '장보기 보상' : `Lv.${item.unlockLevel}`}</small>
-              </button>
-            )
-          })}
-        </div>
+      <div className="pet-action-tabs" aria-label="펫홈 작업">
+        <button className={petTab === 'feed' ? 'active' : ''} onClick={() => setPetTab('feed')} type="button">
+          <span aria-hidden="true">🍚</span>
+          <b>밥먹기</b>
+        </button>
+        {decorTabs.map((tab) => (
+          <button
+            className={petTab === 'decor' && decorTab === tab.id ? 'active' : ''}
+            key={tab.id}
+            onClick={() => {
+              setPetTab('decor')
+              setDecorTab(tab.id)
+            }}
+            type="button"
+          >
+            <span aria-hidden="true">{tab.icon}</span>
+            <b>{tab.label}</b>
+          </button>
+        ))}
       </div>
+
+      {petTab === 'feed' && (
+        <section className="pet-feed-panel">
+          <div className="level-box-drafts" aria-label="레벨 상자 시안">
+            {levelBoxDrafts.map((draft) => (
+              <article className={`level-box-draft level-box-draft-${draft.id}`} key={draft.id}>
+                <strong>{draft.title}</strong>
+                <span>Lv. {level}</span>
+                <b>{expLabel}</b>
+              </article>
+            ))}
+          </div>
+          <div className="level-card">
+            <div>
+              <strong>Lv. {level}</strong>
+              <span>{expLabel}</span>
+            </div>
+            <div className="progress-track">
+              <div className="progress-fill" style={{ width: `${levelProgress}%` }} />
+            </div>
+          </div>
+          <div className="feed-box-drafts" aria-label="밥먹이기 상자 시안">
+            {feedBoxDrafts.map((draft) => (
+              <article className={`feed-box-draft feed-box-draft-${draft.id}`} key={draft.id}>
+                <strong>{draft.title}</strong>
+                <span>{previewFeedText}</span>
+                <b>{previewFeedExp}</b>
+              </article>
+            ))}
+          </div>
+          <div className="feed-list compact-feed-list">
+            {feedIngredients.length === 0 && (
+              <div className="empty-feed-drafts" aria-label="밥먹이기 빈 상태">
+                {/* 작업: 먹일 메뉴가 없을 때 주문 안내를 보여줍니다.
+                    개인 수정 가능: 안내 문구는 자유롭게 바꿔도 됩니다.
+                    적용 위치: 펫홈 > 밥먹이기 탭의 빈 상태. */}
+                {emptyFeedDrafts.slice(0, 1).map((draft) => (
+                  <p className="empty" key={draft.id} style={{ '--empty-tone': draft.tone } as CSSProperties}>
+                    메뉴를 주문해 주세요
+                  </p>
+                ))}
+              </div>
+            )}
+            {feedIngredients.map((ingredient) => (
+              <button className="feed-card" key={ingredient.id} onClick={() => onFeed(ingredient)} type="button">
+                <span>
+                  <strong>{ingredient.name}</strong>
+                </span>
+                <b>+{getIngredientExp(ingredient)} xp</b>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {petTab === 'decor' && (
+        <div className="pet-inventory">
+          <div className="decor-box-drafts" aria-label="꾸미기 박스 시안">
+            {decorBoxDrafts.map((draft) => (
+              <article className={`decor-box-draft decor-box-draft-${draft.id}`} key={draft.id}>
+                {/* 작업: 꾸미기 박스의 적용 방향을 5개 시안으로 비교합니다.
+                    개인 수정 가능: 시안 문구와 표시 항목은 자유롭게 조정해도 됩니다.
+                    적용 위치: 펫홈 > 꾸미기 탭 상단. */}
+                <strong>시안 {draft.id}</strong>
+                <span>{draft.title}</span>
+                <dl>
+                  <div><dt>방</dt><dd>{background}</dd></div>
+                  <div><dt>옷</dt><dd>{outfit}</dd></div>
+                  <div><dt>소품</dt><dd>{accessory}</dd></div>
+                </dl>
+              </article>
+            ))}
+          </div>
+          <div className="decor-grid">
+            {visibleItems.map((item) => {
+              const unlocked = isDecorUnlocked(item, level, shoppingRewardUnlocked)
+              const selected = item.name === background || item.name === outfit || item.name === accessory
+              return (
+                <button className={`decor-card ${selected ? 'selected' : ''} ${unlocked ? '' : 'locked'}`} key={item.id} onClick={() => onSelectDecor(item)} type="button">
+                  <span>{decorIcon(item)}</span>
+                  <strong>{item.name}</strong>
+                  <small>{unlocked ? (selected ? '착용중' : '') : item.unlockByShopping ? '장보기 보상' : `Lv.${item.unlockLevel}`}</small>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </section>
   )
-}
-
-function SeasonRoomDecor({ background }: { background: string }) {
-  const isSpring = background.includes('봄꽃') || background.includes('피크닉')
-  const isSummer = background.includes('여름') || background.includes('햇살') || background.includes('바닷가')
-  const isAutumn = background.includes('가을') || background.includes('야시장')
-  const isWinter = background.includes('겨울') || background.includes('구름') || background.includes('눈꽃')
-  const icons = isSpring
-    ? ['🌷', '🍓', '🌿']
-    : isAutumn
-      ? ['🍁', '🍠', '🌰']
-      : isWinter
-        ? ['❄️', '🍊', '☃️']
-        : isSummer
-          ? ['🍉', '🌊', '🧊']
-          : ['☀️', '🌿', '🍽️']
-
-  return (
-    <div className="season-room-decor" aria-hidden="true">
-      {icons.map((icon, index) => <span key={`${icon}-${index}`}>{icon}</span>)}
-    </div>
-  )
-}
-
-function getClosestReward(level: number, shoppingRewardUnlocked: boolean) {
-  if (!shoppingRewardUnlocked) {
-    return {
-      title: '다음 보상: 장보기 주문서 완료',
-      reward: '구름 방 · 레인 판초 · 미니 선풍기',
-    }
-  }
-  if (level < 2) {
-    return {
-      title: '다음 보상: 먹보 Lv.2',
-      reward: '야시장 · 겨울 목도리 · 선글라스',
-    }
-  }
-  return {
-    title: '보상 수집 진행중',
-    reward: '새 메뉴를 먹이면 경험치가 올라요',
-  }
 }
 
 function decorIcon(item: DecorItem) {
@@ -825,17 +948,17 @@ function roomClass(background: string) {
 
 function TabBar({ current, onChange }: { current: Screen; onChange: (screen: Screen) => void }) {
   const tabs: { id: Screen; label: string; icon: string }[] = [
-    { id: 'home', label: '홈', icon: '🏠' },
-    { id: 'shopping', label: '장보기', icon: '🛒' },
-    { id: 'petHome', label: '펫홈', icon: '🐾' },
+    { id: 'home', label: '홈', icon: '🌿' },
+    { id: 'shopping', label: '장보기', icon: '🛍️' },
+    { id: 'petHome', label: '펫홈', icon: '💛' },
   ]
 
   return (
     <nav className="tab-bar" aria-label="하단 탭">
       {tabs.map((tab) => (
         <button className={current === tab.id ? 'active' : ''} key={tab.id} onClick={() => onChange(tab.id)} type="button">
-          <span>{tab.icon}</span>
-          {tab.label}
+          <span className="tab-icon" aria-hidden="true">{tab.icon}</span>
+          <span className="tab-label">{tab.label}</span>
         </button>
       ))}
     </nav>

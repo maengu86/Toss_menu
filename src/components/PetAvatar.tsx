@@ -1,17 +1,14 @@
 type PetAvatarProps = {
-  mood?: 'idle' | 'happy'
   outfit?: string
   background?: string
   accessory?: string
 }
 
 function PetAvatar({
-  mood = 'idle',
   outfit = '기본 앞치마',
   background = '햇살 주방',
   accessory = '장바구니',
 }: PetAvatarProps) {
-  const isHappy = mood === 'happy'
   const hasWatermelonHat = outfit.includes('수박')
   const hasScarf = outfit.includes('목도리')
   const hasChefCoat = outfit.includes('셰프')
@@ -47,146 +44,171 @@ function PetAvatar({
     <div className={`pet-stage pet-dress-stage ${stageClass}`}>
       <svg className="pet-svg dress-pet soft-pet" viewBox="0 0 260 260" role="img" aria-label="먹보 펫">
         <defs>
-          <linearGradient id="petHead" x1="68" x2="192" y1="36" y2="155" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#fff9e9" />
-            <stop offset="1" stopColor="#ffd987" />
+          {/* Character palette: 시안 3번 기준입니다. stopColor만 바꾸면 몸 전체 톤을 쉽게 조정할 수 있습니다. */}
+          <linearGradient id="mukboBody" x1="70" x2="190" y1="42" y2="218" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#fff3ec" />
+            <stop offset="0.55" stopColor="#f7d7c4" />
+            <stop offset="1" stopColor="#eec2ad" />
           </linearGradient>
-          <linearGradient id="petBody" x1="78" x2="182" y1="134" y2="225" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#fff4dc" />
-            <stop offset="1" stopColor="#ffc86e" />
+          <linearGradient id="mukboEar" x1="55" x2="92" y1="40" y2="132" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#ffd8ca" />
+            <stop offset="1" stopColor="#f27f5b" />
           </linearGradient>
         </defs>
 
-        <ellipse cx="130" cy="229" rx="65" ry="14" fill="#7b5835" opacity="0.13" />
+        <ellipse cx="130" cy="230" rx="66" ry="13" fill="#7b5835" opacity="0.12" />
 
-        <path d="M84 82c-21-19-34-19-43-5 18 2 30 12 39 30z" fill="#ffe0a2" stroke="#8b6038" strokeWidth="5" />
-        <path d="M176 82c21-19 34-19 43-5-18 2-30 12-39 30z" fill="#ffe0a2" stroke="#8b6038" strokeWidth="5" />
-        <path d="M104 49c8-18 22-23 36-10-14 4-22 13-25 28z" fill="#83c874" />
-        <path d="M156 49c-8-18-22-23-36-10 14 4 22 13 25 28z" fill="#75b84f" />
-
+        {/* Z-order guide: SVG는 아래 코드가 먼저 뒤에 깔립니다. 몸통/팔을 먼저 그리고 얼굴을 나중에 그려 얼굴이 가려지지 않게 합니다. */}
+        {/* Body: 3등신 비율의 몸통입니다. d 경로의 숫자를 바꾸면 키, 몸통 폭, 다리 길이를 수정할 수 있습니다. */}
         <path
-          d="M62 104c0-39 30-68 68-68s68 29 68 68c0 43-27 73-68 73s-68-30-68-73z"
-          fill="url(#petHead)"
-          stroke="#8b6038"
+          d="M78 135c6-36 28-56 52-56s46 20 52 56l12 82H66z"
+          fill="url(#mukboBody)"
+          stroke="#6f5a45"
           strokeWidth="6"
+          strokeLinejoin="round"
         />
+        <path d="M88 155h84l-10 52h-64z" fill="#fff8f5" opacity="0.9" />
+        <text x="130" y="190" textAnchor="middle" fill="#7e887f" fontSize="11" fontWeight="900">MUKBO</text>
+
+        {/* Arms/feet: 얼굴보다 뒤쪽에 있어야 해서 머리보다 먼저 렌더링합니다. */}
+        <path d="M82 158c-24 9-34 25-27 42 18 0 31-12 40-33z" fill="url(#mukboEar)" stroke="#6f5a45" strokeWidth="5" strokeLinecap="round" />
+        <path d="M178 158c24 9 34 25 27 42-18 0-31-12-40-33z" fill="url(#mukboEar)" stroke="#6f5a45" strokeWidth="5" strokeLinecap="round" />
+        <path d="M96 218c-13 6-13 18 2 22 11 0 18-6 21-17z" fill="#f27f5b" stroke="#6f5a45" strokeWidth="5" strokeLinecap="round" />
+        <path d="M164 218c13 6 13 18-2 22-11 0-18-6-21-17z" fill="#f27f5b" stroke="#6f5a45" strokeWidth="5" strokeLinecap="round" />
+
+        {/* Ears/head: 시안 3번의 물방울 귀입니다. 귀 모양은 M/C 좌표를 조절해서 바꿀 수 있습니다. */}
+        <path d="M78 91c-31-18-40-48-22-69 28 10 40 35 34 68z" fill="url(#mukboEar)" stroke="#6f5a45" strokeWidth="5" strokeLinejoin="round" />
+        <path d="M182 91c31-18 40-48 22-69-28 10-40 35-34 68z" fill="url(#mukboEar)" stroke="#6f5a45" strokeWidth="5" strokeLinejoin="round" />
         <path
-          d="M80 168c0-33 20-54 50-54s50 21 50 54v12c0 33-20 54-50 54s-50-21-50-54z"
-          fill="url(#petBody)"
-          stroke="#8b6038"
+          d="M58 95c0-43 32-72 72-72s72 29 72 72c0 45-30 74-72 74s-72-29-72-74z"
+          fill="url(#mukboBody)"
+          stroke="#6f5a45"
           strokeWidth="6"
+          strokeLinejoin="round"
         />
-        <ellipse cx="130" cy="184" rx="34" ry="40" fill="#fffdf2" opacity="0.9" />
+        <path d="M86 120c16 18 72 18 88 0 3 25-16 42-44 42s-47-17-44-42z" fill="#ffffff" opacity="0.36" />
 
-        <path d="M84 170c-22 8-31 21-26 36 16 2 29-8 37-28z" fill="#ffe0a2" stroke="#8b6038" strokeWidth="5" />
-        <path d="M176 170c22 8 31 21 26 36-16 2-29-8-37-28z" fill="#ffe0a2" stroke="#8b6038" strokeWidth="5" />
-        <path d="M100 225c-10 8-8 17 5 19 9-2 15-8 16-17z" fill="#ffd789" stroke="#8b6038" strokeWidth="5" />
-        <path d="M160 225c10 8 8 17-5 19-9-2-15-8-16-17z" fill="#ffd789" stroke="#8b6038" strokeWidth="5" />
-
-        <circle cx="104" cy="104" r="10" fill="#29384a" />
-        <circle cx="156" cy="104" r="10" fill="#29384a" />
-        <circle cx="101" cy="100" r="3" fill="#ffffff" />
-        <circle cx="153" cy="100" r="3" fill="#ffffff" />
-        <circle cx="88" cy="123" r="12" fill="#f29aa0" opacity="0.74" />
-        <circle cx="172" cy="123" r="12" fill="#f29aa0" opacity="0.74" />
-        <path d="M124 116c4 4 8 4 12 0" fill="none" stroke="#d7a131" strokeWidth="5" strokeLinecap="round" />
-        <path d={isHappy ? 'M106 135c15 15 33 15 48 0' : 'M112 138c11 7 25 7 36 0'} fill="none" stroke="#29384a" strokeWidth="5" strokeLinecap="round" />
-
-        {hasGlasses && (
-          <g>
-            <rect x="86" y="95" width="34" height="20" rx="10" fill="#29384a" />
-            <rect x="140" y="95" width="34" height="20" rx="10" fill="#29384a" />
-            <path d="M120 105h20" stroke="#29384a" strokeWidth="5" />
-            <path d="M92 101h22M146 101h22" stroke="#ffcf57" strokeWidth="3" strokeLinecap="round" />
-          </g>
-        )}
-
-        <path d="M91 168h78l-8 42H99z" fill="#fff9ec" stroke="#8b6038" strokeWidth="4" />
-        <text x="130" y="192" textAnchor="middle" fill="#7e887f" fontSize="12" fontWeight="900">MUKBO</text>
+        {/* Face: 눈(cx/cy), 볼(ellipse), 입(path)을 바꾸면 표정을 수정할 수 있습니다. */}
+        <circle cx="103" cy="89" r="8" fill="#3f3a36" />
+        <circle cx="157" cy="89" r="8" fill="#3f3a36" />
+        <circle cx="100" cy="86" r="2.5" fill="#ffffff" />
+        <circle cx="154" cy="86" r="2.5" fill="#ffffff" />
+        <ellipse cx="87" cy="111" rx="11" ry="8" fill="#f27f5b" opacity="0.22" />
+        <ellipse cx="173" cy="111" rx="11" ry="8" fill="#f27f5b" opacity="0.22" />
+        <path d="M124 103c4 4 8 4 12 0" fill="none" stroke="#b884a2" strokeWidth="5" strokeLinecap="round" />
+        <path d="M113 124c11 8 23 8 34 0" fill="none" stroke="#3f3a36" strokeWidth="5" strokeLinecap="round" />
 
         {hasScarf && (
           <>
-            <path d="M84 150c28 12 64 12 92 0l4 16c-35 13-65 13-100 0z" fill="#ef6b55" />
-            <path d="M155 162l28 28" stroke="#ef6b55" strokeWidth="10" strokeLinecap="round" />
+            <path d="M82 151c30 12 66 12 96 0l3 15c-37 13-65 13-102 0z" fill="#ef6b55" />
+            <path d="M155 162l25 28" stroke="#ef6b55" strokeWidth="9" strokeLinecap="round" />
           </>
         )}
         {hasChefCoat && (
           <>
-            <path d="M94 166h72v46H94z" fill="#ffffff" opacity="0.8" />
-            <path d="M130 168v40" stroke="#d7e0e7" strokeWidth="4" />
-            <circle cx="120" cy="181" r="3" fill="#5b6f82" />
-            <circle cx="140" cy="181" r="3" fill="#5b6f82" />
+            <path d="M96 168h68v42H96z" fill="#ffffff" opacity="0.82" />
+            <path d="M130 170v36" stroke="#d7e0e7" strokeWidth="4" />
+            <circle cx="119" cy="183" r="3" fill="#5b6f82" />
+            <circle cx="141" cy="183" r="3" fill="#5b6f82" />
           </>
         )}
-        {hasPoncho && <path d="M76 160c24-17 84-17 108 0l-13 52H89z" fill="#8fc6f4" opacity="0.76" stroke="#5b8ab8" strokeWidth="4" />}
+        {hasPoncho && <path d="M76 160c24-15 84-15 108 0l-13 52H89z" fill="#8fc6f4" opacity="0.76" stroke="#5b8ab8" strokeWidth="4" />}
         {hasWatermelonHat && (
           <>
-            <path d="M78 75c20-24 84-24 104 0-25 15-79 15-104 0z" fill="#6fc66d" stroke="#397c40" strokeWidth="4" />
-            <path d="M95 75c22 8 48 8 70 0" stroke="#f35f62" strokeWidth="8" strokeLinecap="round" />
+            <path d="M81 72c22-21 76-21 98 0-23 14-75 14-98 0z" fill="#6fc66d" stroke="#397c40" strokeWidth="4" />
+            <path d="M98 72c20 7 44 7 64 0" stroke="#f35f62" strokeWidth="8" strokeLinecap="round" />
           </>
         )}
         {hasPin && (
-          <g transform="translate(166 60)">
+          <g transform="translate(166 66)">
             <path d="M10 0c7 5 9 13 2 21C5 13 3 5 10 0z" fill="#ef5a63" />
-            <path d="M11 2c-7 5-9 13-2 21 7-8 9-16 2-21z" fill="#f06b7d" />
             <path d="M8 0h6" stroke="#75b84f" strokeWidth="3" strokeLinecap="round" />
           </g>
         )}
+        {hasGlasses && (
+          <g>
+            <rect x="86" y="103" width="32" height="18" rx="9" fill="#3f4652" />
+            <rect x="142" y="103" width="32" height="18" rx="9" fill="#3f4652" />
+            <path d="M118 112h24" stroke="#3f4652" strokeWidth="5" />
+          </g>
+        )}
 
-        {hasMug && (
-          <g transform="translate(190 160)">
-            <path d="M0 10c0-7 5-12 12-12h18c7 0 12 5 12 12v30c0 7-5 12-12 12H12C5 52 0 47 0 40z" fill="#e4544f" stroke="#9e3735" strokeWidth="4" />
-            <path d="M42 14h5c8 0 12 6 12 13s-4 13-12 13h-5" fill="none" stroke="#9e3735" strokeWidth="5" />
-            <path d="M16 22c8-10 20-4 20 6 0 9-10 15-20 23C6 43-4 37-4 28c0-10 12-16 20-6z" fill="#fff7df" transform="scale(.7)" />
-          </g>
-        )}
-        {hasBag && (
-          <g transform="translate(35 169)">
-            <path d="M8 10c0-8 7-14 15-14s15 6 15 14" fill="none" stroke="#5b6f82" strokeWidth="4" />
-            <rect x="2" y="10" width="42" height="42" rx="14" fill="#ffb25f" stroke="#8b6038" strokeWidth="4" />
-            <circle cx="23" cy="31" r="12" fill="#29384a" />
-            <path d="M17 37c4 4 8 4 12 0" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
-          </g>
-        )}
-        {hasSpoon && (
-          <g transform="translate(192 158) rotate(-18)">
-            <ellipse cx="12" cy="10" rx="8" ry="12" fill="#d9e1e8" stroke="#8b9aa7" strokeWidth="3" />
-            <path d="M12 22v44" stroke="#8b9aa7" strokeWidth="6" strokeLinecap="round" />
-          </g>
-        )}
-        {hasFan && (
-          <g transform="translate(188 164)">
-            <circle cx="24" cy="24" r="20" fill="#d7f0ff" stroke="#68a8cb" strokeWidth="4" />
-            <path d="M24 24l-13-8M24 24l13-8M24 24v15" stroke="#68a8cb" strokeWidth="4" strokeLinecap="round" />
-            <rect x="18" y="43" width="12" height="22" rx="6" fill="#68a8cb" />
-          </g>
-        )}
-        {hasJuice && (
-          <g transform="translate(188 158)">
-            <path d="M9 4h36l-5 54H14z" fill="#ff6f63" stroke="#9e3735" strokeWidth="4" />
-            <path d="M15 18h24" stroke="#fff7df" strokeWidth="5" strokeLinecap="round" opacity="0.82" />
-            <path d="M31 3l9-17" stroke="#75b84f" strokeWidth="5" strokeLinecap="round" />
-            <circle cx="28" cy="36" r="4" fill="#29384a" opacity="0.5" />
-          </g>
-        )}
-        {hasSweetPotato && (
-          <g transform="translate(187 169)">
-            <path d="M5 28c8-22 42-27 55-8 8 13-5 30-27 31C14 52 0 42 5 28z" fill="#9b5a37" stroke="#6e3f2b" strokeWidth="4" />
-            <path d="M19 29c8-7 19-9 30-6" stroke="#f5c06b" strokeWidth="5" strokeLinecap="round" />
-            <path d="M12 43c11 5 28 5 42-4" stroke="#f2d08a" strokeWidth="4" strokeLinecap="round" />
-          </g>
-        )}
-        {hasMandarin && (
-          <g transform="translate(184 166)">
-            <path d="M6 23h54l-7 34H13z" fill="#d59a4c" stroke="#8b6038" strokeWidth="4" />
-            <path d="M15 23c0-10 8-17 18-17s18 7 18 17" fill="none" stroke="#8b6038" strokeWidth="4" />
-            <circle cx="22" cy="29" r="9" fill="#f2a13b" />
-            <circle cx="38" cy="28" r="9" fill="#ffb25f" />
-            <circle cx="32" cy="39" r="9" fill="#f2a13b" />
-          </g>
-        )}
+        {hasMug && <AccessoryMug />}
+        {hasBag && <AccessoryBag />}
+        {hasSpoon && <AccessorySpoon />}
+        {hasFan && <AccessoryFan />}
+        {hasJuice && <AccessoryJuice />}
+        {hasSweetPotato && <AccessorySweetPotato />}
+        {hasMandarin && <AccessoryMandarin />}
       </svg>
     </div>
+  )
+}
+
+function AccessoryMug() {
+  return (
+    <g transform="translate(190 164)">
+      <path d="M0 10c0-7 5-12 12-12h18c7 0 12 5 12 12v30c0 7-5 12-12 12H12C5 52 0 47 0 40z" fill="#e4544f" stroke="#9e3735" strokeWidth="4" />
+      <path d="M42 14h5c8 0 12 6 12 13s-4 13-12 13h-5" fill="none" stroke="#9e3735" strokeWidth="5" />
+    </g>
+  )
+}
+
+function AccessoryBag() {
+  return (
+    <g transform="translate(35 173)">
+      <path d="M8 10c0-8 7-14 15-14s15 6 15 14" fill="none" stroke="#5b6f82" strokeWidth="4" />
+      <rect x="2" y="10" width="42" height="42" rx="12" fill="#ffb25f" stroke="#6f5a45" strokeWidth="4" />
+      <path d="M16 32c5 5 10 5 15 0" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
+    </g>
+  )
+}
+
+function AccessorySpoon() {
+  return (
+    <g transform="translate(193 161) rotate(-18)">
+      <ellipse cx="12" cy="10" rx="8" ry="12" fill="#d9e1e8" stroke="#8b9aa7" strokeWidth="3" />
+      <path d="M12 22v44" stroke="#8b9aa7" strokeWidth="6" strokeLinecap="round" />
+    </g>
+  )
+}
+
+function AccessoryFan() {
+  return (
+    <g transform="translate(188 166)">
+      <circle cx="24" cy="24" r="20" fill="#d7f0ff" stroke="#68a8cb" strokeWidth="4" />
+      <path d="M24 24l-13-8M24 24l13-8M24 24v15" stroke="#68a8cb" strokeWidth="4" strokeLinecap="round" />
+    </g>
+  )
+}
+
+function AccessoryJuice() {
+  return (
+    <g transform="translate(190 162)">
+      <path d="M9 4h36l-5 54H14z" fill="#ff6f63" stroke="#9e3735" strokeWidth="4" />
+      <path d="M15 18h24" stroke="#fff7df" strokeWidth="5" strokeLinecap="round" opacity="0.82" />
+      <path d="M31 3l9-17" stroke="#75b84f" strokeWidth="5" strokeLinecap="round" />
+    </g>
+  )
+}
+
+function AccessorySweetPotato() {
+  return (
+    <g transform="translate(187 173)">
+      <path d="M5 28c8-22 42-27 55-8 8 13-5 30-27 31C14 52 0 42 5 28z" fill="#9b5a37" stroke="#6e3f2b" strokeWidth="4" />
+      <path d="M19 29c8-7 19-9 30-6" stroke="#f5c06b" strokeWidth="5" strokeLinecap="round" />
+    </g>
+  )
+}
+
+function AccessoryMandarin() {
+  return (
+    <g transform="translate(184 170)">
+      <path d="M6 23h54l-7 34H13z" fill="#d59a4c" stroke="#6f5a45" strokeWidth="4" />
+      <circle cx="22" cy="29" r="9" fill="#f2a13b" />
+      <circle cx="38" cy="28" r="9" fill="#ffb25f" />
+      <circle cx="32" cy="39" r="9" fill="#f2a13b" />
+    </g>
   )
 }
 

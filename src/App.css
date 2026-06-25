@@ -11,10 +11,10 @@
   --surface: #ffffff;
   --surface-strong: #fff7f1;
   --line: #efd8b4;
-  --ink: #2f251d;
+  --ink: #3f3a36;
   --muted: #8d765e;
   --soft-text: #725f4b;
-  --orange: #ff8a58;
+  --orange: #f27f5b;
   --green: #75b84f;
 }
 
@@ -36,16 +36,19 @@
   position: relative;
   padding: 26px 20px 110px;
   scrollbar-color: transparent transparent;
-  scrollbar-width: thin;
+  scrollbar-width: none;
 }
 
 .screen::-webkit-scrollbar {
-  width: 8px;
+  width: 4px;
 }
 
 .screen::-webkit-scrollbar-track,
 .screen::-webkit-scrollbar-button,
 .screen::-webkit-scrollbar-corner {
+  width: 0;
+  height: 0;
+  display: none;
   background: transparent;
 }
 
@@ -81,14 +84,17 @@
 .top-header h1,
 .compact-header h1 {
   margin: 4px 0 0;
-  color: #2f251d;
+  color: #3f3a36;
   font-size: 28px;
   line-height: 1.1;
 }
 
 .top-header h1 {
-  max-width: 260px;
-  font-size: 25px;
+  max-width: none;
+  overflow: hidden;
+  font-size: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .compact-header {
@@ -261,7 +267,7 @@
 
 .pet-room-status small {
   color: #725f4b;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 800;
 }
 
@@ -305,7 +311,7 @@
 .pet-inventory .decor-tabs button.active {
   min-height: 34px;
   color: #4d3e2e;
-  background: #fffdf8;
+  background: #ffffff;
   transform: none;
   box-shadow: inset 0 -3px 0 rgba(255, 255, 255, 0.55);
 }
@@ -314,7 +320,7 @@
 .pet-inventory .decor-tabs button:nth-child(2).active,
 .pet-inventory .decor-tabs button:nth-child(3).active,
 .pet-inventory .decor-tabs button:nth-child(4).active {
-  background: #fffdf8;
+  background: #ffffff;
 }
 
 .recommend-card,
@@ -337,7 +343,7 @@
 
 .recommend-card h2 {
   margin: 6px 0;
-  color: #2f251d;
+  color: #3f3a36;
   font-size: 22px;
 }
 
@@ -359,8 +365,8 @@
 .small-pill {
   flex: 0 0 auto;
   padding: 10px 13px;
-  color: #ffffff;
-  background: #ff8a58;
+  color: #3f3a36;
+  background: #f2f4f6;
 }
 
 .section-title {
@@ -372,26 +378,35 @@
 
 .section-title h2 {
   margin: 0;
-  color: #2f251d;
+  color: #3f3a36;
   font-size: 20px;
 }
 
 .season-panel {
   overflow: hidden;
   margin: 18px 0 20px;
-  padding: 0 0 10px;
+  padding: 0;
   border: 1px solid rgba(226, 216, 195, 0.82);
   border-radius: 10px;
   background: #ffffff;
-  box-shadow: 0 8px 18px rgba(97, 76, 45, 0.07);
+  box-shadow: 0 8px 18px rgba(97, 76, 45, 0.05);
+  --season-spring-surface: #f1f8ee;
+  --season-spring-ink: #5f8e4f;
+  --season-summer-surface: #fff3ec;
+  --season-summer-ink: #d96d43;
+  --season-autumn-surface: #f8f0e7;
+  --season-autumn-ink: #a86d3c;
+  --season-winter-surface: #eef7fb;
+  --season-winter-ink: #5c91ad;
 }
 
 .season-tabs {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: 1fr;
   gap: 0;
-  align-items: stretch;
+  align-content: start;
   margin: 0;
+  overflow: visible;
   transform: none;
 }
 
@@ -407,24 +422,134 @@
 }
 
 .season-tabs button {
-  min-height: 36px;
-  border: 1px solid rgba(226, 216, 195, 0.78);
-  border-width: 0 1px 1px 0;
+  width: 74px;
+  min-height: 42px;
+  border: 0;
   border-radius: 0;
   clip-path: none;
-  color: #8d765e;
+  color: #3f3a36;
   font-size: 12px;
   font-weight: 900;
   background: #ffffff;
-  box-shadow: inset -1px 0 0 rgba(226, 216, 195, 0.52);
+  box-shadow: none;
+}
+
+.season-tabs button span {
+  display: inline-grid;
+  min-width: 42px;
+  min-height: 20px;
+  place-items: center;
+  border-radius: 0;
+  background: transparent;
+}
+
+.season-tabs button[style*="7abf63"] {
+  color: #3f3a36;
+  background: #ffffff;
+}
+
+.season-tabs button[style*="7abf63"] span {
+  background: transparent;
+}
+
+.season-tabs button[style*="ff9a62"] {
+  color: #3f3a36;
+  background: #ffffff;
+}
+
+.season-tabs button[style*="ff9a62"] span {
+  background: transparent;
+}
+
+.season-tabs button[style*="d79555"] {
+  color: #3f3a36;
+  background: #ffffff;
+}
+
+.season-tabs button[style*="d79555"] span {
+  background: transparent;
+}
+
+.season-tabs button[style*="70aeca"] {
+  color: #3f3a36;
+  background: #ffffff;
+}
+
+.season-tabs button[style*="70aeca"] span {
+  background: transparent;
 }
 
 .season-tabs button.active {
-  color: #ff8a58;
-  min-height: 36px;
+  color: #3f3a36;
+  min-height: 42px;
+  position: relative;
+  z-index: 2;
+  border-radius: 0;
   background: #ffffff;
   transform: none;
-  box-shadow: inset 0 -3px 0 #ff8a58;
+  box-shadow: none;
+}
+
+.season-tabs button.active span {
+  background: color-mix(in srgb, var(--season-accent) 18%, #ffffff);
+}
+
+.season-panel-index {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  box-shadow: none;
+}
+
+.season-panel-index .season-tabs {
+  padding: 8px 0 8px 8px;
+  border-right: 0;
+  background: #ffffff;
+}
+
+.season-panel-index .season-tabs button + button {
+  border-top: 0;
+}
+
+.season-panel-index .seasonal-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  justify-content: stretch;
+  align-content: start;
+  gap: 7px;
+  max-height: 146px;
+  padding: 7px;
+  background: #ffffff;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+.season-panel-index .seasonal-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.season-panel-index .seasonal-tile {
+  width: 100%;
+  min-width: 0;
+  height: 66px;
+  min-height: 66px;
+  aspect-ratio: auto;
+  align-content: center;
+  gap: 4px;
+  padding: 5px 3px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.66);
+  box-shadow: none;
+}
+
+.season-panel-index .seasonal-tile.active {
+  border-color: var(--orange);
+  background: #ffffff;
+  box-shadow: none;
+  transform: none;
 }
 
 .menu-list,
@@ -499,23 +624,26 @@
 }
 
 .seasonal-tile.active {
-  border-color: #ff8a58;
+  border-color: var(--orange);
   background: #ffffff;
-  box-shadow: 0 10px 22px rgba(255, 138, 88, 0.18);
+  box-shadow: 0 10px 22px rgba(242, 127, 91, 0.14);
   transform: translateY(-1px);
 }
 
 .seasonal-tile strong {
-  color: #2f251d;
-  font-size: 11px;
-  line-height: 1.15;
+  color: #3f3a36;
+  min-height: 20px;
+  display: grid;
+  place-items: center;
+  font-size: 9.5px;
+  line-height: 1.1;
   text-align: center;
   white-space: nowrap;
 }
 
 .food-emoji {
   display: block;
-  font-size: 21px;
+  font-size: 20px;
   line-height: 1;
   background: transparent;
 }
@@ -619,8 +747,8 @@
 }
 
 .draft-ingredient-box button.active {
-  border-color: #ff8a58;
-  box-shadow: inset 0 0 0 1px rgba(255, 138, 88, 0.18);
+  border-color: var(--orange);
+  box-shadow: inset 0 0 0 1px rgba(242, 127, 91, 0.14);
 }
 
 .draft-ingredient-box span {
@@ -668,7 +796,7 @@
 }
 
 .draft-folder .draft-tabs button.active {
-  box-shadow: inset 0 -3px 0 #ff8a58;
+  box-shadow: inset 0 -3px 0 var(--orange);
 }
 
 .draft-folder .draft-ingredient-box {
@@ -724,24 +852,47 @@
 }
 
 .selected-menu-widget {
-  position: fixed;
-  right: max(18px, calc((100vw - 430px) / 2 + 18px));
+  position: absolute;
+  right: 18px;
   bottom: 96px;
   z-index: 80;
+}
+
+.selected-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 79;
+  border: 0;
+  background: transparent;
 }
 
 .selected-menu-fab {
   width: 62px;
   height: 62px;
-  display: grid;
-  place-items: center;
+  display: block;
   position: relative;
   border: 0;
   border-radius: 50%;
   color: #ffffff;
-  font-size: 24px;
-  background: #ff8a58;
+  background: var(--orange);
   box-shadow: 0 18px 36px rgba(84, 51, 19, 0.22);
+}
+
+.selected-menu-fab::before,
+.selected-menu-fab::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 24px;
+  height: 3px;
+  border-radius: 999px;
+  background: #ffffff;
+  transform: translate(-50%, -50%);
+}
+
+.selected-menu-fab::after {
+  transform: translate(-50%, -50%) rotate(90deg);
 }
 
 .selected-menu-fab span {
@@ -754,7 +905,7 @@
   right: -2px;
   border: 2px solid #fffdf4;
   border-radius: 999px;
-  color: #ff8a58;
+  color: var(--orange);
   font-size: 11px;
   font-weight: 900;
   background: #ffffff;
@@ -766,13 +917,28 @@
   gap: 8px;
   position: absolute;
   right: 0;
-  bottom: 76px;
+  bottom: -4px;
+  z-index: 81;
   padding: 14px;
-  border: 1px solid rgba(255, 138, 88, 0.28);
-  border-radius: 22px;
-  background: rgba(255, 253, 244, 0.98);
-  box-shadow: 0 18px 42px rgba(84, 51, 19, 0.2);
+  border: 1px solid rgba(47, 37, 29, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 18px 42px rgba(84, 51, 19, 0.14);
   backdrop-filter: blur(14px);
+}
+
+.selected-menu-widget.open .selected-menu-fab {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.selected-menu-panel.variant-2 {
+  background: #ffffff;
+}
+
+.selected-menu-panel.variant-2 .selected-menu-shop {
+  color: #ffffff;
+  background: var(--orange);
 }
 
 .selected-menu-panel-head,
@@ -784,7 +950,7 @@
 }
 
 .selected-menu-panel-head strong {
-  color: #2f251d;
+  color: #3f3a36;
 }
 
 .selected-menu-panel-head button,
@@ -798,25 +964,32 @@
   width: 30px;
   height: 30px;
   color: #725f4b;
-  background: #f0dfc4;
+  background: #f2f4f6;
 }
 
 .selected-menu-chip {
   min-height: 42px;
   padding: 9px 10px;
-  border-radius: 14px;
-  background: #fff7e5;
+  border: 1px solid rgba(226, 216, 195, 0.7);
+  border-radius: 10px;
+  background: #ffffff;
 }
 
 .selected-menu-chip span {
-  color: #2f251d;
+  color: #3f3a36;
   font-size: 13px;
   font-weight: 900;
 }
 
 .selected-menu-chip button {
-  padding: 7px 9px;
-  color: #ff8a58;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: #adb3ba;
+  font-size: 18px;
+  line-height: 1;
   background: #ffffff;
 }
 
@@ -824,10 +997,10 @@
   min-height: 46px;
   margin-top: 4px;
   border: 0;
-  border-radius: 16px;
+  border-radius: 10px;
   color: #ffffff;
   font-weight: 900;
-  background: #ff8a58;
+  background: var(--orange);
 }
 
 .menu-card {
@@ -836,18 +1009,18 @@
   grid-template-columns: 1fr auto;
   gap: 12px;
   align-items: center;
-  padding: 14px;
-  border: 1px solid #efd8b4;
-  border-radius: 18px;
+  padding: 15px 14px;
+  border: 1px solid rgba(226, 216, 195, 0.9);
+  border-radius: 12px;
   color: #3e3327;
   text-align: left;
-  background: #fffdf4;
+  background: #ffffff;
   transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
 .menu-card.selected {
-  border-color: #ff8a58;
-  box-shadow: 0 10px 22px rgba(255, 138, 88, 0.2);
+  border-color: var(--orange);
+  box-shadow: 0 10px 22px rgba(242, 127, 91, 0.14);
   transform: translateY(-1px);
 }
 
@@ -860,9 +1033,21 @@
 
 .menu-card strong {
   display: block;
-  margin: 3px 0;
-  color: #2f251d;
-  font-size: 17px;
+  margin: 0 0 4px;
+  color: #3f3a36;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.menu-card > div,
+.feed-card > span,
+.toss-cart-orderbar > div,
+.price-sheet div,
+.receipt-mini div,
+.checkout-draft dl div,
+.receipt-draft dl div {
+  align-self: center;
 }
 
 .menu-card p {
@@ -881,9 +1066,9 @@
   width: 100%;
   min-height: 54px;
   margin-top: 18px;
-  color: #ffffff;
-  background: #ff8a58;
-  box-shadow: 0 12px 24px rgba(255, 138, 88, 0.28);
+  color: #3f3a36;
+  background: #f2f4f6;
+  box-shadow: 0 12px 24px rgba(84, 51, 19, 0.12);
 }
 
 .primary-action:disabled {
@@ -913,7 +1098,7 @@
 .pet-stage.picnic {
   background:
     linear-gradient(#bde6ff 0 42%, #e8f5d3 42% 100%),
-    repeating-linear-gradient(45deg, #ff8a58 0 16px, #fff8ea 16px 32px);
+    repeating-linear-gradient(45deg, var(--orange) 0 16px, #fff8ea 16px 32px);
 }
 
 .pet-stage.garden {
@@ -989,15 +1174,18 @@
 }
 
 .pet-home-screen .pet-stage {
-  height: 314px;
+  height: 58svh;
+  min-height: 410px;
+  max-height: 560px;
   margin: 0;
   border-radius: 0;
   background: transparent;
 }
 
 .pet-home-screen .dress-pet {
-  width: 278px;
-  max-width: 96%;
+  width: min(88%, 330px);
+  max-width: 330px;
+  max-height: 92%;
 }
 
 .sparkles {
@@ -1029,7 +1217,7 @@
 .level-card strong,
 .shopping-summary strong,
 .reward-card strong {
-  color: #2f251d;
+  color: #3f3a36;
 }
 
 .progress-track {
@@ -1037,13 +1225,13 @@
   margin-top: 12px;
   overflow: hidden;
   border-radius: 999px;
-  background: #ead7b6;
+  background: #f2f4f6;
 }
 
 .progress-fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #75b84f, #ffb25f);
+  background: var(--orange);
   transition: width 220ms ease;
 }
 
@@ -1055,8 +1243,85 @@
   padding: 15px 16px;
   border: 1px solid #efd8b4;
   border-radius: 18px;
-  color: #2f251d;
+  color: #3f3a36;
   background: #fffdf4;
+}
+
+.feed-card span {
+  display: grid;
+  gap: 3px;
+  text-align: left;
+}
+
+.feed-card strong {
+  color: #3f3a36;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.feed-card small {
+  color: #8d765e;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.level-box-drafts,
+.feed-box-drafts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.level-box-draft,
+.feed-box-draft {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  min-height: 54px;
+  align-items: center;
+  gap: 4px 8px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #f7f8fa;
+}
+
+.level-box-draft strong,
+.level-box-draft span,
+.level-box-draft b,
+.feed-box-draft strong,
+.feed-box-draft span,
+.feed-box-draft b {
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.level-box-draft strong,
+.feed-box-draft strong {
+  grid-column: 1 / -1;
+  color: #6b7684;
+}
+
+.level-box-draft span,
+.feed-box-draft span,
+.level-box-draft b,
+.feed-box-draft b {
+  color: #363a40;
+}
+
+.level-box-draft b,
+.feed-box-draft b {
+  text-align: right;
+}
+
+.level-box-draft-2,
+.feed-box-draft-2 {
+  background: #fff8f5;
+}
+
+.level-box-draft-5,
+.feed-box-draft-5 {
+  grid-column: 1 / -1;
 }
 
 .feed-card:disabled {
@@ -1093,7 +1358,7 @@
 }
 
 .ingredient-row b {
-  color: #2f251d;
+  color: #3f3a36;
 }
 
 .market-group {
@@ -1103,7 +1368,7 @@
   margin-top: 16px;
   padding: 6px;
   border-radius: 18px;
-  background: #f0dfc4;
+  background: #f2f4f6;
 }
 
 .market-group button {
@@ -1168,7 +1433,7 @@
 .decor-card strong {
   display: block;
   margin: 0;
-  color: #2f251d;
+  color: #3f3a36;
   font-size: 12px;
   line-height: 1.2;
 }
@@ -1227,6 +1492,7 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
   position: absolute;
+  z-index: 200;
   right: 0;
   bottom: 0;
   left: 0;
@@ -1239,23 +1505,40 @@
 .tab-bar button {
   display: grid;
   place-items: center;
-  gap: 2px;
+  align-content: center;
+  gap: 5px;
   border: 0;
-  border-radius: 16px;
-  color: #8d765e;
+  color: #3f3a36;
   font-size: 12px;
   font-weight: 900;
   background: transparent;
 }
 
-.tab-bar span {
-  font-size: 19px;
+.tab-bar .tab-icon {
+  min-width: auto;
+  min-height: auto;
+  display: block;
+  color: #6f665f;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.tab-bar .tab-label {
+  min-width: 42px;
+  min-height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 0;
   line-height: 1;
 }
 
 .tab-bar button.active {
-  color: #315e34;
-  background: #dff1cf;
+  color: #3f3a36;
+  background: transparent;
+}
+
+.tab-bar button.active .tab-label {
+  background: color-mix(in srgb, #dff1cf 60%, transparent);
 }
 
 .toast {
@@ -1279,7 +1562,28 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  padding-top: 12px;
   padding-bottom: 18px;
+  background: #ffffff;
+}
+
+.toss-back-row {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  margin: -4px 0 8px;
+}
+
+.toss-back-row button {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: #363a40;
+  font-size: 34px;
+  line-height: 1;
   background: #ffffff;
 }
 
@@ -1293,7 +1597,7 @@
   grid-template-columns: 44px 1fr 44px;
   align-items: center;
   margin: -10px -4px 10px;
-  color: #191f28;
+  color: #363a40;
 }
 
 .toss-shopping-header button {
@@ -1301,7 +1605,7 @@
   height: 38px;
   border: 0;
   border-radius: 50%;
-  color: #191f28;
+  color: #363a40;
   font-size: 30px;
   line-height: 1;
   background: transparent;
@@ -1321,13 +1625,13 @@
 }
 
 .toss-header h1 {
-  color: #191f28;
+  color: #363a40;
   font-size: 30px;
   letter-spacing: 0;
 }
 
 .toss-header span {
-  color: #ff8a58;
+  color: var(--orange);
 }
 
 .toss-steps {
@@ -1361,12 +1665,12 @@
 }
 
 .toss-steps div.active {
-  color: #191f28;
+  color: #363a40;
 }
 
 .toss-steps div.active span {
-  color: #ffffff;
-  background: #ff8a58;
+  color: #3f3a36;
+  background: #f2f4f6;
 }
 
 .toss-summary-card,
@@ -1398,7 +1702,7 @@
 .toss-summary-card strong {
   display: block;
   margin-top: 6px;
-  color: #191f28;
+  color: #363a40;
   font-size: 28px;
   line-height: 1.1;
 }
@@ -1443,20 +1747,9 @@
   background: #f9fafb;
 }
 
-.toss-menu-box-head span {
-  grid-column: 1 / -1;
-  color: #8b95a1;
-  font-size: 12px;
-  font-weight: 900;
-}
-
 .toss-menu-box-head strong {
-  color: #191f28;
+  color: #363a40;
   font-size: 16px;
-}
-
-.toss-menu-box-head b {
-  color: #191f28;
 }
 
 .toss-list {
@@ -1476,14 +1769,14 @@
 
 .toss-row input {
   margin: 0;
-  accent-color: #ff8a58;
+  accent-color: #8b95a1;
 }
 
 .toss-row strong,
 .checkout-card strong,
 .complete-card h2,
 .option-group h2 {
-  color: #191f28;
+  color: #363a40;
 }
 
 .toss-primary,
@@ -1498,8 +1791,8 @@
   width: 100%;
   margin-top: 16px;
   color: #ffffff;
-  background: #ff8a58;
-  box-shadow: 0 14px 24px rgba(49, 130, 246, 0.2);
+  background: var(--orange);
+  box-shadow: none;
 }
 
 .complete-card .toss-primary {
@@ -1514,7 +1807,7 @@
 
 .toss-secondary {
   color: #4e5968;
-  background: #f0dfc4;
+  background: #f2f4f6;
 }
 
 .toss-secondary.wide {
@@ -1528,7 +1821,7 @@
 }
 
 .toss-copy strong {
-  color: #191f28;
+  color: #363a40;
   font-size: 21px;
 }
 
@@ -1543,20 +1836,20 @@
   padding: 17px;
   border: 1px solid #edf0f3;
   border-radius: 20px;
-  color: #191f28;
+  color: #363a40;
   text-align: left;
   background: #ffffff;
   transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
 .store-card.selected {
-  border-color: #ff8a58;
-  box-shadow: inset 0 0 0 2px rgba(49, 130, 246, 0.16);
+  border-color: var(--orange);
+  box-shadow: inset 0 0 0 2px rgba(242, 127, 91, 0.14);
   transform: translateY(-1px);
 }
 
 .store-card span {
-  color: #ff8a58;
+  color: #8d765e;
   font-size: 12px;
   font-weight: 900;
 }
@@ -1601,9 +1894,9 @@
   place-items: center;
   margin-right: 12px;
   border-radius: 14px;
-  color: #ffffff;
+  color: #3f3a36;
   font-weight: 900;
-  background: #ff8a58;
+  background: #f2f4f6;
 }
 
 .checkout-card > div {
@@ -1617,7 +1910,7 @@
 }
 
 .checkout-card b {
-  color: #191f28;
+  color: #363a40;
   font-size: 20px;
 }
 
@@ -1642,13 +1935,13 @@
   border-radius: 14px;
   color: #4e5968;
   font-weight: 900;
-  background: #f9fafb;
+  background: #ffffff;
 }
 
 .option-group button.active {
-  border-color: #ff8a58;
-  color: #ff8a58;
-  background: #fff1cf;
+  border-color: var(--orange);
+  color: #3f3a36;
+  background: #ffffff;
 }
 
 .price-sheet {
@@ -1666,7 +1959,7 @@
 
 .price-sheet b,
 .receipt-mini b {
-  color: #191f28;
+  color: #363a40;
 }
 
 .price-sheet .total {
@@ -1677,7 +1970,7 @@
 
 .price-sheet .total span,
 .price-sheet .total b {
-  color: #191f28;
+  color: #363a40;
   font-size: 17px;
   font-weight: 900;
 }
@@ -1688,7 +1981,7 @@
 }
 
 .complete-card > span {
-  color: #ff8a58;
+  color: #8d765e;
   font-size: 13px;
   font-weight: 900;
 }
@@ -1705,7 +1998,123 @@
   margin: 18px 0 4px;
   padding: 15px;
   border-radius: 16px;
-  background: #fff8ea;
+  background: #f7f8fa;
+}
+
+.receipt-drafts {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 4px;
+}
+
+.receipt-draft {
+  display: grid;
+  gap: 10px;
+  padding: 13px;
+  border: 1px solid #edf0f3;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.receipt-draft-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.receipt-draft strong,
+.receipt-draft span,
+.receipt-draft dt,
+.receipt-draft dd {
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.receipt-draft span,
+.receipt-draft p,
+.receipt-draft dt {
+  color: #6b7684;
+}
+
+.receipt-draft p {
+  display: none;
+}
+
+/* 작업: 주문완료 시안 내부에 실제 주문 데이터를 영수증 항목으로 배치합니다.
+   개인 수정 가능: 간격, 배경색, 강조 방식은 디자인 취향에 맞게 바꿔도 됩니다.
+   적용 위치: 장보기 > 주문완료 화면의 시안 카드 전체. */
+.receipt-draft dl {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+}
+
+.receipt-draft dl div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.receipt-draft dt,
+.receipt-draft dd {
+  margin: 0;
+}
+
+.receipt-draft dd {
+  color: #363a40;
+  text-align: right;
+}
+
+.receipt-draft-2 dl {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.receipt-draft-2 dl div {
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  border-radius: 8px;
+  background: #f7f8fa;
+}
+
+.receipt-draft-3 {
+  border-color: rgba(242, 127, 91, 0.26);
+  background: #fff8f5;
+}
+
+.receipt-draft-3 dl div:last-child {
+  margin-top: 2px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(242, 127, 91, 0.22);
+}
+
+.receipt-draft-3 dl div:last-child dd {
+  color: var(--orange);
+  font-size: 14px;
+}
+
+.receipt-draft-4 dl {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.receipt-draft-4 dl div {
+  display: grid;
+  gap: 4px;
+  border-left: 2px solid var(--orange);
+  padding: 3px 0 3px 8px;
+}
+
+.receipt-draft-5 {
+  border-style: dashed;
+}
+
+.receipt-draft-5 dl {
+  gap: 5px;
+  padding-top: 8px;
+  border-top: 1px dashed #d1d6db;
 }
 
 .toss-screen > button.toss-primary {
@@ -1714,16 +2123,582 @@
 }
 
 .toss-cart-spacer {
-  min-height: 18px;
+  min-height: 148px;
   flex: 1 1 auto;
 }
 
+.toss-cart-orderbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 104px;
+  align-items: center;
+  gap: 12px;
+  position: fixed;
+  right: max(0px, calc((100vw - 430px) / 2));
+  bottom: 101px;
+  left: max(0px, calc((100vw - 430px) / 2));
+  z-index: 120;
+  width: min(100vw, 430px);
+  padding: 10px 16px;
+  border-top: 1px solid rgba(229, 232, 235, 0.95);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 -8px 20px rgba(25, 31, 40, 0.06);
+  backdrop-filter: blur(14px);
+}
+
+.toss-cart-orderbar > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.toss-cart-orderbar span {
+  color: #8d765e;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.toss-cart-orderbar strong {
+  color: #3f3a36;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.toss-cart-orderbar .toss-primary {
+  min-height: 48px;
+  margin-top: 0;
+}
+
+.selected-menu-widget {
+  bottom: 128px;
+}
+
+.selected-menu-fab span {
+  display: none;
+}
+
+.toss-screen {
+  background: #ffffff;
+}
+
+.toss-summary-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 5px 12px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border-color: #e5e8eb;
+  box-shadow: none;
+}
+
+.toss-summary-card span,
+.toss-summary-card p {
+  grid-column: 1 / -1;
+}
+
+.toss-summary-card strong {
+  margin: 0;
+  font-size: 22px;
+}
+
+.toss-menu-list {
+  gap: 10px;
+}
+
+.toss-select-all {
+  min-height: 48px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid #e5e8eb;
+  border-radius: 10px;
+  color: #363a40;
+  background: #ffffff;
+}
+
+.toss-select-all input {
+  width: 19px;
+  height: 19px;
+  margin: 0;
+  appearance: none;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid #d1d6db;
+  border-radius: 5px;
+  background: #ffffff;
+}
+
+.toss-select-all input:checked::after {
+  content: "✓";
+  color: #6b7684;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.toss-select-all span {
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.toss-select-all b {
+  color: #8b95a1;
+  font-size: 13px;
+}
+
+.empty-cart-pet {
+  min-height: 560px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 10px;
+  padding: 22px 16px;
+  border-radius: 18px;
+  background: #fffdf8;
+}
+
+.empty-cart-pet .pet-stage {
+  width: 100%;
+  max-width: 300px;
+  height: 250px;
+  margin: 0;
+  border: 0;
+  background: transparent;
+}
+
+.empty-cart-pet .pet-stage::before,
+.empty-cart-pet .pet-stage::after {
+  display: none;
+}
+
+.empty-cart-pet .pet-svg {
+  width: 240px;
+}
+
+.empty-cart-pet h2 {
+  margin: 6px 0 0;
+  color: #191f28;
+  font-size: 26px;
+}
+
+.empty-cart-pet p {
+  margin: 0;
+  color: #6b7684;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.empty-cart-pet > div {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.empty-cart-pet .toss-primary,
+.empty-cart-pet .toss-secondary {
+  margin-top: 0;
+}
+
+.toss-menu-box {
+  overflow: visible;
+  border: 1px solid #e5e8eb;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.toss-menu-box-head {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 14px 10px;
+  border-bottom: 0;
+  background: #ffffff;
+}
+
+.toss-menu-box-head label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #363a40;
+}
+
+.toss-menu-box-head input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  appearance: none;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid #d1d6db;
+  border-radius: 4px;
+  background: #ffffff;
+}
+
+.toss-menu-box-head input:checked::after,
+.toss-row input:checked::after {
+  content: "✓";
+  color: #6b7684;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.toss-menu-box-head strong {
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.toss-menu-remove {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 10px;
+  color: #6b7684;
+  font-size: 12px;
+  font-weight: 900;
+  background: #f2f4f6;
+}
+
+.toss-menu-remove:active {
+  background: #e5e8eb;
+}
+
+.toss-list .toss-row {
+  min-height: 62px;
+  padding: 10px 12px;
+  background: #f7f8fa;
+}
+
+.toss-product-list {
+  gap: 8px;
+  padding: 0 12px 12px;
+}
+
+.toss-product-list .toss-row {
+  grid-template-columns: 18px 46px minmax(0, 1fr) auto;
+  gap: 10px;
+  border: 1px solid #edf0f3;
+  border-radius: 8px;
+}
+
+.toss-product-list em {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  font-size: 24px;
+  font-style: normal;
+  background: #ffffff;
+}
+
+.toss-row input {
+  width: 18px;
+  height: 18px;
+  appearance: none;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid #d1d6db;
+  border-radius: 4px;
+  background: #ffffff;
+}
+
+/* 작업: 장보기 체크박스 배경을 모든 상태에서 흰색으로 고정합니다.
+   개인 수정 가능: 체크 색상은 color 값으로 조정해도 됩니다.
+   적용 위치: 장보기 장바구니의 메뉴/식재료 체크박스. */
+.toss-menu-box-head input:checked,
+.toss-row input:checked {
+  background: #ffffff;
+}
+
+.toss-product-list strong {
+  color: #363a40;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.toss-product-list b {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
 .toss-cart-continue {
-  position: sticky;
-  bottom: 8px;
-  z-index: 90;
-  flex: 0 0 auto;
-  box-shadow: 0 18px 36px rgba(255, 138, 88, 0.24);
+  border-radius: 8px;
+  color: #ffffff;
+  background: var(--orange);
+  box-shadow: none;
+}
+
+.pet-home-screen {
+  padding: 0 0 96px;
+  background: #ffffff;
+}
+
+.pet-room-stage {
+  height: 390px;
+  min-height: auto;
+  flex: 0 0 390px;
+  display: grid;
+  align-items: end;
+  justify-items: center;
+  margin: 12px 16px 0;
+  border-radius: 10px 10px 0 0;
+}
+
+/* 작업: 고정된 캐릭터 배경 안에서 펫 SVG가 잘리지 않도록 위치와 크기를 고정합니다.
+   개인 수정 가능: 캐릭터 크기는 width/max-height 값으로 조정해도 됩니다.
+   적용 위치: 펫홈 상단 캐릭터 배경 영역. */
+.pet-room-stage .pet-stage {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  display: grid;
+  align-items: end;
+  justify-items: center;
+  overflow: visible;
+}
+
+.pet-room-stage .dress-pet {
+  width: min(82%, 300px);
+  max-width: 300px;
+  max-height: 340px;
+  margin-bottom: 18px;
+}
+
+.pet-share-button {
+  width: 42px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  position: absolute;
+  right: 14px;
+  top: 14px;
+  z-index: 6;
+  border: 1px solid rgba(229, 232, 235, 0.88);
+  border-radius: 12px;
+  color: #3f3a36;
+  font-size: 18px;
+  font-weight: 900;
+  background: rgba(255, 255, 255, 0.68);
+  backdrop-filter: blur(10px);
+}
+
+.pet-action-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+  margin: 0 16px;
+  padding: 8px 8px 7px;
+  border-top: 1px solid rgba(229, 232, 235, 0.95);
+  background: #ffffff;
+}
+
+.pet-action-tabs button {
+  min-width: 0;
+  min-height: 52px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 3px;
+  border: 0;
+  border-radius: 10px;
+  color: #8d765e;
+  font-weight: 900;
+  background: transparent;
+}
+
+.pet-action-tabs button.active {
+  color: #3f3a36;
+  background: rgba(242, 127, 91, 0.08);
+}
+
+.pet-action-tabs span {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.pet-action-tabs b {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 10px;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.decor-box-drafts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding-top: 12px;
+}
+
+.decor-box-draft {
+  display: grid;
+  gap: 4px;
+  min-height: 82px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #f7f8fa;
+}
+
+.decor-box-draft strong,
+.decor-box-draft span {
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.decor-box-draft span {
+  color: #363a40;
+}
+
+.decor-box-draft p {
+  margin: 0;
+  color: #6b7684;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.decor-box-draft dl {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+}
+
+.decor-box-draft dl div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.decor-box-draft dt,
+.decor-box-draft dd {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.decor-box-draft dt {
+  color: #8d765e;
+}
+
+.decor-box-draft dd {
+  min-width: 0;
+  overflow: hidden;
+  color: #363a40;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.decor-box-draft-2 {
+  box-shadow: inset 0 0 0 2px rgba(242, 127, 91, 0.18);
+}
+
+.decor-box-draft-3 {
+  background: #fff8f5;
+}
+
+.decor-box-draft-4 {
+  min-height: 64px;
+}
+
+.decor-box-draft-5 {
+  grid-column: 1 / -1;
+}
+
+.pet-feed-panel {
+  margin: 0 16px 44px;
+  padding: 12px 0 0;
+  border-radius: 0 0 10px 10px;
+  background: #ffffff;
+}
+
+.empty-feed-drafts {
+  display: grid;
+  gap: 8px;
+}
+
+.empty-feed-drafts .empty {
+  margin: 0;
+  border: 0;
+  color: #7d858f;
+  background: #f3f4f6;
+}
+
+/* 작업: 펫홈 밥먹이기 빈 상태를 회색조 단일 안내 박스로 보여줍니다.
+   개인 수정 가능: 회색 배경값과 글자색은 취향에 맞게 바꿔도 됩니다.
+   적용 위치: 펫홈 > 밥먹이기 탭에서 먹일 메뉴가 없을 때. */
+.empty-feed-drafts .empty {
+  font-size: 14px;
+}
+
+.pet-inventory {
+  margin: 0 16px 12px;
+  padding: 0 0 16px;
+  border-radius: 0 0 10px 10px;
+  background: #ffffff;
+  border: 0;
+  box-shadow: none;
+}
+
+.pet-inventory .decor-tabs {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.pet-inventory .decor-tabs button {
+  min-height: 42px;
+  border: 0;
+  border-right: 0;
+  border-radius: 0;
+  clip-path: none;
+  color: #8d765e;
+  font-size: 12px;
+  background: #ffffff;
+}
+
+.pet-inventory .decor-tabs button:last-child {
+  border-right: 0;
+}
+
+.pet-inventory .decor-tabs button.active {
+  color: #3f3a36;
+  background: rgba(242, 127, 91, 0.08);
+}
+
+.decor-grid {
+  padding-top: 12px;
+}
+
+.decor-card {
+  border-radius: 8px;
+}
+
+.decor-card small:empty {
+  display: none;
+}
+
+.toast {
+  top: 50%;
+  bottom: auto;
+  background: rgba(47, 37, 29, 0.92);
+  transform: translate(-50%, -50%);
 }
 
 @media (max-width: 520px) {
@@ -1744,4 +2719,8 @@
     padding-left: 16px;
   }
 }
+
+
+
+
 
