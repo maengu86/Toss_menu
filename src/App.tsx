@@ -12,7 +12,19 @@ const tossShoppingOptions = [
 ]
 const paymentOptions = ['토스페이', '카드 간편결제', '계좌 결제']
 const deliveryOptions = ['문 앞에 놓기', '직접 받을게요']
-const maxExp = 100
+// 작업: 펫 레벨업 기준을 누적 XP로 관리합니다.
+// 개인 수정 가능: 2레벨/3레벨 기준을 바꾸고 싶으면 아래 숫자만 조정하면 됩니다.
+// 적용 위치: 펫홈 레벨 표시, 경험치 바, 꾸미기 아이템 잠금 해제 조건.
+const petLevelThresholds = [
+  { level: 1, minExp: 0 },
+  { level: 2, minExp: 10000 },
+  { level: 3, minExp: 30000 },
+] as const
+
+// 작업: 메뉴 가격을 XP로 변환합니다. 10원당 1xp 규칙을 한 곳에서 관리합니다.
+// 개인 수정 가능: 환산 비율을 바꾸려면 10을 원하는 금액 기준으로 변경하면 됩니다.
+// 적용 위치: 메뉴 카드 XP 표시, 밥먹이기 버튼, 실제 펫 경험치 증가량.
+const wonPerPetExp = 10
 
 const receiptDrafts = [
   { id: 1, label: '라인형', items: ['결제 수단', '배송 방식', '배송 요청', '총액'] },
@@ -40,6 +52,38 @@ function ingredientKey(menuId: string, ingredientName: string) {
   return `${menuId}:${ingredientName}`
 }
 
+function getMenuExp(menu: Menu) {
+  const menuPrice = menu.ingredients.reduce((sum, ingredient) => sum + ingredient.price, 0)
+  return Math.floor(menuPrice / wonPerPetExp)
+}
+
+function getPetLevel(totalExp: number) {
+  return petLevelThresholds.reduce((currentLevel, threshold) => (
+    totalExp >= threshold.minExp ? threshold.level : currentLevel
+  ), 1)
+}
+
+function getNextLevelThreshold(level: number) {
+  return petLevelThresholds.find((threshold) => threshold.level > level)
+}
+
+function getCurrentLevelThreshold(level: number) {
+  let currentThreshold = 0
+  for (const threshold of petLevelThresholds) {
+    if (threshold.level <= level) currentThreshold = threshold.minExp
+  }
+  return currentThreshold
+}
+
+function getLevelProgress(totalExp: number, level: number) {
+  const nextThreshold = getNextLevelThreshold(level)
+  if (!nextThreshold) return 100
+
+  const currentThreshold = getCurrentLevelThreshold(level)
+  const levelRange = nextThreshold.minExp - currentThreshold
+  return Math.min(100, Math.max(0, ((totalExp - currentThreshold) / levelRange) * 100))
+}
+
 function App() {
   const firstSummerIngredient = seasonalIngredients.find((item) => item.seasonKey === 'summer') ?? seasonalIngredients[0]
   const [screen, setScreen] = useState<Screen>('home')
@@ -49,8 +93,10 @@ function App() {
   const [selectedSeasonalIngredientId, setSelectedSeasonalIngredientId] = useState(firstSummerIngredient.id)
   const [fedMenuIds, setFedMenuIds] = useState<string[]>([])
   const [checkedIngredients, setCheckedIngredients] = useState<string[]>([])
-  const [level, setLevel] = useState(1)
-  const [exp, setExp] = useState(18)
+  // 작업: 펫 경험치는 레벨별 잔여치가 아니라 누적 XP로 저장합니다.
+  // 개인 수정 가능: 기본 시작 XP를 바꾸고 싶으면 0을 원하는 값으로 변경해도 됩니다.
+  // 적용 위치: 펫홈 레벨 카드와 밥먹이기 후 성장 상태.
+  const [exp, setExp] = useState(0)
   const [shopStep, setShopStep] = useState<ShopStep>('cart')
   const [paymentMethod, setPaymentMethod] = useState(paymentOptions[0])
   const [deliveryOption, setDeliveryOption] = useState(deliveryOptions[0])
@@ -79,6 +125,7 @@ function App() {
   const selectedDeliveryInfo = tossShoppingOptions[0]
   const orderTotal = checkedPrice + selectedDeliveryInfo.fee
   const checkedTotal = shoppingItems.filter((item) => checkedIngredients.includes(ingredientKey(item.menuId, item.ingredient.name))).length
+  const level = getPetLevel(exp)
   function showToast(message: string) {
     setToast(message)
     window.setTimeout(() => setToast(''), 2200)
@@ -115,10 +162,7 @@ function App() {
       return
     }
 
-    const next = exp + menu.exp
-    const gainedLevel = Math.floor(next / maxExp)
-    setLevel((current) => current + gainedLevel)
-    setExp(next % maxExp)
+    setExp((current) => current + getMenuExp(menu))
     setFedMenuIds((current) => [...current, menu.id])
   }
 
@@ -326,7 +370,7 @@ function HomeScreen({
               <div>
                 <strong>{menu.name}</strong>
               </div>
-              <b>{menu.exp}xp</b>
+              <b>{getMenuExp(menu)}xp</b>
             </button>
           )
         })}
@@ -586,6 +630,9 @@ function PetHomeScreen({
   const [petTab, setPetTab] = useState<'feed' | 'decor'>('feed')
   const visibleItems = decorTab === 'all' ? decorItems : decorItems.filter((item) => item.type === decorTab)
   const feedMenus = selectedMenus.filter((menu) => !fedMenuIds.includes(menu.id))
+  const nextLevelThreshold = getNextLevelThreshold(level)
+  const levelProgress = getLevelProgress(exp, level)
+  const expLabel = nextLevelThreshold ? `${exp}/${nextLevelThreshold.minExp} xp` : `${exp} xp`
   const decorTabs: { id: 'all' | DecorItem['type']; label: string; icon: string }[] = [
     { id: 'all', label: '전체', icon: '🧩' },
     { id: 'background', label: '방', icon: '🏠' },
@@ -626,18 +673,21 @@ function PetHomeScreen({
           <div className="level-card">
             <div>
               <strong>Lv. {level}</strong>
-              <span>{exp}/{maxExp} xp</span>
+              <span>{expLabel}</span>
             </div>
             <div className="progress-track">
-              <div className="progress-fill" style={{ width: `${exp}%` }} />
+              <div className="progress-fill" style={{ width: `${levelProgress}%` }} />
             </div>
           </div>
           <div className="feed-list compact-feed-list">
             {feedMenus.length === 0 && (
-              <div className="empty-feed-drafts" aria-label="먹이기 빈 상태 시안">
-                {emptyFeedDrafts.map((draft) => (
+              <div className="empty-feed-drafts" aria-label="밥먹이기 빈 상태">
+                {/* 작업: 먹일 메뉴가 없을 때 주문 안내를 보여줍니다.
+                    개인 수정 가능: 안내 문구는 자유롭게 바꿔도 됩니다.
+                    적용 위치: 펫홈 > 밥먹이기 탭의 빈 상태. */}
+                {emptyFeedDrafts.slice(0, 1).map((draft) => (
                   <p className="empty" key={draft.id} style={{ '--empty-tone': draft.tone } as CSSProperties}>
-                    시안 {draft.id} · 밥을 먹이시려면, 메뉴를 주문해주세요
+                    메뉴를 주문해 주세요
                   </p>
                 ))}
               </div>
@@ -645,7 +695,7 @@ function PetHomeScreen({
             {feedMenus.map((menu) => (
               <button className="feed-card" key={menu.id} onClick={() => onFeed(menu)} type="button">
                 <span>{menu.name}</span>
-                <b>+{menu.exp} xp</b>
+                <b>+{getMenuExp(menu)} xp</b>
               </button>
             ))}
           </div>
