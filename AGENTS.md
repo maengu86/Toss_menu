@@ -5,23 +5,73 @@
 ## 브랜치 규칙
 
 - `main` 브랜치는 배포 가능한 안정 버전만 유지합니다.
-- 개인 작업은 반드시 각자의 기능 브랜치에서 진행합니다.
+- 개인 작업은 반드시 담당 기능 브랜치에서 진행합니다.
 - `main`에 직접 커밋하거나 직접 push하지 않습니다.
-- 브랜치 이름은 아래 형식을 사용합니다.
+- 기능별 브랜치는 아래 기준으로 사용합니다.
 
 ```text
-feature/member-seo
-feature/member-park
-feature/member-maeng
-feature/member-oh
+feature/home-menu       홈 화면, 제철 재료, 메뉴 추천, 메뉴 선택
+feature/shopping-flow   장보기, 상품 선택, 주문/결제 체험
+feature/pet-home        펫홈, 밥 먹이기, 꾸미기, 성장 상태
+feature/app-integration 공통 연결, 화면 간 흐름, 문서, 통합 QA
 ```
 
 - 기능 단위로 더 나누어야 할 경우 아래 형식을 사용합니다.
 
 ```text
-feature/member-oh/pet-home-drag
-fix/member-seo/cart-reset
-design/member-park/home-ui
+feature/pet-home/drag-feed
+fix/shopping-flow/cart-reset
+design/home-menu/season-tabs
+docs/app-integration/collaboration-rules
+```
+
+## 기능별 작업 범위
+
+각 브랜치는 담당 기능 외의 코드를 임의로 수정하지 않습니다.
+
+```text
+feature/home-menu
+- 홈 화면 문구, 계절/재료 탭, 메뉴 추천, 메뉴 선택 UI
+- 주로 영향받는 영역: HomeScreen, 메뉴/재료 표시 데이터
+
+feature/shopping-flow
+- 장보기 화면, 전체 선택, 메뉴 빼기, 주문/결제 체험, 구매 후 장바구니 처리
+- 주로 영향받는 영역: ShoppingScreen, 장보기 상태, 주문 완료 흐름
+
+feature/pet-home
+- 펫홈, 밥 먹이기, 펫 코스튬, 꾸미기, 경험치/레벨
+- 주로 영향받는 영역: PetHomeScreen, PetAvatar, 꾸미기/먹이기 상태
+
+feature/app-integration
+- 화면 간 이동, 공통 상태 연결, 문서, 빌드/배포 설정, 통합 버그 수정
+- 다른 기능 브랜치의 작업을 대신 수정하지 않고 연결 문제만 다룹니다.
+```
+
+공통 파일인 `src/App.tsx`, `src/App.css`, `src/data.ts`, `src/types.ts`는 여러 기능이 함께 사용하므로 특히 조심합니다. 공통 파일을 수정할 때도 현재 브랜치의 담당 기능과 직접 관련된 코드만 바꿉니다.
+
+## Codex 작업 규칙
+
+Codex로 작업할 때는 다른 기능을 건드리지 않는 것을 기본 원칙으로 합니다.
+
+- 작업 시작 전에 현재 브랜치가 요청한 기능 브랜치와 맞는지 확인합니다.
+- 사용자가 요청한 기능과 직접 관련 없는 화면, 문구, 스타일, 데이터는 수정하지 않습니다.
+- `src/App.tsx`처럼 여러 기능이 섞인 파일을 수정할 때는 필요한 컴포넌트와 상태만 좁게 수정합니다.
+- 다른 기능의 버그가 보여도 요청 범위가 아니면 임의로 고치지 않고 사용자에게 따로 보고합니다.
+- 리팩터링은 요청한 기능을 구현하는 데 꼭 필요한 경우에만 진행합니다.
+- 포맷팅만 바뀌는 대규모 변경은 금지합니다.
+- 여러 기능을 동시에 바꿔야 하는 요청이면 기능별로 작업 범위를 나누고, 영향 범위를 먼저 설명합니다.
+- Codex가 파일을 수정한 뒤에는 `git diff --stat`으로 변경 범위가 요청 기능에 맞는지 확인합니다.
+- 작업 완료 전 가능한 경우 아래 검증을 실행합니다.
+
+```bash
+npm.cmd run build
+npm.cmd run lint
+```
+
+Codex에게 요청할 때는 가능한 한 아래처럼 기능 범위를 명시합니다.
+
+```text
+feature/shopping-flow 브랜치에서 장보기 전체 선택만 수정해줘. 펫홈과 홈 추천은 건드리지 마.
 ```
 
 ## 작업 시작 전
