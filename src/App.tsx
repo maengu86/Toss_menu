@@ -3,7 +3,7 @@ import type { CSSProperties, ReactNode } from 'react'
 import './App.css'
 import PetAvatar from './components/PetAvatar'
 import { decorItems, menus, seasonalIngredients, seasons } from './data'
-import type { DecorItem, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
+import type { DecorItem, Ingredient, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
 
 const tossShoppingOptions = [
   { name: '바로배송', eta: '오늘 밤 도착', fee: 3000, perk: '빠른 추천' },
@@ -27,11 +27,23 @@ const petLevelThresholds = [
 const wonPerPetExp = 10
 
 const receiptDrafts = [
-  { id: 1, label: '라인형', items: ['결제 수단', '배송 방식', '배송 요청', '총액'] },
-  { id: 2, label: '칩형', items: ['토스페이', '바로배송', '문 앞', '총액'] },
-  { id: 3, label: '요약형', items: ['결제', '배송', '요청', '금액'] },
-  { id: 4, label: '분리형', items: ['수단', '방식', '요청', '합계'] },
-  { id: 5, label: '영수증형', items: ['Pay', 'Ship', 'Memo', 'Total'] },
+  { id: 1, title: '라인형 영수증', description: '결제, 배송, 요청, 총액을 한 줄씩 고정 노출합니다.' },
+]
+
+const checkoutDrafts = [
+  { id: 1, title: '기본 주문서', description: '배송과 결제 정보를 위에서 아래로 차분하게 확인합니다.' },
+  { id: 2, title: '요약 카드형', description: '총액을 강조하고 옵션을 카드 안에 묶어서 보여줍니다.' },
+  { id: 3, title: '체크리스트형', description: '결제 전 확인할 항목을 체크리스트처럼 정리합니다.' },
+  { id: 4, title: '분리 블록형', description: '상품, 배송, 결제 정보를 독립된 블록으로 나눕니다.' },
+  { id: 5, title: '하단 결제형', description: '결제 버튼 직전 최종 확인용으로 압축해서 보여줍니다.' },
+]
+
+const decorBoxDrafts = [
+  { id: 1, title: '기본 격자형', description: '아이템을 같은 크기 카드로 정리합니다.' },
+  { id: 2, title: '선택 강조형', description: '현재 착용 중인 아이템을 더 강하게 표시합니다.' },
+  { id: 3, title: '잠금 정보형', description: '레벨과 장보기 해금 조건을 먼저 보여줍니다.' },
+  { id: 4, title: '작은 버튼형', description: '많은 꾸미기 아이템을 촘촘하게 보여줍니다.' },
+  { id: 5, title: '미리보기형', description: '캐릭터에 적용될 느낌을 설명과 함께 보여줍니다.' },
 ]
 
 const emptyFeedDrafts = [
@@ -44,6 +56,11 @@ const emptyFeedDrafts = [
 
 type ShopStep = 'cart' | 'checkout' | 'complete'
 
+type FeedIngredient = Ingredient & {
+  id: string
+  menuName: string
+}
+
 function formatWon(value: number) {
   return value.toLocaleString('ko-KR') + '원'
 }
@@ -52,9 +69,12 @@ function ingredientKey(menuId: string, ingredientName: string) {
   return `${menuId}:${ingredientName}`
 }
 
+function getIngredientExp(ingredient: Ingredient) {
+  return Math.floor(ingredient.price / wonPerPetExp)
+}
+
 function getMenuExp(menu: Menu) {
-  const menuPrice = menu.ingredients.reduce((sum, ingredient) => sum + ingredient.price, 0)
-  return Math.floor(menuPrice / wonPerPetExp)
+  return menu.ingredients.reduce((sum, ingredient) => sum + getIngredientExp(ingredient), 0)
 }
 
 function getPetLevel(totalExp: number) {
@@ -91,7 +111,10 @@ function App() {
   const [selectedMenuOpen, setSelectedMenuOpen] = useState(false)
   const [selectedSeason, setSelectedSeason] = useState<SeasonKey>('summer')
   const [selectedSeasonalIngredientId, setSelectedSeasonalIngredientId] = useState(firstSummerIngredient.id)
-  const [fedMenuIds, setFedMenuIds] = useState<string[]>([])
+  // 작업: 결제 완료된 식재료를 펫에게 먹일 수 있는 재고로 저장합니다.
+  // 개인 수정 가능: 재료 카드에 더 많은 정보를 보여주고 싶으면 FeedIngredient 타입에 필드를 추가하면 됩니다.
+  // 적용 위치: 주문 완료 후 펫홈 > 밥먹이기 목록.
+  const [feedIngredients, setFeedIngredients] = useState<FeedIngredient[]>([])
   const [checkedIngredients, setCheckedIngredients] = useState<string[]>([])
   // 작업: 펫 경험치는 레벨별 잔여치가 아니라 누적 XP로 저장합니다.
   // 개인 수정 가능: 기본 시작 XP를 바꾸고 싶으면 0을 원하는 값으로 변경해도 됩니다.
@@ -107,6 +130,7 @@ function App() {
   const [toast, setToast] = useState('')
   const [isScrolling, setIsScrolling] = useState(false)
   const scrollTimerRef = useRef<number | undefined>(undefined)
+  const orderSequenceRef = useRef(0)
 
   const today = new Intl.DateTimeFormat('ko-KR', {
     month: 'long',
@@ -154,16 +178,11 @@ function App() {
 
   function removeMenu(menuId: string) {
     setSelectedMenuIds((current) => current.filter((id) => id !== menuId))
-    setFedMenuIds((current) => current.filter((id) => id !== menuId))
   }
 
-  function feedPet(menu: Menu) {
-    if (fedMenuIds.includes(menu.id)) {
-      return
-    }
-
-    setExp((current) => current + getMenuExp(menu))
-    setFedMenuIds((current) => [...current, menu.id])
+  function feedPet(ingredient: FeedIngredient) {
+    setExp((current) => current + getIngredientExp(ingredient))
+    setFeedIngredients((current) => current.filter((item) => item.id !== ingredient.id))
   }
 
   function toggleIngredient(key: string) {
@@ -173,6 +192,21 @@ function App() {
   }
 
   function completeOrderFlow() {
+    const checkedItems = shoppingItems.filter((item) => checkedIngredients.includes(ingredientKey(item.menuId, item.ingredient.name)))
+    orderSequenceRef.current += 1
+    const orderId = orderSequenceRef.current
+
+    setFeedIngredients((current) => [
+      ...current,
+      ...checkedItems.map((item, index) => {
+        const menu = selectedMenus.find((selectedMenu) => selectedMenu.id === item.menuId)
+        return {
+          ...item.ingredient,
+          id: `${orderId}:${index}:${item.menuId}:${item.ingredient.name}`,
+          menuName: menu?.name ?? '주문 메뉴',
+        }
+      }),
+    ])
     setShoppingRewardUnlocked(true)
     setShopStep('complete')
   }
@@ -259,10 +293,9 @@ function App() {
             accessory={selectedAccessory}
             decorItems={decorItems}
             exp={exp}
-            fedMenuIds={fedMenuIds}
+            feedIngredients={feedIngredients}
             level={level}
             outfit={selectedOutfit}
-            selectedMenus={selectedMenus}
             shoppingRewardUnlocked={shoppingRewardUnlocked}
             onFeed={feedPet}
             onSelectDecor={selectDecor}
@@ -318,7 +351,7 @@ function HomeScreen({
     <section className="screen" onScroll={onScrollActivity}>
       <header className="top-header">
         <p>{today}</p>
-        <h1>지금 제철 음식은 뭐가 있을까?</h1>
+        <h1>제철음식 뭐가있을까?</h1>
       </header>
 
       <div className={`season-panel season-panel-index season-${selectedSeason}`}>
@@ -530,6 +563,27 @@ function ShoppingScreen({
             <div><span>배송비</span><b>{formatWon(deliveryTypeInfo.fee)}</b></div>
             <div className="total"><span>총 결제 금액</span><b>{formatWon(orderTotal)}</b></div>
           </div>
+          <div className="checkout-drafts" aria-label="장보기 주문 페이지 시안">
+            {checkoutDrafts.map((draft) => (
+              <article className={`checkout-draft checkout-draft-${draft.id}`} key={draft.id}>
+                {/* 작업: 장보기 주문 페이지에서 실제 결제 정보가 들어간 시안을 비교합니다.
+                    개인 수정 가능: 시안 제목과 항목 배치는 자유롭게 바꿔도 됩니다.
+                    적용 위치: 장보기 > 주문/결제 단계. */}
+                <div className="checkout-draft-head">
+                  <strong>시안 {draft.id}</strong>
+                  <span>{draft.title}</span>
+                </div>
+                <p>{draft.description}</p>
+                <dl>
+                  <div><dt>상품 금액</dt><dd>{formatWon(checkedPrice)}</dd></div>
+                  <div><dt>배송</dt><dd>{deliveryTypeInfo.name}</dd></div>
+                  <div><dt>요청</dt><dd>{deliveryOption}</dd></div>
+                  <div><dt>결제</dt><dd>{paymentMethod}</dd></div>
+                  <div><dt>총액</dt><dd>{formatWon(orderTotal)}</dd></div>
+                </dl>
+              </article>
+            ))}
+          </div>
           <div className="toss-button-row">
             <button className="toss-secondary" onClick={() => onSetStep('cart')} type="button">이전</button>
             <button className="toss-primary" onClick={onCompleteOrder} type="button">{formatWon(orderTotal)} 결제하기</button>
@@ -550,16 +604,37 @@ function ShoppingScreen({
           <div className="receipt-drafts" aria-label="주문 완료 정보 시안">
             {receiptDrafts.map((draft) => (
               <article className={`receipt-draft receipt-draft-${draft.id}`} key={draft.id}>
-                <strong>시안 {draft.id}</strong>
-                <span>{draft.label}</span>
-                <div>
-                  {draft.items.map((item) => <i key={item}>{item}</i>)}
+                {/* 작업: 주문완료 시안에 실제 적용될 주문 데이터를 넣어 디자인 판단이 가능하게 합니다.
+                    개인 수정 가능: title/description이나 필드 순서는 자유롭게 바꿔도 됩니다.
+                    적용 위치: 장보기 > 주문완료 화면의 영수증 시안 목록. */}
+                <div className="receipt-draft-head">
+                  <strong>시안 {draft.id}</strong>
+                  <span>{draft.title}</span>
                 </div>
+                <p>{draft.description}</p>
+                <dl>
+                  <div>
+                    <dt>결제 수단</dt>
+                    <dd>{paymentMethod}</dd>
+                  </div>
+                  <div>
+                    <dt>배송 방식</dt>
+                    <dd>{deliveryTypeInfo.name}</dd>
+                  </div>
+                  <div>
+                    <dt>배송 요청</dt>
+                    <dd>{deliveryOption}</dd>
+                  </div>
+                  <div>
+                    <dt>총 결제금액</dt>
+                    <dd>{formatWon(orderTotal)}</dd>
+                  </div>
+                </dl>
               </article>
             ))}
           </div>
-          <button className="toss-primary" onClick={onGoHome} type="button">펫홈에서 밥 먹이기</button>
-          <button className="toss-secondary wide" onClick={() => onSetStep('cart')} type="button">다시 장보기 보기</button>
+          <button className="toss-primary" onClick={onGoHome} type="button">밥주러 가기</button>
+          <button className="toss-secondary wide" onClick={() => onSetStep('cart')} type="button">장보러 가기</button>
         </div>
       )}
     </section>
@@ -603,8 +678,7 @@ function PetHomeScreen({
   background,
   outfit,
   accessory,
-  selectedMenus,
-  fedMenuIds,
+  feedIngredients,
   decorItems,
   shoppingRewardUnlocked,
   onFeed,
@@ -617,11 +691,10 @@ function PetHomeScreen({
   background: string
   outfit: string
   accessory: string
-  selectedMenus: Menu[]
-  fedMenuIds: string[]
+  feedIngredients: FeedIngredient[]
   decorItems: DecorItem[]
   shoppingRewardUnlocked: boolean
-  onFeed: (menu: Menu) => void
+  onFeed: (ingredient: FeedIngredient) => void
   onSelectDecor: (item: DecorItem) => void
   onShare: () => void
   onScrollActivity: () => void
@@ -629,7 +702,6 @@ function PetHomeScreen({
   const [decorTab, setDecorTab] = useState<'all' | DecorItem['type']>('all')
   const [petTab, setPetTab] = useState<'feed' | 'decor'>('feed')
   const visibleItems = decorTab === 'all' ? decorItems : decorItems.filter((item) => item.type === decorTab)
-  const feedMenus = selectedMenus.filter((menu) => !fedMenuIds.includes(menu.id))
   const nextLevelThreshold = getNextLevelThreshold(level)
   const levelProgress = getLevelProgress(exp, level)
   const expLabel = nextLevelThreshold ? `${exp}/${nextLevelThreshold.minExp} xp` : `${exp} xp`
@@ -650,7 +722,7 @@ function PetHomeScreen({
       <div className="pet-action-tabs" aria-label="펫홈 작업">
         <button className={petTab === 'feed' ? 'active' : ''} onClick={() => setPetTab('feed')} type="button">
           <span aria-hidden="true">🍚</span>
-          <b>밥먹이기</b>
+          <b>밥주러 가기</b>
         </button>
         {decorTabs.map((tab) => (
           <button
@@ -680,7 +752,7 @@ function PetHomeScreen({
             </div>
           </div>
           <div className="feed-list compact-feed-list">
-            {feedMenus.length === 0 && (
+            {feedIngredients.length === 0 && (
               <div className="empty-feed-drafts" aria-label="밥먹이기 빈 상태">
                 {/* 작업: 먹일 메뉴가 없을 때 주문 안내를 보여줍니다.
                     개인 수정 가능: 안내 문구는 자유롭게 바꿔도 됩니다.
@@ -692,10 +764,13 @@ function PetHomeScreen({
                 ))}
               </div>
             )}
-            {feedMenus.map((menu) => (
-              <button className="feed-card" key={menu.id} onClick={() => onFeed(menu)} type="button">
-                <span>{menu.name}</span>
-                <b>+{getMenuExp(menu)} xp</b>
+            {feedIngredients.map((ingredient) => (
+              <button className="feed-card" key={ingredient.id} onClick={() => onFeed(ingredient)} type="button">
+                <span>
+                  <strong>{ingredient.name}</strong>
+                  <small>{ingredient.menuName} · {ingredient.quantity}</small>
+                </span>
+                <b>+{getIngredientExp(ingredient)} xp</b>
               </button>
             ))}
           </div>
@@ -704,6 +779,18 @@ function PetHomeScreen({
 
       {petTab === 'decor' && (
         <div className="pet-inventory">
+          <div className="decor-box-drafts" aria-label="꾸미기 박스 시안">
+            {decorBoxDrafts.map((draft) => (
+              <article className={`decor-box-draft decor-box-draft-${draft.id}`} key={draft.id}>
+                {/* 작업: 꾸미기 박스의 적용 방향을 5개 시안으로 비교합니다.
+                    개인 수정 가능: 시안 문구와 강조 색상은 자유롭게 조정해도 됩니다.
+                    적용 위치: 펫홈 > 꾸미기 탭 상단. */}
+                <strong>시안 {draft.id}</strong>
+                <span>{draft.title}</span>
+                <p>{draft.description}</p>
+              </article>
+            ))}
+          </div>
           <div className="decor-grid">
             {visibleItems.map((item) => {
               const unlocked = isDecorUnlocked(item, level, shoppingRewardUnlocked)
