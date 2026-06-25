@@ -2205,6 +2205,104 @@
   gap: 10px;
 }
 
+.toss-select-all {
+  min-height: 48px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid #e5e8eb;
+  border-radius: 10px;
+  color: #363a40;
+  background: #ffffff;
+}
+
+.toss-select-all input {
+  width: 19px;
+  height: 19px;
+  margin: 0;
+  appearance: none;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid #d1d6db;
+  border-radius: 5px;
+  background: #ffffff;
+}
+
+.toss-select-all input:checked::after {
+  content: "✓";
+  color: #6b7684;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.toss-select-all span {
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.toss-select-all b {
+  color: #8b95a1;
+  font-size: 13px;
+}
+
+.empty-cart-pet {
+  min-height: 560px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 10px;
+  padding: 22px 16px;
+  border-radius: 18px;
+  background: #fffdf8;
+}
+
+.empty-cart-pet .pet-stage {
+  width: 100%;
+  max-width: 300px;
+  height: 250px;
+  margin: 0;
+  border: 0;
+  background: transparent;
+}
+
+.empty-cart-pet .pet-stage::before,
+.empty-cart-pet .pet-stage::after {
+  display: none;
+}
+
+.empty-cart-pet .pet-svg {
+  width: 240px;
+}
+
+.empty-cart-pet h2 {
+  margin: 6px 0 0;
+  color: #191f28;
+  font-size: 26px;
+}
+
+.empty-cart-pet p {
+  margin: 0;
+  color: #6b7684;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.empty-cart-pet > div {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.empty-cart-pet .toss-primary,
+.empty-cart-pet .toss-secondary {
+  margin-top: 0;
+}
+
 .toss-menu-box {
   overflow: visible;
   border: 1px solid #e5e8eb;
@@ -2214,7 +2312,8 @@
 }
 
 .toss-menu-box-head {
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr auto;
+  align-items: center;
   gap: 8px;
   padding: 13px 14px 10px;
   border-bottom: 0;
@@ -2253,6 +2352,21 @@
   font-size: 17px;
   font-weight: 900;
   line-height: 1.25;
+}
+
+.toss-menu-remove {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 10px;
+  color: #6b7684;
+  font-size: 12px;
+  font-weight: 900;
+  background: #f2f4f6;
+}
+
+.toss-menu-remove:active {
+  background: #e5e8eb;
 }
 
 .toss-list .toss-row {

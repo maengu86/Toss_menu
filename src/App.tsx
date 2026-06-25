@@ -69,6 +69,11 @@ type FeedIngredient = Ingredient & {
   menuName: string
 }
 
+type OrderSnapshot = {
+  checkedPrice: number
+  orderTotal: number
+}
+
 function formatWon(value: number) {
   return value.toLocaleString('ko-KR') + '원'
 }
@@ -124,6 +129,8 @@ function App() {
   // 적용 위치: 주문 완료 후 펫홈 > 밥먹이기 목록.
   const [feedIngredients, setFeedIngredients] = useState<FeedIngredient[]>([])
   const [checkedIngredients, setCheckedIngredients] = useState<string[]>([])
+  const [removedCartIngredientKeys, setRemovedCartIngredientKeys] = useState<string[]>([])
+  const [lastOrder, setLastOrder] = useState<OrderSnapshot | null>(null)
   // 작업: 펫 경험치는 레벨별 잔여치가 아니라 누적 XP로 저장합니다.
   // 개인 수정 가능: 기본 시작 XP를 바꾸고 싶으면 0을 원하는 값으로 변경해도 됩니다.
   // 적용 위치: 펫홈 레벨 카드와 밥먹이기 후 성장 상태.
@@ -147,15 +154,23 @@ function App() {
   }).format(new Date())
 
   const selectedMenus = menus.filter((menu) => selectedMenuIds.includes(menu.id))
+  const cartMenus = selectedMenus
+    .map((menu) => ({
+      ...menu,
+      ingredients: menu.ingredients.filter((ingredient) => !removedCartIngredientKeys.includes(ingredientKey(menu.id, ingredient.name))),
+    }))
+    .filter((menu) => menu.ingredients.length > 0)
   const seasonIngredients = seasonalIngredients.filter((ingredient) => ingredient.seasonKey === selectedSeason)
   const seasonalMenus = menus.filter((menu) => menu.seasonalIngredientIds?.includes(selectedSeasonalIngredientId))
 
-  const shoppingItems = selectedMenus.flatMap((menu) => menu.ingredients.map((ingredient) => ({ menuId: menu.id, ingredient })))
+  const shoppingItems = cartMenus.flatMap((menu) => menu.ingredients.map((ingredient) => ({ menuId: menu.id, ingredient })))
   const checkedPrice = shoppingItems.reduce((sum, item) => (
     checkedIngredients.includes(ingredientKey(item.menuId, item.ingredient.name)) ? sum + item.ingredient.price : sum
   ), 0)
   const selectedDeliveryInfo = tossShoppingOptions[0]
   const orderTotal = checkedPrice + selectedDeliveryInfo.fee
+  const displayCheckedPrice = shopStep === 'complete' ? lastOrder?.checkedPrice ?? checkedPrice : checkedPrice
+  const displayOrderTotal = shopStep === 'complete' ? lastOrder?.orderTotal ?? orderTotal : orderTotal
   const checkedTotal = shoppingItems.filter((item) => checkedIngredients.includes(ingredientKey(item.menuId, item.ingredient.name))).length
   const level = getPetLevel(exp)
   function showToast(message: string) {
@@ -178,6 +193,7 @@ function App() {
   function toggleMenu(menuId: string) {
     setSelectedMenuIds((current) => {
       if (current.includes(menuId)) return current.filter((id) => id !== menuId)
+      setRemovedCartIngredientKeys((keys) => keys.filter((key) => !key.startsWith(`${menuId}:`)))
       const next = [...current, menuId]
       setSelectedMenuOpen(false)
       return next
@@ -186,6 +202,8 @@ function App() {
 
   function removeMenu(menuId: string) {
     setSelectedMenuIds((current) => current.filter((id) => id !== menuId))
+    setCheckedIngredients((current) => current.filter((key) => !key.startsWith(`${menuId}:`)))
+    setRemovedCartIngredientKeys((current) => current.filter((key) => !key.startsWith(`${menuId}:`)))
   }
 
   function feedPet(ingredient: FeedIngredient) {
@@ -201,9 +219,17 @@ function App() {
 
   function completeOrderFlow() {
     const checkedItems = shoppingItems.filter((item) => checkedIngredients.includes(ingredientKey(item.menuId, item.ingredient.name)))
+    if (checkedItems.length === 0) {
+      showToast('구매할 상품을 선택해주세요.')
+      setShopStep('cart')
+      return
+    }
+    const orderedKeys = checkedItems.map((item) => ingredientKey(item.menuId, item.ingredient.name))
     orderSequenceRef.current += 1
     const orderId = orderSequenceRef.current
 
+    setLastOrder({ checkedPrice, orderTotal })
+    setRemovedCartIngredientKeys((current) => Array.from(new Set([...current, ...orderedKeys])))
     setFeedIngredients((current) => [
       ...current,
       ...checkedItems.map((item, index) => {
@@ -215,18 +241,15 @@ function App() {
         }
       }),
     ])
+    setCheckedIngredients((current) => current.filter((key) => !orderedKeys.includes(key)))
+    setSelectedMenuIds([])
+    setSelectedMenuOpen(false)
     setShoppingRewardUnlocked(true)
     setShopStep('complete')
   }
 
   function restartShoppingAfterOrder() {
-    const orderedMenuIds = new Set(
-      shoppingItems
-        .filter((item) => checkedIngredients.includes(ingredientKey(item.menuId, item.ingredient.name)))
-        .map((item) => item.menuId),
-    )
-    setSelectedMenuIds((current) => current.filter((menuId) => !orderedMenuIds.has(menuId)))
-    setCheckedIngredients([])
+    setLastOrder(null)
     setShopStep('cart')
     setScreen('shopping')
   }
@@ -285,21 +308,29 @@ function App() {
 
         {screen === 'shopping' && (
           <ShoppingScreen
+            background={selectedBackground}
+            accessory={selectedAccessory}
             checkedIngredients={checkedIngredients}
             checkedTotal={checkedTotal}
             deliveryOption={deliveryOption}
             deliveryOptions={deliveryOptions}
-            selectedMenus={selectedMenus}
-            checkedPrice={checkedPrice}
+            selectedMenus={cartMenus}
+            checkedPrice={displayCheckedPrice}
             deliveryTypeInfo={selectedDeliveryInfo}
-            orderTotal={orderTotal}
+            orderTotal={displayOrderTotal}
             paymentMethod={paymentMethod}
             paymentOptions={paymentOptions}
+            outfit={selectedOutfit}
             step={shopStep}
             onBackHome={() => setScreen('home')}
             onCompleteOrder={completeOrderFlow}
-            onGoHome={() => setScreen('petHome')}
+            onGoHome={() => {
+              setLastOrder(null)
+              setShopStep('cart')
+              setScreen('petHome')
+            }}
             onRestartShopping={restartShoppingAfterOrder}
+            onRemoveMenu={removeMenu}
             onScrollActivity={handleScrollActivity}
             onSelectDelivery={setDeliveryOption}
             onSelectPayment={setPaymentMethod}
@@ -456,6 +487,8 @@ function HomeScreen({
 }
 
 function ShoppingScreen({
+  background,
+  accessory,
   selectedMenus,
   checkedIngredients,
   checkedTotal,
@@ -465,6 +498,7 @@ function ShoppingScreen({
   step,
   paymentMethod,
   paymentOptions,
+  outfit,
   deliveryOption,
   deliveryOptions,
   onToggleIngredient,
@@ -475,8 +509,11 @@ function ShoppingScreen({
   onCompleteOrder,
   onGoHome,
   onRestartShopping,
+  onRemoveMenu,
   onScrollActivity,
 }: {
+  background: string
+  accessory: string
   selectedMenus: Menu[]
   checkedIngredients: string[]
   checkedTotal: number
@@ -486,6 +523,7 @@ function ShoppingScreen({
   step: ShopStep
   paymentMethod: string
   paymentOptions: string[]
+  outfit: string
   deliveryOption: string
   deliveryOptions: string[]
   onToggleIngredient: (name: string) => void
@@ -496,9 +534,12 @@ function ShoppingScreen({
   onCompleteOrder: () => void
   onGoHome: () => void
   onRestartShopping: () => void
+  onRemoveMenu: (menuId: string) => void
   onScrollActivity: () => void
 }) {
   const canContinue = checkedTotal > 0
+  const allIngredientKeys = selectedMenus.flatMap((menu) => menu.ingredients.map((item) => ingredientKey(menu.id, item.name)))
+  const allChecked = allIngredientKeys.length > 0 && allIngredientKeys.every((key) => checkedIngredients.includes(key))
 
   return (
     <section className="screen toss-screen" onScroll={onScrollActivity}>
@@ -509,7 +550,32 @@ function ShoppingScreen({
       {step === 'cart' && (
         <>
           <div className="toss-menu-list">
-            {selectedMenus.length === 0 && <p className="empty">홈에서 메뉴를 먼저 선택해주세요.</p>}
+            {selectedMenus.length === 0 && (
+              <div className="empty-cart-pet">
+                <PetAvatar outfit={outfit} background={background} accessory={accessory} />
+                <h2>배고파요...</h2>
+                <p>오늘은 뭐 먹을래요?</p>
+                <div>
+                  <button className="toss-primary" onClick={onBackHome} type="button">장보러가기</button>
+                  <button className="toss-secondary" onClick={onGoHome} type="button">펫 관리하기</button>
+                </div>
+              </div>
+            )}
+            {selectedMenus.length > 0 && (
+              <label className="toss-select-all">
+                <input
+                  checked={allChecked}
+                  onChange={() => {
+                    allIngredientKeys.forEach((key) => {
+                      if (allChecked === checkedIngredients.includes(key)) onToggleIngredient(key)
+                    })
+                  }}
+                  type="checkbox"
+                />
+                <span>전체 선택</span>
+                <b>{checkedTotal}/{allIngredientKeys.length}</b>
+              </label>
+            )}
             {selectedMenus.map((menu) => {
                 const menuKeys = menu.ingredients.map((item) => ingredientKey(menu.id, item.name))
                 const menuChecked = menuKeys.every((key) => checkedIngredients.includes(key))
@@ -528,6 +594,9 @@ function ShoppingScreen({
                         />
                         <strong>{menu.name}</strong>
                       </label>
+                      <button className="toss-menu-remove" onClick={() => onRemoveMenu(menu.id)} type="button">
+                        메뉴 빼기
+                      </button>
                     </div>
                     <div className="ingredient-list toss-list toss-product-list">
                       {menu.ingredients.map((item) => {
