@@ -68,10 +68,6 @@ const couponRewardExp = petLevelExpRequirements.reduce((total, requirement) => t
 // 작업: 메뉴와 식재료 가격을 동일한 수치의 XP로 사용합니다.
 // 적용 위치: 메뉴 카드 XP 표시, 밥먹이기 버튼, 실제 펫 경험치 증가량.
 
-const receiptDrafts = [
-  { id: 1, title: '라인형 영수증' },
-]
-
 const kakaoMapAppKey = import.meta.env.VITE_KAKAO_MAP_APP_KEY as string | undefined
 const kakaoMapDefaultLevel = 3
 
@@ -1151,52 +1147,36 @@ function ShoppingScreen({
         <div className="complete-card">
           <h2>주문 체험이 완료됐어요</h2>
           <p>실제 결제와 주문은 발생하지 않습니다.</p>
-          <div className="receipt-mini">
-            <div><span>결제 수단</span><b>{paymentMethod}</b></div>
-            <div><span>배송 방식</span><b>{deliveryTypeInfo.name}</b></div>
-            <div><span>배송 요청</span><b>{deliveryOption}</b></div>
-            {couponDiscount > 0 && <div><span>쿠폰 할인</span><b>-{formatWon(couponDiscount)}</b></div>}
-            <div><span>총액</span><b>{formatWon(orderTotal)}</b></div>
-          </div>
           <div className="receipt-drafts receipt-main" aria-label="주문 완료 영수증">
-            {receiptDrafts.map((draft) => (
-              <article className={`receipt-draft receipt-draft-${draft.id}`} key={draft.id}>
-                {/* 작업: 선택된 라인형 영수증을 주문완료 메인 UI로 적용합니다.
-                    개인 수정 가능: 항목 순서는 바꿔도 되지만 실제 주문값 바인딩은 유지해야 합니다.
-                    적용 위치: 장보기 > 주문완료 화면의 메인 영수증. */}
-                <div className="receipt-draft-head">
-                  <strong>적용 영수증</strong>
-                  <span>{draft.title}</span>
+            <article className="receipt-draft receipt-draft-1">
+              <dl>
+                <div>
+                  <dt>결제 수단</dt>
+                  <dd>{paymentMethod}</dd>
                 </div>
-                <dl>
+                <div>
+                  <dt>배송 방식</dt>
+                  <dd>{deliveryTypeInfo.name}</dd>
+                </div>
+                <div>
+                  <dt>배송 요청</dt>
+                  <dd>{deliveryOption}</dd>
+                </div>
+                {couponDiscount > 0 && (
                   <div>
-                    <dt>결제 수단</dt>
-                    <dd>{paymentMethod}</dd>
+                    <dt>쿠폰 할인</dt>
+                    <dd>-{formatWon(couponDiscount)}</dd>
                   </div>
-                  <div>
-                    <dt>배송 방식</dt>
-                    <dd>{deliveryTypeInfo.name}</dd>
-                  </div>
-                  <div>
-                    <dt>배송 요청</dt>
-                    <dd>{deliveryOption}</dd>
-                  </div>
-                  {couponDiscount > 0 && (
-                    <div>
-                      <dt>쿠폰 할인</dt>
-                      <dd>-{formatWon(couponDiscount)}</dd>
-                    </div>
-                  )}
-                  <div>
-                    <dt>총 결제금액</dt>
-                    <dd>{formatWon(orderTotal)}</dd>
-                  </div>
-                </dl>
-              </article>
-            ))}
+                )}
+                <div>
+                  <dt>총 결제금액</dt>
+                  <dd>{formatWon(orderTotal)}</dd>
+                </div>
+              </dl>
+            </article>
           </div>
           <button className="toss-primary" onClick={onGoPetHome} type="button">밥주러 가기</button>
-          <button className="toss-secondary wide" onClick={onGoHome} type="button">제철홈으로 가기</button>
+          <button className="toss-secondary wide" onClick={onGoHome} type="button">장보러 가기</button>
         </div>
       )}
     </section>
