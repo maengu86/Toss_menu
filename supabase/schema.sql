@@ -85,7 +85,7 @@ insert into public.seasons (key, label, accent, sort_order) values
   ('spring', '봄', '#7abf63', 1),
   ('summer', '여름', '#ff9a62', 2),
   ('autumn', '가을', '#d79555', 3),
-  ('winter', '겨울', '#70aeca', 4);
+  ('winter', '겨울', '#70aeca', 4)
 on conflict (key) do update set
   label = excluded.label,
   accent = excluded.accent,
@@ -139,7 +139,7 @@ insert into public.seasonal_ingredients (id, name, season, season_key, emoji) va
   ('lotus-root', '연근', '겨울', 'winter', '🪷'),
   ('burdock', '우엉', '겨울', 'winter', '🥕'),
   ('hallabong', '한라봉', '겨울', 'winter', '🍊'),
-  ('yellowtail', '방어', '겨울', 'winter', '🐟');
+  ('yellowtail', '방어', '겨울', 'winter', '🐟')
 on conflict (id) do update set
   name = excluded.name,
   season = excluded.season,
@@ -201,7 +201,7 @@ insert into public.menus (id, name, season, season_key, weather, exp, color) val
   ('lotus-root-jorim', '연근 조림', '겨울', 'winter', '아삭한 반찬', 27, '#b48a64'),
   ('burdock-gimbap', '우엉 김밥', '겨울', 'winter', '든든한 도시락', 32, '#9c744c'),
   ('hallabong-salad', '한라봉 샐러드', '겨울', 'winter', '상큼한 날', 26, '#f29a3b'),
-  ('yellowtail-sashimi-bowl', '방어 덮밥', '겨울', 'winter', '기름진 제철', 44, '#4f8faf');
+  ('yellowtail-sashimi-bowl', '방어 덮밥', '겨울', 'winter', '기름진 제철', 44, '#4f8faf')
 on conflict (id) do update set
   name = excluded.name,
   season = excluded.season,
@@ -265,7 +265,7 @@ insert into public.menu_seasonal_ingredients (menu_id, ingredient_id) values
   ('lotus-root-jorim', 'lotus-root'),
   ('burdock-gimbap', 'burdock'),
   ('hallabong-salad', 'hallabong'),
-  ('yellowtail-sashimi-bowl', 'yellowtail');
+  ('yellowtail-sashimi-bowl', 'yellowtail')
 on conflict (menu_id, ingredient_id) do nothing;
 
 insert into public.menu_ingredients (menu_id, name, quantity, price, sort_order) values
@@ -458,7 +458,7 @@ insert into public.decor_items (id, name, type, unlock_level, unlock_by_shopping
   ('mandarin-basket', '귤 바구니', 'accessory', null, true),
   ('sun-glasses', '선글라스', 'accessory', 2, false),
   ('soup-spoon', '수프 숟가락', 'accessory', null, false),
-  ('mini-fan', '미니 선풍기', 'accessory', null, true);
+  ('mini-fan', '미니 선풍기', 'accessory', null, true)
 on conflict (id) do update set
   name = excluded.name,
   type = excluded.type,
