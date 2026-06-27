@@ -1,8 +1,9 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import './App.css'
 import PetAvatar from './components/PetAvatar'
-import { decorItems, menus, seasonalIngredients, seasons } from './data'
+import { getRoomBackgroundImage } from './data/decorAssets'
+import { fallbackAppData, loadAppData } from './services/appDataService'
 import type { DecorItem, Ingredient, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
 
 const tossShoppingOptions = [
@@ -28,38 +29,6 @@ const wonPerPetExp = 10
 
 const receiptDrafts = [
   { id: 1, title: '라인형 영수증' },
-]
-
-const decorBoxDrafts = [
-  { id: 1, title: '기본 격자형' },
-  { id: 2, title: '선택 강조형' },
-  { id: 3, title: '잠금 정보형' },
-  { id: 4, title: '작은 버튼형' },
-  { id: 5, title: '미리보기형' },
-]
-
-const levelBoxDrafts = [
-  { id: 1, title: '기본 레벨바' },
-  { id: 2, title: '숫자 강조형' },
-  { id: 3, title: '진행률 카드형' },
-  { id: 4, title: '미니 상태형' },
-  { id: 5, title: '넓은 게이지형' },
-]
-
-const feedBoxDrafts = [
-  { id: 1, title: '기본 재료 카드' },
-  { id: 2, title: 'XP 강조형' },
-  { id: 3, title: '작은 목록형' },
-  { id: 4, title: '버튼 강조형' },
-  { id: 5, title: '상자형 목록' },
-]
-
-const emptyFeedDrafts = [
-  { id: 1, tone: '#fff4ef' },
-  { id: 2, tone: '#f2f7ff' },
-  { id: 3, tone: '#f4fbf5' },
-  { id: 4, tone: '#faf5ff' },
-  { id: 5, tone: '#fff9e8' },
 ]
 
 type ShopStep = 'store' | 'detail' | 'cart' | 'checkout' | 'complete'
@@ -126,6 +95,8 @@ function getLevelProgress(totalExp: number, level: number) {
 }
 
 function App() {
+  const [appData, setAppData] = useState(fallbackAppData)
+  const { decorItems, menus, seasonalIngredients, seasons } = appData
   const firstSummerIngredient = seasonalIngredients.find((item) => item.seasonKey === 'summer') ?? seasonalIngredients[0]
   const [screen, setScreen] = useState<Screen>('home')
   const [selectedMenuIds, setSelectedMenuIds] = useState<string[]>([])
@@ -158,6 +129,22 @@ function App() {
   const scrollTimerRef = useRef<number | undefined>(undefined)
   const orderSequenceRef = useRef(0)
 
+  useEffect(() => {
+    let isMounted = true
+
+    loadAppData()
+      .then((data) => {
+        if (isMounted) setAppData(data)
+      })
+      .catch((error) => {
+        console.warn('Supabase data load failed. Falling back to local data.', error)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
   const today = new Intl.DateTimeFormat('ko-KR', {
     month: 'long',
     day: 'numeric',
@@ -172,7 +159,10 @@ function App() {
     }))
     .filter((menu) => menu.ingredients.length > 0)
   const seasonIngredients = seasonalIngredients.filter((ingredient) => ingredient.seasonKey === selectedSeason)
-  const seasonalMenus = menus.filter((menu) => menu.seasonalIngredientIds?.includes(selectedSeasonalIngredientId))
+  const activeSeasonalIngredientId = seasonIngredients.some((ingredient) => ingredient.id === selectedSeasonalIngredientId)
+    ? selectedSeasonalIngredientId
+    : (seasonIngredients[0]?.id ?? selectedSeasonalIngredientId)
+  const seasonalMenus = menus.filter((menu) => menu.seasonalIngredientIds?.includes(activeSeasonalIngredientId))
   const seasonIngredientIds = new Set(seasonIngredients.map((ingredient) => ingredient.id))
   const seasonCatalogMenus = menus.filter((menu) => menu.seasonalIngredientIds?.some((id) => seasonIngredientIds.has(id)))
   const shoppingCatalogMenus = shoppingCatalogMenuIds.length > 0
@@ -343,13 +333,15 @@ function App() {
           <HomeScreen
             today={today}
             seasons={seasons}
+            allSeasonalIngredients={seasonalIngredients}
+            allMenus={menus}
             seasonIngredients={seasonIngredients}
             seasonalMenus={seasonalMenus}
             checkedIngredients={checkedIngredients}
             checkedPrice={checkedPrice}
             checkedTotal={checkedTotal}
             selectedSeason={selectedSeason}
-            selectedSeasonalIngredientId={selectedSeasonalIngredientId}
+            selectedSeasonalIngredientId={activeSeasonalIngredientId}
             selectedMenuOpen={selectedMenuOpen}
             selectedMenus={selectedMenus}
             selectedMenuIds={selectedMenuIds}
@@ -455,6 +447,8 @@ function App() {
 function HomeScreen({
   today,
   seasons,
+  allSeasonalIngredients,
+  allMenus,
   seasonIngredients,
   seasonalMenus,
   checkedIngredients,
@@ -479,6 +473,8 @@ function HomeScreen({
 }: {
   today: string
   seasons: { key: SeasonKey; label: string; accent: string }[]
+  allSeasonalIngredients: SeasonalIngredient[]
+  allMenus: Menu[]
   seasonIngredients: SeasonalIngredient[]
   seasonalMenus: Menu[]
   checkedIngredients: string[]
@@ -507,10 +503,10 @@ function HomeScreen({
   const normalizedQuery = searchQuery.trim().toLowerCase()
   const hasSearch = normalizedQuery.length > 0
   const ingredientSearchResults = hasSearch
-    ? seasonalIngredients.filter((ingredient) => ingredient.name.toLowerCase().includes(normalizedQuery))
+    ? allSeasonalIngredients.filter((ingredient) => ingredient.name.toLowerCase().includes(normalizedQuery))
     : []
   const menuSearchResults = hasSearch
-    ? menus.filter((menu) => (
+    ? allMenus.filter((menu) => (
       menu.name.toLowerCase().includes(normalizedQuery)
       || menu.ingredients.some((ingredient) => ingredient.name.toLowerCase().includes(normalizedQuery))
     ))
@@ -1307,26 +1303,26 @@ function PetHomeScreen({
   const nextLevelThreshold = getNextLevelThreshold(level)
   const levelProgress = getLevelProgress(exp, level)
   const expLabel = nextLevelThreshold ? `${exp}/${nextLevelThreshold.minExp} xp` : `${exp} xp`
-  const previewFeedIngredient = feedIngredients[0]
-  const previewFeedText = previewFeedIngredient ? previewFeedIngredient.name : '주문한 재료 없음'
-  const previewFeedExp = previewFeedIngredient ? `+${getIngredientExp(previewFeedIngredient)} xp` : '0 xp'
-  const decorTabs: { id: 'all' | DecorItem['type']; label: string; icon: string }[] = [
-    { id: 'all', label: '전체', icon: '🧩' },
-    { id: 'background', label: '방', icon: '🏠' },
-    { id: 'outfit', label: '옷', icon: '👕' },
-    { id: 'accessory', label: '소품', icon: '🎒' },
+  const roomImage = getRoomBackgroundImage(background)
+  const decorTabs: { id: 'all' | DecorItem['type']; label: string }[] = [
+    { id: 'all', label: '전체' },
+    { id: 'background', label: '방' },
+    { id: 'outfit', label: '옷' },
+    { id: 'accessory', label: '소품' },
   ]
 
   return (
     <section className="screen pet-home-screen" onScroll={onScrollActivity}>
-      <div className={`pet-room-stage ${roomClass(background)}`}>
+      <div
+        className={`pet-room-stage ${roomClass(background)} ${roomImage ? 'has-room-image' : ''}`}
+        style={roomImage ? { backgroundImage: `url(${roomImage})` } : undefined}
+      >
         <button className="pet-share-button" aria-label="먹보 링크 복사" onClick={onShare} type="button">📤</button>
-        <PetAvatar outfit={outfit} background={background} accessory={accessory} />
+        <PetAvatar outfit={outfit} background={background} accessory={accessory} body="sudal" />
       </div>
 
       <div className="pet-action-tabs" aria-label="펫홈 작업">
         <button className={petTab === 'feed' ? 'active' : ''} onClick={() => setPetTab('feed')} type="button">
-          <span aria-hidden="true">🍚</span>
           <b>밥먹기</b>
         </button>
         {decorTabs.map((tab) => (
@@ -1339,7 +1335,6 @@ function PetHomeScreen({
             }}
             type="button"
           >
-            <span aria-hidden="true">{tab.icon}</span>
             <b>{tab.label}</b>
           </button>
         ))}
@@ -1347,52 +1342,35 @@ function PetHomeScreen({
 
       {petTab === 'feed' && (
         <section className="pet-feed-panel">
-          <div className="level-box-drafts" aria-label="레벨 상자 시안">
-            {levelBoxDrafts.map((draft) => (
-              <article className={`level-box-draft level-box-draft-${draft.id}`} key={draft.id}>
-                <strong>{draft.title}</strong>
-                <span>Lv. {level}</span>
-                <b>{expLabel}</b>
-              </article>
-            ))}
-          </div>
           <div className="level-card">
-            <div>
-              <strong>Lv. {level}</strong>
-              <span>{expLabel}</span>
+            <div className="pet-level-card-main">
+              <div className="pet-level-mark">
+                <small>LEVEL</small>
+                <strong>{level}</strong>
+              </div>
+              <div className="pet-level-copy">
+                <strong>먹보가 자라고 있어요</strong>
+                <span>{expLabel}</span>
+              </div>
             </div>
-            <div className="progress-track">
-              <div className="progress-fill" style={{ width: `${levelProgress}%` }} />
+            <div className="pet-level-progress-row">
+              <div className="progress-track">
+                <div className="progress-fill" style={{ width: `${levelProgress}%` }} />
+              </div>
+              <b>{Math.round(levelProgress)}%</b>
             </div>
-          </div>
-          <div className="feed-box-drafts" aria-label="밥먹이기 상자 시안">
-            {feedBoxDrafts.map((draft) => (
-              <article className={`feed-box-draft feed-box-draft-${draft.id}`} key={draft.id}>
-                <strong>{draft.title}</strong>
-                <span>{previewFeedText}</span>
-                <b>{previewFeedExp}</b>
-              </article>
-            ))}
           </div>
           <div className="feed-list compact-feed-list">
             {feedIngredients.length === 0 && (
-              <div className="empty-feed-drafts" aria-label="밥먹이기 빈 상태">
-                {/* 작업: 먹일 메뉴가 없을 때 주문 안내를 보여줍니다.
-                    개인 수정 가능: 안내 문구는 자유롭게 바꿔도 됩니다.
-                    적용 위치: 펫홈 > 밥먹이기 탭의 빈 상태. */}
-                {emptyFeedDrafts.slice(0, 1).map((draft) => (
-                  <p className="empty" key={draft.id} style={{ '--empty-tone': draft.tone } as CSSProperties}>
-                    메뉴를 주문해 주세요
-                  </p>
-                ))}
-              </div>
+              <p className="empty">메뉴를 주문해 주세요</p>
             )}
             {feedIngredients.map((ingredient) => (
               <button className="feed-card" key={ingredient.id} onClick={() => onFeed(ingredient)} type="button">
+                <span className="feed-card-icon" aria-hidden="true">{shoppingItemEmoji(ingredient.name)}</span>
                 <span>
                   <strong>{ingredient.name}</strong>
+                  <small>{ingredient.menuName}</small>
                 </span>
-                <b>+{getIngredientExp(ingredient)} xp</b>
               </button>
             ))}
           </div>
@@ -1401,31 +1379,21 @@ function PetHomeScreen({
 
       {petTab === 'decor' && (
         <div className="pet-inventory">
-          <div className="decor-box-drafts" aria-label="꾸미기 박스 시안">
-            {decorBoxDrafts.map((draft) => (
-              <article className={`decor-box-draft decor-box-draft-${draft.id}`} key={draft.id}>
-                {/* 작업: 꾸미기 박스의 적용 방향을 5개 시안으로 비교합니다.
-                    개인 수정 가능: 시안 문구와 표시 항목은 자유롭게 조정해도 됩니다.
-                    적용 위치: 펫홈 > 꾸미기 탭 상단. */}
-                <strong>시안 {draft.id}</strong>
-                <span>{draft.title}</span>
-                <dl>
-                  <div><dt>방</dt><dd>{background}</dd></div>
-                  <div><dt>옷</dt><dd>{outfit}</dd></div>
-                  <div><dt>소품</dt><dd>{accessory}</dd></div>
-                </dl>
-              </article>
-            ))}
-          </div>
           <div className="decor-grid">
             {visibleItems.map((item) => {
               const unlocked = isDecorUnlocked(item, level, shoppingRewardUnlocked)
               const selected = item.name === background || item.name === outfit || item.name === accessory
+              const itemRoomImage = item.type === 'background' ? getRoomBackgroundImage(item.name) : undefined
               return (
                 <button className={`decor-card ${selected ? 'selected' : ''} ${unlocked ? '' : 'locked'}`} key={item.id} onClick={() => onSelectDecor(item)} type="button">
-                  <span>{decorIcon(item)}</span>
+                  <span
+                    className={itemRoomImage ? 'decor-card-visual room-thumbnail' : 'decor-card-visual'}
+                    style={itemRoomImage ? { backgroundImage: `url(${itemRoomImage})` } : undefined}
+                  >
+                    {!itemRoomImage && decorIcon(item)}
+                  </span>
                   <strong>{item.name}</strong>
-                  <small>{unlocked ? (selected ? '착용중' : '') : item.unlockByShopping ? '장보기 보상' : `Lv.${item.unlockLevel}`}</small>
+                  <small>{unlocked ? (selected ? '착용중' : item.badge ?? '') : item.unlockByShopping ? '장보기 보상' : `Lv.${item.unlockLevel}`}</small>
                 </button>
               )
             })}
