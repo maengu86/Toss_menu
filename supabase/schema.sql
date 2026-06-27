@@ -45,9 +45,13 @@ create table if not exists public.decor_items (
   id text primary key,
   name text not null,
   type text not null check (type in ('background', 'outfit', 'accessory')),
+  badge text,
   unlock_level integer,
   unlock_by_shopping boolean not null default false
 );
+
+alter table public.decor_items
+  add column if not exists badge text;
 
 create index if not exists seasonal_ingredients_season_key_idx on public.seasonal_ingredients(season_key);
 create index if not exists menus_season_key_idx on public.menus(season_key);
@@ -435,41 +439,76 @@ insert into public.menu_ingredients (menu_id, name, quantity, price, sort_order)
   ('yellowtail-sashimi-bowl', '밥', '1공기', 1200, 2),
   ('yellowtail-sashimi-bowl', '무순', '1팩', 1800, 3);
 
-update public.menus as menu
-set exp = menu_price.total
-from (
-  select menu_id, sum(price)::integer as total
-  from public.menu_ingredients
-  group by menu_id
-) as menu_price
-where menu.id = menu_price.menu_id;
-
-insert into public.decor_items (id, name, type, unlock_level, unlock_by_shopping) values
-  ('sunny-kitchen', '햇살 주방', 'background', null, false),
-  ('spring-flower-room', '봄꽃 창가', 'background', null, false),
-  ('summer-beach-room', '여름 바닷가', 'background', null, false),
-  ('autumn-leaf-room', '가을 낙엽방', 'background', 2, false),
-  ('winter-snow-room', '겨울 눈꽃방', 'background', null, true),
-  ('picnic-mat', '피크닉 매트', 'background', null, false),
-  ('garden-window', '초록 창가', 'background', null, false),
-  ('night-market', '야시장', 'background', 2, false),
-  ('cloud-room', '구름 방', 'background', null, true),
-  ('basic-bib', '기본 앞치마', 'outfit', null, false),
-  ('watermelon-hat', '수박 모자', 'outfit', null, false),
-  ('winter-scarf', '겨울 목도리', 'outfit', 2, false),
-  ('chef-coat', '셰프 코트', 'outfit', null, false),
-  ('rain-poncho', '레인 판초', 'outfit', null, true),
-  ('heart-mug', '하트 머그', 'accessory', null, false),
-  ('market-bag', '장바구니', 'accessory', null, false),
-  ('berry-pin', '딸기 핀', 'accessory', null, false),
-  ('watermelon-juice', '수박 주스', 'accessory', null, false),
-  ('roasted-sweet-potato', '군고구마 봉투', 'accessory', 2, false),
-  ('mandarin-basket', '귤 바구니', 'accessory', null, true),
-  ('sun-glasses', '선글라스', 'accessory', 2, false),
-  ('soup-spoon', '수프 숟가락', 'accessory', null, false),
-  ('mini-fan', '미니 선풍기', 'accessory', null, true)
+insert into public.decor_items (id, name, type, badge, unlock_level, unlock_by_shopping) values
+  ('strawberry-farm', '딸기 농장', 'background', '봄 한정 이벤트', null, false),
+  ('maple-tea-party', '단풍 다과회', 'background', null, null, false),
+  ('snowman-garden', '눈사람 정원', 'background', '겨울 한정 이벤트', null, false),
+  ('rainy-window', '빗방울 창가', 'background', '여름 한정 이벤트', null, false),
+  ('starlight-camp', '별빛 캠핑장', 'background', null, null, false),
+  ('hot-spring-village', '온천 마을', 'background', null, null, false),
+  ('bakery-kitchen', '빵집 주방', 'background', null, null, false),
+  ('sunny-kitchen', '햇살 주방', 'background', null, null, false),
+  ('spring-flower-room', '봄꽃 창가', 'background', null, null, false),
+  ('summer-beach-room', '여름 바닷가', 'background', null, null, false),
+  ('autumn-leaf-room', '가을 낙엽방', 'background', null, 2, false),
+  ('winter-snow-room', '겨울 눈꽃방', 'background', null, null, true),
+  ('picnic-mat', '피크닉 매트', 'background', null, null, false),
+  ('garden-window', '초록 창가', 'background', null, null, false),
+  ('night-market', '야시장', 'background', null, 2, false),
+  ('cloud-room', '구름 방', 'background', null, null, true),
+  ('basic-bib', '기본 앞치마', 'outfit', null, null, false),
+  ('watermelon-hat', '수박 모자', 'outfit', null, null, false),
+  ('winter-scarf', '겨울 목도리', 'outfit', null, 2, false),
+  ('chef-coat', '셰프 코트', 'outfit', null, null, false),
+  ('rain-poncho', '레인 판초', 'outfit', null, null, true),
+  ('cherry-overalls', '체리 멜빵바지', 'outfit', null, null, false),
+  ('strawberry-pajamas', '딸기 잠옷', 'outfit', null, null, false),
+  ('maple-poncho', '단풍잎 판초', 'outfit', null, null, false),
+  ('snow-knit', '눈꽃 니트', 'outfit', null, null, false),
+  ('straw-hat-overalls', '밀짚모자+멜빵', 'outfit', null, null, false),
+  ('raincoat-boots', '비옷+장화', 'outfit', null, null, false),
+  ('cherry-blossom-cardigan', '벚꽃 가디건', 'outfit', '봄 한정 이벤트', null, false),
+  ('rose-garden-shirt', '장미 정원 드레스셔츠', 'outfit', null, null, false),
+  ('linen-overalls', '리넨 멜빵바지', 'outfit', null, null, false),
+  ('pumpkin-jacket', '호박 잠바', 'outfit', '10월 31일 한정', null, false),
+  ('snowflake-pajamas', '눈송이 잠옷', 'outfit', '겨울 한정 이벤트', null, false),
+  ('rudolph-costume', '루돌프 코스튬', 'outfit', '겨울 한정 이벤트', null, false),
+  ('chef-apron-set', '요리사 앞치마 풀세트', 'outfit', null, null, false),
+  ('sommelier-bowtie', '소믈리에 나비넥타이', 'outfit', null, null, false),
+  ('striped-sailor-shirt', '줄무늬 뱃사공 셔츠', 'outfit', null, null, false),
+  ('swimsuit', '수영복', 'outfit', '여름 한정 이벤트', null, false),
+  ('heart-mug', '하트 머그', 'accessory', null, null, false),
+  ('market-bag', '장바구니', 'accessory', null, null, false),
+  ('berry-pin', '딸기 핀', 'accessory', null, null, false),
+  ('watermelon-juice', '수박 주스', 'accessory', null, null, false),
+  ('roasted-sweet-potato', '군고구마 봉투', 'accessory', null, 2, false),
+  ('mandarin-basket', '귤 바구니', 'accessory', null, null, true),
+  ('sun-glasses', '선글라스', 'accessory', null, 2, false),
+  ('soup-spoon', '수프 숟가락', 'accessory', null, null, false),
+  ('mini-fan', '미니 선풍기', 'accessory', null, null, true),
+  ('cherry-hairpin', '체리 머리핀', 'accessory', null, null, false),
+  ('acorn-beret', '밤톨 베레모', 'accessory', null, null, false),
+  ('summer-tube', '여름용 튜브', 'accessory', '여름 한정 이벤트', null, false),
+  ('maple-fan', '단풍잎 부채', 'accessory', '가을 한정 이벤트', null, false),
+  ('steamed-bun-basket', '호빵 바구니', 'accessory', '겨울 간식 세트', null, false),
+  ('snowman-mug', '눈사람 머그', 'accessory', '겨울 한정 이벤트', null, false),
+  ('cherry-pie-slice', '체리 파이 한 조각', 'accessory', null, null, false),
+  ('fruit-basket', '과일바구니', 'accessory', null, null, false),
+  ('umbrella', '우산', 'accessory', null, null, false),
+  ('cherry-basket', '체리 바구니', 'accessory', null, null, false),
+  ('grape-hat-piece', '포도송이 모자장식', 'accessory', null, null, false),
+  ('bun-steamer', '호빵 찜통', 'accessory', '겨울 한정 이벤트', null, false),
+  ('strawberry-milk', '딸기 우유팩', 'accessory', null, null, false),
+  ('cake-slice', '케이크 한 조각', 'accessory', null, null, false),
+  ('floral-edition', '꽃무늬 에디션', 'accessory', null, null, false),
+  ('bell-necklace', '방울 목걸이', 'accessory', null, null, false),
+  ('eco-bag', '에코백', 'accessory', null, null, false),
+  ('bread-board-knife', '나무 도마+빵칼', 'accessory', null, null, false),
+  ('yarn-needle', '털실 뭉치+바늘', 'accessory', null, null, false),
+  ('mittens', '벙어리장갑', 'accessory', null, null, false)
 on conflict (id) do update set
   name = excluded.name,
   type = excluded.type,
+  badge = excluded.badge,
   unlock_level = excluded.unlock_level,
   unlock_by_shopping = excluded.unlock_by_shopping;
