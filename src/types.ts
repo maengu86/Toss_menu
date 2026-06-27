@@ -37,4 +37,6 @@ export type DecorItem = {
   badge?: string
   unlockLevel?: number
   unlockByShopping?: boolean
+  unlockSeasonKey?: SeasonKey
+  unlockSeasonSpendWon?: number
 }

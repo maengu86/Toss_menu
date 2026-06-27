@@ -1,8 +1,10 @@
+import html2canvas from 'html2canvas'
 import { useEffect, useRef, useState } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
+import type { CSSProperties, ReactNode, RefObject } from 'react'
 import './App.css'
 import PetAvatar from './components/PetAvatar'
 import { getRoomBackgroundImage } from './data/decorAssets'
+import { getPetDecorIconImage, getPetFeedIconImage, getPetShareIconImage } from './data/sudalPetIcons'
 import { fallbackAppData, loadAppData } from './services/appDataService'
 import type { DecorItem, Ingredient, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
 
@@ -43,8 +45,71 @@ type OrderSnapshot = {
   orderTotal: number
 }
 
+type SeasonSpendMap = Record<SeasonKey, number>
+
+const seasonSpendStorageKey = 'toss-pet-season-spend-v1'
+
+const emptySeasonSpend: SeasonSpendMap = {
+  spring: 0,
+  summer: 0,
+  autumn: 0,
+  winter: 0,
+}
+
+function getSeasonLabel(season: SeasonKey) {
+  if (season === 'spring') return '봄'
+  if (season === 'summer') return '여름'
+  if (season === 'autumn') return '가을'
+  return '겨울'
+}
+
 function formatWon(value: number) {
   return value.toLocaleString('ko-KR') + '원'
+}
+
+function loadSeasonSpend() {
+  if (typeof window === 'undefined') return emptySeasonSpend
+
+  try {
+    const raw = window.localStorage.getItem(seasonSpendStorageKey)
+    if (!raw) return emptySeasonSpend
+    const parsed = JSON.parse(raw) as Partial<SeasonSpendMap>
+    return {
+      spring: parsed.spring ?? 0,
+      summer: parsed.summer ?? 0,
+      autumn: parsed.autumn ?? 0,
+      winter: parsed.winter ?? 0,
+    }
+  } catch {
+    return emptySeasonSpend
+  }
+}
+
+function saveSeasonSpend(value: SeasonSpendMap) {
+  try {
+    window.localStorage.setItem(seasonSpendStorageKey, JSON.stringify(value))
+  } catch {
+    // ignore persistence failures
+  }
+}
+
+function addSeasonSpend(base: SeasonSpendMap, delta: Partial<SeasonSpendMap>) {
+  return {
+    spring: base.spring + (delta.spring ?? 0),
+    summer: base.summer + (delta.summer ?? 0),
+    autumn: base.autumn + (delta.autumn ?? 0),
+    winter: base.winter + (delta.winter ?? 0),
+  }
+}
+
+function getDecorUnlockMessage(item: DecorItem) {
+  if (item.unlockSeasonKey && item.unlockSeasonSpendWon) {
+    return `${getSeasonLabel(item.unlockSeasonKey)} 제철 식재료 ${formatWon(item.unlockSeasonSpendWon)} 이상 사용하면 해금돼요.`
+  }
+
+  if (item.unlockByShopping) return '장보기 완료 후 해금돼요.'
+  if (item.unlockLevel) return `Lv.${item.unlockLevel} 해금`
+  return '아직 해금되지 않았어요.'
 }
 
 function ingredientKey(menuId: string, ingredientName: string) {
@@ -110,13 +175,19 @@ function App() {
   const [paymentMethod, setPaymentMethod] = useState(paymentOptions[0])
   const [deliveryOption, setDeliveryOption] = useState(deliveryOptions[0])
   const [shoppingRewardUnlocked, setShoppingRewardUnlocked] = useState(false)
-  const [selectedBackground, setSelectedBackground] = useState('햇살 주방')
-  const [selectedOutfit, setSelectedOutfit] = useState('기본 앞치마')
-  const [selectedAccessory, setSelectedAccessory] = useState('장바구니')
+  const [seasonSpendBySeason, setSeasonSpendBySeason] = useState<SeasonSpendMap>(() => loadSeasonSpend())
+  const [selectedBackground, setSelectedBackground] = useState('아늑한 집안')
+  const [selectedOutfit, setSelectedOutfit] = useState('체리 멜빵바지')
+  const [selectedAccessory, setSelectedAccessory] = useState('체리 머리핀')
   const [toast, setToast] = useState('')
   const [isScrolling, setIsScrolling] = useState(false)
   const scrollTimerRef = useRef<number | undefined>(undefined)
+  const petCaptureRef = useRef<HTMLDivElement | null>(null)
   const orderSequenceRef = useRef(0)
+
+  useEffect(() => {
+    saveSeasonSpend(seasonSpendBySeason)
+  }, [seasonSpendBySeason])
 
   useEffect(() => {
     let isMounted = true
@@ -134,15 +205,6 @@ function App() {
     }
   }, [])
 
-  useEffect(() => {
-    const ingredientExists = seasonalIngredients.some((ingredient) => ingredient.id === selectedSeasonalIngredientId)
-    const firstIngredientInSeason = seasonalIngredients.find((ingredient) => ingredient.seasonKey === selectedSeason)
-
-    if (!ingredientExists && firstIngredientInSeason) {
-      setSelectedSeasonalIngredientId(firstIngredientInSeason.id)
-    }
-  }, [seasonalIngredients, selectedSeason, selectedSeasonalIngredientId])
-
   const today = new Intl.DateTimeFormat('ko-KR', {
     month: 'long',
     day: 'numeric',
@@ -157,7 +219,12 @@ function App() {
     }))
     .filter((menu) => menu.ingredients.length > 0)
   const seasonIngredients = seasonalIngredients.filter((ingredient) => ingredient.seasonKey === selectedSeason)
-  const seasonalMenus = menus.filter((menu) => menu.seasonalIngredientIds?.includes(selectedSeasonalIngredientId))
+  const activeSeasonalIngredientId =
+    seasonIngredients.some((ingredient) => ingredient.id === selectedSeasonalIngredientId)
+      ? selectedSeasonalIngredientId
+      : seasonIngredients[0]?.id ?? selectedSeasonalIngredientId
+  const seasonalMenus = menus.filter((menu) => menu.seasonalIngredientIds?.includes(activeSeasonalIngredientId))
+  const seasonalIngredientSeasonById = new Map(seasonalIngredients.map((ingredient) => [ingredient.id, ingredient.seasonKey]))
 
   const shoppingItems = cartMenus.flatMap((menu) => menu.ingredients.map((ingredient) => ({ menuId: menu.id, ingredient })))
   const checkedPrice = shoppingItems.reduce((sum, item) => (
@@ -223,6 +290,14 @@ function App() {
     const orderedKeys = checkedItems.map((item) => ingredientKey(item.menuId, item.ingredient.name))
     orderSequenceRef.current += 1
     const orderId = orderSequenceRef.current
+    const seasonSpendDelta = checkedItems.reduce<Partial<SeasonSpendMap>>((acc, item) => {
+      const menu = selectedMenus.find((selectedMenu) => selectedMenu.id === item.menuId)
+      const seasonalIngredientId = menu?.seasonalIngredientIds?.[0]
+      const seasonKey = seasonalIngredientSeasonById.get(seasonalIngredientId ?? '')
+      if (!seasonKey) return acc
+      acc[seasonKey] = (acc[seasonKey] ?? 0) + item.ingredient.price
+      return acc
+    }, {})
 
     setLastOrder({ checkedPrice, orderTotal })
     setRemovedCartIngredientKeys((current) => Array.from(new Set([...current, ...orderedKeys])))
@@ -237,6 +312,9 @@ function App() {
         }
       }),
     ])
+    if (Object.keys(seasonSpendDelta).length > 0) {
+      setSeasonSpendBySeason((current) => addSeasonSpend(current, seasonSpendDelta))
+    }
     setCheckedIngredients((current) => current.filter((key) => !orderedKeys.includes(key)))
     setSelectedMenuIds([])
     setSelectedMenuOpen(false)
@@ -251,8 +329,8 @@ function App() {
   }
 
   function selectDecor(item: DecorItem) {
-    if (!isDecorUnlocked(item, level, shoppingRewardUnlocked)) {
-      showToast(item.unlockByShopping ? '장보기 플로우를 완료하면 해금돼요.' : `레벨 ${item.unlockLevel}에 해금돼요.`)
+    if (!isDecorUnlocked(item, level, shoppingRewardUnlocked, seasonSpendBySeason)) {
+      showToast(getDecorUnlockMessage(item))
       return
     }
 
@@ -261,13 +339,54 @@ function App() {
     if (item.type === 'accessory') setSelectedAccessory(item.name)
   }
 
-  async function copyShareLink() {
-    const url = window.location.href
+  function clearDecor(type: 'outfit' | 'accessory') {
+    if (type === 'outfit') setSelectedOutfit('')
+    if (type === 'accessory') setSelectedAccessory('')
+    showToast('착용을 해제했어요.')
+  }
+
+  async function sharePetRoom() {
+    const target = petCaptureRef.current
+    if (!target) {
+      showToast('공유할 영역을 찾지 못했어요.')
+      return
+    }
+
     try {
-      await navigator.clipboard.writeText(url)
-      showToast('먹보 링크를 복사했어요.')
-    } catch {
-      showToast(url)
+      const canvas = await html2canvas(target, {
+        backgroundColor: null,
+        scale: window.devicePixelRatio > 1 ? window.devicePixelRatio : 2,
+        useCORS: true,
+        ignoreElements: (element) => (
+          element instanceof HTMLElement && element.dataset.captureIgnore === 'true'
+        ),
+      })
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'))
+      if (!blob) throw new Error('캔버스 변환에 실패했어요.')
+
+      const file = new File([blob], '먹보-수달영역.png', { type: 'image/png' })
+      const shareData = {
+        files: [file],
+        title: '먹보 수달',
+        text: '먹보 수달 영역을 캡처했어요.',
+      }
+
+      if (navigator.share && (!navigator.canShare || navigator.canShare(shareData))) {
+        await navigator.share(shareData)
+        showToast('먹보 이미지를 공유했어요.')
+        return
+      }
+
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = '먹보-수달영역.png'
+      link.click()
+      URL.revokeObjectURL(url)
+      showToast('먹보 이미지를 저장했어요.')
+    } catch (error) {
+      console.warn('Failed to share pet capture.', error)
+      showToast('이미지 공유에 실패했어요.')
     }
   }
 
@@ -281,7 +400,7 @@ function App() {
             seasonIngredients={seasonIngredients}
             seasonalMenus={seasonalMenus}
             selectedSeason={selectedSeason}
-            selectedSeasonalIngredientId={selectedSeasonalIngredientId}
+            selectedSeasonalIngredientId={activeSeasonalIngredientId}
             selectedMenuOpen={selectedMenuOpen}
             selectedMenus={selectedMenus}
             selectedMenuIds={selectedMenuIds}
@@ -343,11 +462,14 @@ function App() {
             exp={exp}
             feedIngredients={feedIngredients}
             level={level}
+            captureRef={petCaptureRef}
             outfit={selectedOutfit}
             shoppingRewardUnlocked={shoppingRewardUnlocked}
+            seasonSpendBySeason={seasonSpendBySeason}
+            onClearDecor={clearDecor}
             onFeed={feedPet}
             onSelectDecor={selectDecor}
-            onShare={copyShareLink}
+            onShare={sharePetRoom}
             onScrollActivity={handleScrollActivity}
           />
         )}
@@ -716,28 +838,6 @@ function OptionGroup({ title, children }: { title: string; children: ReactNode }
   )
 }
 
-function shoppingItemEmoji(name: string) {
-  if (name.includes('수박')) return '🍉'
-  if (name.includes('콩국수') || name.includes('소면') || name.includes('파스타')) return '🍜'
-  if (name.includes('콩국물') || name.includes('우유') || name.includes('요거트')) return '🥛'
-  if (name.includes('복숭아')) return '🍑'
-  if (name.includes('옥수수')) return '🌽'
-  if (name.includes('토마토')) return '🍅'
-  if (name.includes('오이')) return '🥒'
-  if (name.includes('가지')) return '🍆'
-  if (name.includes('귤')) return '🍊'
-  if (name.includes('배추')) return '🥬'
-  if (name.includes('굴')) return '🦪'
-  if (name.includes('무')) return '⚪'
-  if (name.includes('고구마')) return '🍠'
-  if (name.includes('버섯')) return '🍄'
-  if (name.includes('딸기')) return '🍓'
-  if (name.includes('샐러드')) return '🥗'
-  if (name.includes('치즈')) return '🧀'
-  if (name.includes('쌀') || name.includes('밥')) return '🍚'
-  return '🛒'
-}
-
 function PetHomeScreen({
   level,
   exp,
@@ -747,6 +847,9 @@ function PetHomeScreen({
   feedIngredients,
   decorItems,
   shoppingRewardUnlocked,
+  seasonSpendBySeason,
+  captureRef,
+  onClearDecor,
   onFeed,
   onSelectDecor,
   onShare,
@@ -760,6 +863,9 @@ function PetHomeScreen({
   feedIngredients: FeedIngredient[]
   decorItems: DecorItem[]
   shoppingRewardUnlocked: boolean
+  seasonSpendBySeason: SeasonSpendMap
+  captureRef: RefObject<HTMLDivElement | null>
+  onClearDecor: (type: 'outfit' | 'accessory') => void
   onFeed: (ingredient: FeedIngredient) => void
   onSelectDecor: (item: DecorItem) => void
   onShare: () => void
@@ -768,6 +874,8 @@ function PetHomeScreen({
   const [decorTab, setDecorTab] = useState<'all' | DecorItem['type']>('all')
   const [petTab, setPetTab] = useState<'feed' | 'decor'>('feed')
   const visibleItems = decorTab === 'all' ? decorItems : decorItems.filter((item) => item.type === decorTab)
+  const canClearDecor = decorTab === 'outfit' || decorTab === 'accessory'
+  const isClearSelected = decorTab === 'outfit' ? outfit === '' : decorTab === 'accessory' ? accessory === '' : false
   const nextLevelThreshold = getNextLevelThreshold(level)
   const levelProgress = getLevelProgress(exp, level)
   const expLabel = nextLevelThreshold ? `${exp}/${nextLevelThreshold.minExp} xp` : `${exp} xp`
@@ -782,10 +890,13 @@ function PetHomeScreen({
   return (
     <section className="screen pet-home-screen" onScroll={onScrollActivity}>
       <div
+        ref={captureRef}
         className={`pet-room-stage ${roomClass(background)} ${roomImage ? 'has-room-image' : ''}`}
         style={roomImage ? { backgroundImage: `url(${roomImage})` } : undefined}
       >
-        <button className="pet-share-button" aria-label="먹보 링크 복사" onClick={onShare} type="button">📤</button>
+        <button className="pet-share-button" aria-label="먹보 영역 캡처" data-capture-ignore="true" onClick={onShare} type="button">
+          <img alt="" aria-hidden="true" src={getPetShareIconImage()} />
+        </button>
         <PetAvatar outfit={outfit} background={background} accessory={accessory} body="sudal" />
       </div>
 
@@ -817,7 +928,7 @@ function PetHomeScreen({
                 <strong>{level}</strong>
               </div>
               <div className="pet-level-copy">
-                <strong>먹보가 자라고 있어요</strong>
+                <strong>성장 현황</strong>
                 <span>{expLabel}</span>
               </div>
             </div>
@@ -834,7 +945,9 @@ function PetHomeScreen({
             )}
             {feedIngredients.map((ingredient) => (
               <button className="feed-card" key={ingredient.id} onClick={() => onFeed(ingredient)} type="button">
-                <span className="feed-card-icon" aria-hidden="true">{shoppingItemEmoji(ingredient.name)}</span>
+                <span className="feed-card-icon" aria-hidden="true">
+                  <img alt="" src={getPetFeedIconImage(ingredient.name)} />
+                </span>
                 <span>
                   <strong>{ingredient.name}</strong>
                   <small>{ingredient.menuName}</small>
@@ -848,8 +961,19 @@ function PetHomeScreen({
       {petTab === 'decor' && (
         <div className="pet-inventory">
           <div className="decor-grid">
+            {canClearDecor && (
+              <button
+                className={`decor-card clear-card ${isClearSelected ? 'selected' : ''}`}
+                onClick={() => onClearDecor(decorTab)}
+                type="button"
+              >
+                <span className="decor-card-visual decor-card-empty" aria-hidden="true">-</span>
+                <strong>미착용</strong>
+                <small>해제</small>
+              </button>
+            )}
             {visibleItems.map((item) => {
-              const unlocked = isDecorUnlocked(item, level, shoppingRewardUnlocked)
+              const unlocked = isDecorUnlocked(item, level, shoppingRewardUnlocked, seasonSpendBySeason)
               const selected = item.name === background || item.name === outfit || item.name === accessory
               const itemRoomImage = item.type === 'background' ? getRoomBackgroundImage(item.name) : undefined
               return (
@@ -858,10 +982,10 @@ function PetHomeScreen({
                     className={itemRoomImage ? 'decor-card-visual room-thumbnail' : 'decor-card-visual'}
                     style={itemRoomImage ? { backgroundImage: `url(${itemRoomImage})` } : undefined}
                   >
-                    {!itemRoomImage && decorIcon(item)}
+                    {!itemRoomImage && <img alt="" src={getPetDecorIconImage(item)} />}
                   </span>
                   <strong>{item.name}</strong>
-                  <small>{unlocked ? (selected ? '착용중' : item.badge ?? '') : item.unlockByShopping ? '장보기 보상' : `Lv.${item.unlockLevel}`}</small>
+                  <small>{selected ? '착용중' : ''}</small>
                 </button>
               )
             })}
@@ -870,36 +994,6 @@ function PetHomeScreen({
       )}
     </section>
   )
-}
-
-function decorIcon(item: DecorItem) {
-  if (item.type === 'background') {
-    if (item.name.includes('봄꽃')) return '🌷'
-    if (item.name.includes('바닷가')) return '🌊'
-    if (item.name.includes('낙엽')) return '🍁'
-    if (item.name.includes('눈꽃')) return '❄️'
-    if (item.name.includes('피크닉')) return '🌼'
-    if (item.name.includes('초록')) return '🪟'
-    if (item.name.includes('야시장')) return '🌙'
-    if (item.name.includes('구름')) return '☁️'
-    return '☀️'
-  }
-  if (item.type === 'outfit') {
-    if (item.name.includes('수박')) return '🍉'
-    if (item.name.includes('목도리')) return '🧣'
-    if (item.name.includes('셰프')) return '🧑‍🍳'
-    if (item.name.includes('판초')) return '☔'
-    return '👕'
-  }
-  if (item.name.includes('머그')) return '☕'
-  if (item.name.includes('딸기')) return '🍓'
-  if (item.name.includes('선글라스')) return '🕶️'
-  if (item.name.includes('숟가락')) return '🥄'
-  if (item.name.includes('선풍기')) return '🪭'
-  if (item.name.includes('주스')) return '🧃'
-  if (item.name.includes('군고구마')) return '🍠'
-  if (item.name.includes('귤')) return '🍊'
-  return '🛍️'
 }
 
 function roomClass(background: string) {
@@ -912,6 +1006,28 @@ function roomClass(background: string) {
   if (background.includes('야시장')) return 'night'
   if (background.includes('구름')) return 'cloud'
   return 'sunny'
+}
+
+function shoppingItemEmoji(name: string) {
+  if (name.includes('수박')) return '🍉'
+  if (name.includes('콩국수') || name.includes('소면') || name.includes('파스타')) return '🍜'
+  if (name.includes('콩국물') || name.includes('우유') || name.includes('요거트')) return '🥛'
+  if (name.includes('복숭아')) return '🍑'
+  if (name.includes('옥수수')) return '🌽'
+  if (name.includes('토마토')) return '🍅'
+  if (name.includes('오이')) return '🥒'
+  if (name.includes('가지')) return '🍆'
+  if (name.includes('귤')) return '🍊'
+  if (name.includes('배추')) return '🥬'
+  if (name.includes('굴')) return '🦪'
+  if (name.includes('무')) return '⚪'
+  if (name.includes('고구마')) return '🍠'
+  if (name.includes('버섯')) return '🍄'
+  if (name.includes('딸기')) return '🍓'
+  if (name.includes('샐러드')) return '🥗'
+  if (name.includes('치즈')) return '🧀'
+  if (name.includes('쌀') || name.includes('밥')) return '🍚'
+  return '🛒'
 }
 
 function TabBar({ current, onChange }: { current: Screen; onChange: (screen: Screen) => void }) {
@@ -933,7 +1049,10 @@ function TabBar({ current, onChange }: { current: Screen; onChange: (screen: Scr
   )
 }
 
-function isDecorUnlocked(item: DecorItem, level: number, shoppingRewardUnlocked: boolean) {
+function isDecorUnlocked(item: DecorItem, level: number, shoppingRewardUnlocked: boolean, seasonSpendBySeason: SeasonSpendMap) {
+  if (item.unlockSeasonKey && item.unlockSeasonSpendWon) {
+    return (seasonSpendBySeason[item.unlockSeasonKey] ?? 0) >= item.unlockSeasonSpendWon
+  }
   if (item.unlockByShopping) return shoppingRewardUnlocked
   if (item.unlockLevel) return level >= item.unlockLevel
   return true
