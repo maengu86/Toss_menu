@@ -1642,7 +1642,7 @@ function PetHomeScreen({
   onClearDecor,
   onFeed,
   onSelectDecor,
-  onShare,
+  onShare: onShareFallback,
   onScrollActivity,
 }: {
   level: number
@@ -1661,6 +1661,7 @@ function PetHomeScreen({
 }) {
   const [decorTab, setDecorTab] = useState<PetHomeDecorTab>('all')
   const [petTab, setPetTab] = useState<'feed' | 'decor'>('feed')
+  const petRoomRef = useRef<HTMLDivElement>(null)
   const petHomeDecorItems = decorItems.filter((item) => item.type !== 'outfit' && isPetHomeVisibleDecorItem(item))
   const visibleItems = decorTab === 'all' ? petHomeDecorItems : petHomeDecorItems.filter((item) => item.type === decorTab)
   const canClearDecor = decorTab === 'accessory'
@@ -1680,11 +1681,43 @@ function PetHomeScreen({
     accessory: petTabAccessoryIcon,
   } as const
 
+  async function sharePetHomeImage() {
+    const target = petRoomRef.current
+    if (!target) return
+
+    try {
+      const canvas = await renderPetHomeShareCanvas(target, {
+        background,
+        roomImage,
+      })
+      const blob = await canvasToBlob(canvas)
+      const file = new File([blob], 'mukbo-pet-home.png', { type: 'image/png' })
+
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: 'Mukbo pet home',
+          text: 'Sharing my pet home',
+        })
+        return
+      }
+
+      downloadBlob(blob, file.name)
+    } catch {
+      onShareFallback()
+    }
+  }
+
+  function onShare() {
+    void sharePetHomeImage()
+  }
+
   return (
     <section className="screen pet-home-screen" onScroll={onScrollActivity}>
       <div className="pet-home-shell">
       <div
         className={`pet-room-stage ${roomClass(background)} ${roomImage ? 'has-room-image' : ''}`}
+        ref={petRoomRef}
         style={roomImage ? { backgroundImage: `url(${roomImage})` } : undefined}
       >
         <button className="pet-share-button" aria-label="수달 영역 캡처" onClick={onShare} type="button">
@@ -1855,6 +1888,154 @@ function isDecorUnlocked(item: DecorItem, level: number, shoppingRewardUnlocked:
   if (item.unlockByShopping) return shoppingRewardUnlocked
   if (item.unlockLevel) return level >= item.unlockLevel
   return true
+}
+
+function canvasToBlob(canvas: HTMLCanvasElement) {
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) resolve(blob)
+      else reject(new Error('Canvas export failed'))
+    }, 'image/png')
+  })
+}
+
+async function renderPetHomeShareCanvas(
+  target: HTMLElement,
+  { background, roomImage }: { background: string; roomImage?: string },
+) {
+  const bounds = target.getBoundingClientRect()
+  const scale = Math.max(2, window.devicePixelRatio || 1)
+  const canvas = document.createElement('canvas')
+  canvas.width = Math.round(bounds.width * scale)
+  canvas.height = Math.round(bounds.height * scale)
+
+  const context = canvas.getContext('2d')
+  if (!context) throw new Error('Canvas context unavailable')
+
+  context.scale(scale, scale)
+
+  if (roomImage) {
+    const backgroundImage = await loadCanvasImage(roomImage)
+    drawImageCover(context, backgroundImage, 0, 0, bounds.width, bounds.height)
+  } else {
+    drawPetRoomFallbackBackground(context, roomClass(background), bounds.width, bounds.height)
+  }
+
+  const petElement = target.querySelector('.dress-pet')
+  const petBounds = petElement?.getBoundingClientRect()
+  if (!petBounds) return canvas
+
+  const petRect = {
+    height: petBounds.height,
+    width: petBounds.width,
+    x: petBounds.left - bounds.left,
+    y: petBounds.top - bounds.top,
+  }
+
+  await drawSvgImageLayers(context, target, petRect)
+
+  return canvas
+}
+
+function loadCanvasImage(src: string) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image()
+    image.onload = () => resolve(image)
+    image.onerror = reject
+    image.src = src
+  })
+}
+
+function drawImageCover(
+  context: CanvasRenderingContext2D,
+  image: HTMLImageElement,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+) {
+  const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight)
+  const drawWidth = image.naturalWidth * scale
+  const drawHeight = image.naturalHeight * scale
+  context.drawImage(image, x + (width - drawWidth) / 2, y + (height - drawHeight) / 2, drawWidth, drawHeight)
+}
+
+async function drawSvgImageLayers(
+  context: CanvasRenderingContext2D,
+  target: HTMLElement,
+  petRect: { height: number; width: number; x: number; y: number },
+) {
+  const layers = Array.from(target.querySelectorAll<SVGImageElement>('.sudal-pet image'))
+
+  for (const layer of layers) {
+    const href = layer.href.baseVal || layer.getAttribute('href')
+    if (!href) continue
+
+    const image = await loadCanvasImage(href)
+    const frame = {
+      height: Number(layer.getAttribute('height') ?? 0),
+      width: Number(layer.getAttribute('width') ?? 0),
+      x: Number(layer.getAttribute('x') ?? 0),
+      y: Number(layer.getAttribute('y') ?? 0),
+    }
+
+    drawImageMeet(
+      context,
+      image,
+      petRect.x + (frame.x / 260) * petRect.width,
+      petRect.y + (frame.y / 340) * petRect.height,
+      (frame.width / 260) * petRect.width,
+      (frame.height / 340) * petRect.height,
+    )
+  }
+}
+
+function drawImageMeet(
+  context: CanvasRenderingContext2D,
+  image: HTMLImageElement,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+) {
+  const scale = Math.min(width / image.naturalWidth, height / image.naturalHeight)
+  const drawWidth = image.naturalWidth * scale
+  const drawHeight = image.naturalHeight * scale
+  context.drawImage(image, x + (width - drawWidth) / 2, y + (height - drawHeight) / 2, drawWidth, drawHeight)
+}
+
+function drawPetRoomFallbackBackground(context: CanvasRenderingContext2D, className: string, width: number, height: number) {
+  const gradient = context.createLinearGradient(0, 0, 0, height)
+  if (className === 'winter') {
+    gradient.addColorStop(0, '#bfe7ff')
+    gradient.addColorStop(0.54, '#edf6ff')
+    gradient.addColorStop(1, '#dfefff')
+  } else if (className === 'summer') {
+    gradient.addColorStop(0, '#9edcf9')
+    gradient.addColorStop(0.54, '#9edcf9')
+    gradient.addColorStop(0.55, '#f7d886')
+    gradient.addColorStop(1, '#f7d886')
+  } else if (className === 'autumn') {
+    gradient.addColorStop(0, '#e4b06c')
+    gradient.addColorStop(1, '#d98955')
+  } else if (className === 'night') {
+    gradient.addColorStop(0, '#3f5578')
+    gradient.addColorStop(1, '#927754')
+  } else {
+    gradient.addColorStop(0, '#f7cf79')
+    gradient.addColorStop(1, '#f6c86d')
+  }
+  context.fillStyle = gradient
+  context.fillRect(0, 0, width, height)
+}
+
+function downloadBlob(blob: Blob, fileName: string) {
+  const url = URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = url
+  anchor.download = fileName
+  anchor.click()
+  URL.revokeObjectURL(url)
 }
 
 export default App
