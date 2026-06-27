@@ -186,6 +186,20 @@ npm.cmd run build
 npm.cmd run lint
 ```
 
+## Supabase 연동 규칙
+
+이 프로젝트는 Supabase와 연결되어 있으므로 데이터 관련 작업 시 아래 규칙을 지킵니다.
+
+- 프런트엔드에서는 `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`만 사용합니다.
+- `service_role` 키, 데이터베이스 비밀번호 등 관리자 권한 비밀값은 코드나 Git에 절대 올리지 않습니다.
+- 로컬 환경변수 파일은 커밋하지 않으며, 새 환경변수가 필요하면 실제 값 없이 예시 파일과 설정 방법만 공유합니다.
+- Supabase 테이블이나 컬럼을 변경할 때는 `supabase/schema.sql`, `src/services/appDataService.ts`, 관련 타입을 함께 확인합니다.
+- DB의 snake_case 컬럼과 앱의 camelCase 타입 간 매핑을 임의로 제거하거나 변경하지 않습니다.
+- Supabase 연결 실패 시 앱이 로컬 데이터로 동작할 수 있도록 `fallbackAppData` 흐름을 유지합니다.
+- 테이블 추가 또는 권한 변경 시 Row Level Security(RLS) 정책과 익명 사용자 접근 범위를 반드시 확인합니다.
+- 실제 운영 데이터의 삭제, 초기화, 대량 수정은 사용자 또는 담당자 확인 없이 실행하지 않습니다.
+- Supabase 연동 변경 후에는 연결 성공뿐 아니라 환경변수가 없는 상태의 fallback 동작도 확인합니다.
+
 ## 코드 작성 원칙
 
 - 기존 구조를 크게 바꾸기보다 현재 컴포넌트와 데이터 흐름을 우선 활용합니다.

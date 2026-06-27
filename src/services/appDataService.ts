@@ -161,7 +161,7 @@ function mapMenu(row: MenuRow): Menu {
     season: row.season,
     weather: row.weather,
     description: row.description ?? '',
-    exp: row.exp,
+    exp: ingredients.reduce((total, ingredient) => total + ingredient.price, 0),
     color: row.color,
     image: row.image ?? '',
     imageFallback: row.image_fallback ?? '🍽️',
