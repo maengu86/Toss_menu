@@ -22,6 +22,6 @@ export const decorItems: DecorItem[] = [
   { id: 'roasted-sweet-potato', name: '군고구마 봉투', type: 'accessory', unlockLevel: 2 },
   { id: 'mandarin-basket', name: '귤 바구니', type: 'accessory', unlockByShopping: true },
   { id: 'sun-glasses', name: '선글라스', type: 'accessory', unlockLevel: 2 },
-  { id: 'soup-spoon', name: '스프 숟가락', type: 'accessory' },
+  { id: 'soup-spoon', name: '수프 숟가락', type: 'accessory' },
   { id: 'mini-fan', name: '미니 선풍기', type: 'accessory', unlockByShopping: true },
 ]

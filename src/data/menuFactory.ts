@@ -1,7 +1,5 @@
 import type { Menu } from '../types'
 
-const baseMenuFields = { image: '', imageFallback: '🍽️' }
-
 export function createMenu(
   id: string,
   name: string,
@@ -13,7 +11,8 @@ export function createMenu(
   ingredients: [string, string, number][],
 ): Menu {
   return {
-    ...baseMenuFields,
+    image: '',
+    imageFallback: '🍽️',
     id,
     name,
     season,
