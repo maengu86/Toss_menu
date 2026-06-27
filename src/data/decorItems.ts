@@ -1,0 +1,27 @@
+import type { DecorItem } from '../types'
+
+export const decorItems: DecorItem[] = [
+  { id: 'sunny-kitchen', name: '햇살 주방', type: 'background' },
+  { id: 'spring-flower-room', name: '봄꽃 창가', type: 'background' },
+  { id: 'summer-beach-room', name: '여름 바닷가', type: 'background' },
+  { id: 'autumn-leaf-room', name: '가을 낙엽방', type: 'background', unlockLevel: 2 },
+  { id: 'winter-snow-room', name: '겨울 눈꽃방', type: 'background', unlockByShopping: true },
+  { id: 'picnic-mat', name: '피크닉 매트', type: 'background' },
+  { id: 'garden-window', name: '초록 창가', type: 'background' },
+  { id: 'night-market', name: '야시장', type: 'background', unlockLevel: 2 },
+  { id: 'cloud-room', name: '구름 방', type: 'background', unlockByShopping: true },
+  { id: 'basic-bib', name: '기본 앞치마', type: 'outfit' },
+  { id: 'watermelon-hat', name: '수박 모자', type: 'outfit' },
+  { id: 'winter-scarf', name: '겨울 목도리', type: 'outfit', unlockLevel: 2 },
+  { id: 'chef-coat', name: '셰프 코트', type: 'outfit' },
+  { id: 'rain-poncho', name: '레인 판초', type: 'outfit', unlockByShopping: true },
+  { id: 'heart-mug', name: '하트 머그', type: 'accessory' },
+  { id: 'market-bag', name: '장바구니', type: 'accessory' },
+  { id: 'berry-pin', name: '딸기 핀', type: 'accessory' },
+  { id: 'watermelon-juice', name: '수박 주스', type: 'accessory' },
+  { id: 'roasted-sweet-potato', name: '군고구마 봉투', type: 'accessory', unlockLevel: 2 },
+  { id: 'mandarin-basket', name: '귤 바구니', type: 'accessory', unlockByShopping: true },
+  { id: 'sun-glasses', name: '선글라스', type: 'accessory', unlockLevel: 2 },
+  { id: 'soup-spoon', name: '수프 숟가락', type: 'accessory' },
+  { id: 'mini-fan', name: '미니 선풍기', type: 'accessory', unlockByShopping: true },
+]

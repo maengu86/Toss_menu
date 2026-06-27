@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import './App.css'
 import PetAvatar from './components/PetAvatar'
-import { decorItems, menus, seasonalIngredients, seasons } from './data'
+import { fallbackAppData, loadAppData } from './services/appDataService'
 import type { DecorItem, Ingredient, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
 
 const tossShoppingOptions = [
@@ -126,6 +126,8 @@ function getLevelProgress(totalExp: number, level: number) {
 }
 
 function App() {
+  const [appData, setAppData] = useState(fallbackAppData)
+  const { decorItems, menus, seasonalIngredients, seasons } = appData
   const firstSummerIngredient = seasonalIngredients.find((item) => item.seasonKey === 'summer') ?? seasonalIngredients[0]
   const [screen, setScreen] = useState<Screen>('home')
   const [selectedMenuIds, setSelectedMenuIds] = useState<string[]>([])
@@ -157,6 +159,31 @@ function App() {
   const [isScrolling, setIsScrolling] = useState(false)
   const scrollTimerRef = useRef<number | undefined>(undefined)
   const orderSequenceRef = useRef(0)
+
+  useEffect(() => {
+    let isMounted = true
+
+    loadAppData()
+      .then((data) => {
+        if (isMounted) setAppData(data)
+      })
+      .catch((error) => {
+        console.warn('Supabase data load failed. Falling back to local data.', error)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  useEffect(() => {
+    const ingredientExists = seasonalIngredients.some((ingredient) => ingredient.id === selectedSeasonalIngredientId)
+    const firstIngredientInSeason = seasonalIngredients.find((ingredient) => ingredient.seasonKey === selectedSeason)
+
+    if (!ingredientExists && firstIngredientInSeason) {
+      setSelectedSeasonalIngredientId(firstIngredientInSeason.id)
+    }
+  }, [seasonalIngredients, selectedSeason, selectedSeasonalIngredientId])
 
   const today = new Intl.DateTimeFormat('ko-KR', {
     month: 'long',
@@ -1307,26 +1334,22 @@ function PetHomeScreen({
   const nextLevelThreshold = getNextLevelThreshold(level)
   const levelProgress = getLevelProgress(exp, level)
   const expLabel = nextLevelThreshold ? `${exp}/${nextLevelThreshold.minExp} xp` : `${exp} xp`
-  const previewFeedIngredient = feedIngredients[0]
-  const previewFeedText = previewFeedIngredient ? previewFeedIngredient.name : '주문한 재료 없음'
-  const previewFeedExp = previewFeedIngredient ? `+${getIngredientExp(previewFeedIngredient)} xp` : '0 xp'
-  const decorTabs: { id: 'all' | DecorItem['type']; label: string; icon: string }[] = [
-    { id: 'all', label: '전체', icon: '🧩' },
-    { id: 'background', label: '방', icon: '🏠' },
-    { id: 'outfit', label: '옷', icon: '👕' },
-    { id: 'accessory', label: '소품', icon: '🎒' },
+  const decorTabs: { id: 'all' | DecorItem['type']; label: string }[] = [
+    { id: 'all', label: '전체' },
+    { id: 'background', label: '방' },
+    { id: 'outfit', label: '옷' },
+    { id: 'accessory', label: '소품' },
   ]
 
   return (
     <section className="screen pet-home-screen" onScroll={onScrollActivity}>
       <div className={`pet-room-stage ${roomClass(background)}`}>
         <button className="pet-share-button" aria-label="먹보 링크 복사" onClick={onShare} type="button">📤</button>
-        <PetAvatar outfit={outfit} background={background} accessory={accessory} />
+        <PetAvatar outfit={outfit} background={background} accessory={accessory} body="sudal" />
       </div>
 
       <div className="pet-action-tabs" aria-label="펫홈 작업">
         <button className={petTab === 'feed' ? 'active' : ''} onClick={() => setPetTab('feed')} type="button">
-          <span aria-hidden="true">🍚</span>
           <b>밥먹기</b>
         </button>
         {decorTabs.map((tab) => (
@@ -1339,7 +1362,6 @@ function PetHomeScreen({
             }}
             type="button"
           >
-            <span aria-hidden="true">{tab.icon}</span>
             <b>{tab.label}</b>
           </button>
         ))}
@@ -1347,52 +1369,35 @@ function PetHomeScreen({
 
       {petTab === 'feed' && (
         <section className="pet-feed-panel">
-          <div className="level-box-drafts" aria-label="레벨 상자 시안">
-            {levelBoxDrafts.map((draft) => (
-              <article className={`level-box-draft level-box-draft-${draft.id}`} key={draft.id}>
-                <strong>{draft.title}</strong>
-                <span>Lv. {level}</span>
-                <b>{expLabel}</b>
-              </article>
-            ))}
-          </div>
           <div className="level-card">
-            <div>
-              <strong>Lv. {level}</strong>
-              <span>{expLabel}</span>
+            <div className="pet-level-card-main">
+              <div className="pet-level-mark">
+                <small>LEVEL</small>
+                <strong>{level}</strong>
+              </div>
+              <div className="pet-level-copy">
+                <strong>먹보가 자라고 있어요</strong>
+                <span>{expLabel}</span>
+              </div>
             </div>
-            <div className="progress-track">
-              <div className="progress-fill" style={{ width: `${levelProgress}%` }} />
+            <div className="pet-level-progress-row">
+              <div className="progress-track">
+                <div className="progress-fill" style={{ width: `${levelProgress}%` }} />
+              </div>
+              <b>{Math.round(levelProgress)}%</b>
             </div>
-          </div>
-          <div className="feed-box-drafts" aria-label="밥먹이기 상자 시안">
-            {feedBoxDrafts.map((draft) => (
-              <article className={`feed-box-draft feed-box-draft-${draft.id}`} key={draft.id}>
-                <strong>{draft.title}</strong>
-                <span>{previewFeedText}</span>
-                <b>{previewFeedExp}</b>
-              </article>
-            ))}
           </div>
           <div className="feed-list compact-feed-list">
             {feedIngredients.length === 0 && (
-              <div className="empty-feed-drafts" aria-label="밥먹이기 빈 상태">
-                {/* 작업: 먹일 메뉴가 없을 때 주문 안내를 보여줍니다.
-                    개인 수정 가능: 안내 문구는 자유롭게 바꿔도 됩니다.
-                    적용 위치: 펫홈 > 밥먹이기 탭의 빈 상태. */}
-                {emptyFeedDrafts.slice(0, 1).map((draft) => (
-                  <p className="empty" key={draft.id} style={{ '--empty-tone': draft.tone } as CSSProperties}>
-                    메뉴를 주문해 주세요
-                  </p>
-                ))}
-              </div>
+              <p className="empty">메뉴를 주문해 주세요</p>
             )}
             {feedIngredients.map((ingredient) => (
               <button className="feed-card" key={ingredient.id} onClick={() => onFeed(ingredient)} type="button">
+                <span className="feed-card-icon" aria-hidden="true">{shoppingItemEmoji(ingredient.name)}</span>
                 <span>
                   <strong>{ingredient.name}</strong>
+                  <small>{ingredient.menuName}</small>
                 </span>
-                <b>+{getIngredientExp(ingredient)} xp</b>
               </button>
             ))}
           </div>
@@ -1401,22 +1406,6 @@ function PetHomeScreen({
 
       {petTab === 'decor' && (
         <div className="pet-inventory">
-          <div className="decor-box-drafts" aria-label="꾸미기 박스 시안">
-            {decorBoxDrafts.map((draft) => (
-              <article className={`decor-box-draft decor-box-draft-${draft.id}`} key={draft.id}>
-                {/* 작업: 꾸미기 박스의 적용 방향을 5개 시안으로 비교합니다.
-                    개인 수정 가능: 시안 문구와 표시 항목은 자유롭게 조정해도 됩니다.
-                    적용 위치: 펫홈 > 꾸미기 탭 상단. */}
-                <strong>시안 {draft.id}</strong>
-                <span>{draft.title}</span>
-                <dl>
-                  <div><dt>방</dt><dd>{background}</dd></div>
-                  <div><dt>옷</dt><dd>{outfit}</dd></div>
-                  <div><dt>소품</dt><dd>{accessory}</dd></div>
-                </dl>
-              </article>
-            ))}
-          </div>
           <div className="decor-grid">
             {visibleItems.map((item) => {
               const unlocked = isDecorUnlocked(item, level, shoppingRewardUnlocked)

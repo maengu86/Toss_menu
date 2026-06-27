@@ -1,13 +1,17 @@
+import sudalMain from './sudal/sudal_main.png'
+
 type PetAvatarProps = {
   outfit?: string
   background?: string
   accessory?: string
+  body?: 'default' | 'sudal'
 }
 
 function PetAvatar({
   outfit = '기본 앞치마',
   background = '햇살 주방',
   accessory = '장바구니',
+  body = 'default',
 }: PetAvatarProps) {
   const hasWatermelonHat = outfit.includes('수박')
   const hasScarf = outfit.includes('목도리')
@@ -39,6 +43,59 @@ function PetAvatar({
                 : background.includes('구름')
                   ? 'cloud'
                   : ''
+
+  if (body === 'sudal') {
+    return (
+      <div className={`pet-stage pet-dress-stage ${stageClass}`}>
+        <svg className="pet-svg dress-pet sudal-pet" viewBox="0 0 260 340" role="img" aria-label="먹보 수달 펫">
+          <image href={sudalMain} x="18" y="5" width="224" height="324" preserveAspectRatio="xMidYMid meet" />
+
+          {hasScarf && (
+            <>
+              <path d="M75 117c34 14 76 14 110 0l2 17c-42 15-72 15-114 0z" fill="#ef6b55" />
+              <path d="M159 130l25 36" stroke="#ef6b55" strokeWidth="10" strokeLinecap="round" />
+            </>
+          )}
+          {hasChefCoat && (
+            <>
+              <path d="M91 166c22-12 56-12 78 0l-4 82H95z" fill="#ffffff" opacity="0.9" stroke="#d7e0e7" strokeWidth="3" />
+              <path d="M130 168v74" stroke="#d7e0e7" strokeWidth="4" />
+              <circle cx="118" cy="188" r="3" fill="#5b6f82" />
+              <circle cx="142" cy="188" r="3" fill="#5b6f82" />
+            </>
+          )}
+          {hasPoncho && <path d="M67 151c30-18 96-18 126 0l-15 102H82z" fill="#8fc6f4" opacity="0.8" stroke="#5b8ab8" strokeWidth="4" />}
+          {hasWatermelonHat && (
+            <>
+              <path d="M67 55c28-26 98-26 126 0-30 17-96 17-126 0z" fill="#6fc66d" stroke="#397c40" strokeWidth="4" />
+              <path d="M88 55c28 9 56 9 84 0" stroke="#f35f62" strokeWidth="9" strokeLinecap="round" />
+            </>
+          )}
+          {hasPin && (
+            <g transform="translate(177 58)">
+              <path d="M10 0c7 5 9 13 2 21C5 13 3 5 10 0z" fill="#ef5a63" />
+              <path d="M8 0h6" stroke="#75b84f" strokeWidth="3" strokeLinecap="round" />
+            </g>
+          )}
+          {hasGlasses && (
+            <g transform="translate(0 -25)">
+              <rect x="82" y="103" width="38" height="21" rx="10" fill="#3f4652" opacity="0.9" />
+              <rect x="140" y="103" width="38" height="21" rx="10" fill="#3f4652" opacity="0.9" />
+              <path d="M120 113h20" stroke="#3f4652" strokeWidth="5" />
+            </g>
+          )}
+
+          {hasMug && <AccessoryMug />}
+          {hasBag && <AccessoryBag />}
+          {hasSpoon && <AccessorySpoon />}
+          {hasFan && <AccessoryFan />}
+          {hasJuice && <AccessoryJuice />}
+          {hasSweetPotato && <AccessorySweetPotato />}
+          {hasMandarin && <AccessoryMandarin />}
+        </svg>
+      </div>
+    )
+  }
 
   return (
     <div className={`pet-stage pet-dress-stage ${stageClass}`}>
