@@ -27,7 +27,9 @@ dist-ssr
 
 .vercel
 
+.env*
+!.env.example
+
 # Temporary publishing scripts
 work-*.mjs
-.env*
 *캡쳐본

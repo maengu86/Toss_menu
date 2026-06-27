@@ -7,6 +7,49 @@ import { fallbackAppData, loadAppData } from './services/appDataService'
 import type { DecorItem, Ingredient, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
 import discountCouponImage from '../discount-coupon-20.jpg'
 
+type KakaoLatLng = object
+type KakaoMapBounds = { extend: (position: KakaoLatLng) => void }
+type KakaoMapInstance = {
+  addControl: (control: object, position: unknown) => void
+  panTo: (position: KakaoLatLng) => void
+  setBounds: (bounds: KakaoMapBounds) => void
+}
+type KakaoMapMarker = { setMap: (map: KakaoMapInstance | null) => void }
+type KakaoInfoWindow = {
+  close: () => void
+  open: (map: KakaoMapInstance, marker: KakaoMapMarker) => void
+}
+type KakaoMapsSdk = {
+  maps: {
+    LatLng: new (latitude: number, longitude: number) => KakaoLatLng
+    Map: new (container: HTMLElement, options: { center: KakaoLatLng; level: number }) => KakaoMapInstance
+    ZoomControl: new () => object
+    ControlPosition: { RIGHT: unknown }
+    Marker: new (options: { map: KakaoMapInstance; position: KakaoLatLng }) => KakaoMapMarker
+    InfoWindow: new (options: { content: string }) => KakaoInfoWindow
+    LatLngBounds: new () => KakaoMapBounds
+    services: {
+      Places: new () => {
+        keywordSearch: (
+          keyword: string,
+          callback: (results: KakaoPlace[], status: string) => void,
+          options?: { location: KakaoLatLng; radius: number },
+        ) => void
+      }
+      Status: { OK: string }
+    }
+    event: { addListener: (marker: KakaoMapMarker, eventName: string, listener: () => void) => void }
+    load: (callback: () => void) => void
+  }
+}
+
+declare global {
+  interface Window {
+    kakao?: KakaoMapsSdk
+    __kakaoMapsSdkPromise?: Promise<void>
+  }
+}
+
 const tossShoppingOptions = [
   { name: '토스쇼핑 배송', eta: '내일 도착 예정', fee: 0, perk: '무료 배송' },
   { name: '예약배송', eta: '내일 오전 도착', fee: 0, perk: '배송비 0원' },
@@ -25,6 +68,8 @@ const couponRewardExp = petLevelExpRequirements.reduce((total, requirement) => t
 const receiptDrafts = [
   { id: 1, title: '라인형 영수증' },
 ]
+
+const kakaoMapAppKey = import.meta.env.VITE_KAKAO_MAP_APP_KEY as string | undefined
 
 type ShopStep = 'store' | 'detail' | 'cart' | 'checkout' | 'complete'
 
@@ -52,6 +97,28 @@ type RewardCoupon = {
   id: string
   level: number
   milestoneExp: number
+}
+
+type NearbyRestaurant = {
+  id: string
+  name: string
+  menuName: string
+  emoji: string
+  distance: string
+  eta: string
+  rating: string
+}
+
+type KakaoPlace = {
+  id: string
+  place_name: string
+  x: string
+  y: string
+  road_address_name?: string
+  address_name?: string
+  phone?: string
+  place_url?: string
+  distance?: string
 }
 
 function formatWon(value: number) {
@@ -801,25 +868,14 @@ function HomeScreen({
             <button onClick={() => setLocationPreview(true)} type="button">📍 내 위치</button>
           </div>
 
-          <div className="home-map-preview" aria-label="주변 음식점 지도 미리보기">
-            <div className="map-road road-one" />
-            <div className="map-road road-two" />
-            <span className="map-current-location">🔵</span>
-            {nearbyRestaurants.slice(0, 3).map((restaurant, index) => (
-              <button
-                className={`map-restaurant-pin pin-${index + 1}`}
-                aria-label={`${restaurant.name} 위치`}
-                key={restaurant.id}
-                type="button"
-              >
-                {restaurant.emoji}
-              </button>
-            ))}
-            {nearbyRestaurants.length === 0 && <p>이 제철 식재료로 만든 요리를 준비하고 있어요.</p>}
-          </div>
+          <KakaoRestaurantMap
+            fallbackRestaurants={nearbyRestaurants}
+            keyword={`${selectedSeasonalIngredient?.name ?? '제철'} 맛집`}
+            useCurrentLocation={locationPreview}
+          />
 
           <p className="home-location-status">
-            {locationPreview ? 'GPS API 연결 전 위치 기반 화면 미리보기예요.' : '현재 위치를 허용하면 가까운 순서로 보여드릴 예정이에요.'}
+            {locationPreview ? '현재 위치를 허용하면 반경 5km 안의 결과를 우선 보여줘요.' : '카카오맵 키가 있으면 실제 장소 검색 결과가 지도에 표시돼요.'}
           </p>
 
           <div className="home-restaurant-list">
@@ -1318,6 +1374,245 @@ function ShoppingScreen({
       )}
     </section>
   )
+}
+
+function KakaoRestaurantMap({
+  fallbackRestaurants,
+  keyword,
+  useCurrentLocation,
+}: {
+  fallbackRestaurants: NearbyRestaurant[]
+  keyword: string
+  useCurrentLocation: boolean
+}) {
+  const mapRef = useRef<HTMLDivElement | null>(null)
+  const mapInstanceRef = useRef<KakaoMapInstance | null>(null)
+  const markersRef = useRef<KakaoMapMarker[]>([])
+  const placeMarkerRef = useRef(new Map<string, {
+    infoWindow: KakaoInfoWindow
+    marker: KakaoMapMarker
+    position: KakaoLatLng
+  }>())
+  const [statusMessage, setStatusMessage] = useState(kakaoMapAppKey ? '카카오맵을 불러오는 중이에요.' : '카카오맵 키를 설정하면 실제 지도가 표시돼요.')
+  const [places, setPlaces] = useState<KakaoPlace[]>([])
+  const [selectedPlace, setSelectedPlace] = useState<KakaoPlace | null>(null)
+
+  const openPlace = (place: KakaoPlace) => {
+    setSelectedPlace(place)
+
+    const markerInfo = placeMarkerRef.current.get(place.id)
+    if (!markerInfo || !mapInstanceRef.current) return
+
+    placeMarkerRef.current.forEach(({ infoWindow }) => infoWindow.close())
+    markerInfo.infoWindow.open(mapInstanceRef.current, markerInfo.marker)
+    mapInstanceRef.current.panTo(markerInfo.position)
+  }
+
+  useEffect(() => {
+    const appKey = kakaoMapAppKey ?? ''
+    if (!appKey || !mapRef.current) return
+
+    const placeMarkers = placeMarkerRef.current
+    let canceled = false
+    setSelectedPlace(null)
+    setPlaces([])
+
+    async function renderMap() {
+      try {
+        const center = await getSearchCenter(useCurrentLocation)
+        if (canceled || !mapRef.current) return
+
+        await loadKakaoMapsSdk(appKey)
+        if (canceled || !mapRef.current || !window.kakao) return
+
+        const kakao = window.kakao
+        const centerLatLng = new kakao.maps.LatLng(center.lat, center.lng)
+        const map = new kakao.maps.Map(mapRef.current, {
+          center: centerLatLng,
+          level: 5,
+        })
+        mapInstanceRef.current = map
+        map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT)
+        const places = new kakao.maps.services.Places()
+        const searchOptions = useCurrentLocation
+          ? { location: centerLatLng, radius: 5000 }
+          : undefined
+
+        markersRef.current.forEach((marker) => marker.setMap(null))
+        placeMarkers.clear()
+        markersRef.current = [
+          new kakao.maps.Marker({
+            map,
+            position: centerLatLng,
+          }),
+        ]
+
+        places.keywordSearch(keyword, (results: KakaoPlace[], status: string) => {
+          if (canceled) return
+
+          if (status !== kakao.maps.services.Status.OK) {
+            setStatusMessage(`${keyword} 검색 결과가 없어서 추천 목록을 먼저 보여드려요.`)
+            setPlaces([])
+            return
+          }
+
+          const nextPlaces = results.slice(0, 8)
+          const bounds = new kakao.maps.LatLngBounds()
+          nextPlaces.forEach((place) => {
+            const position = new kakao.maps.LatLng(Number(place.y), Number(place.x))
+            const marker = new kakao.maps.Marker({ map, position })
+            const infoWindow = new kakao.maps.InfoWindow({
+              content: `<div style="padding:8px 10px;font-size:12px;font-weight:700;white-space:nowrap;">${escapeHtml(place.place_name)}</div>`,
+            })
+
+            kakao.maps.event.addListener(marker, 'click', () => {
+              openPlace(place)
+            })
+
+            placeMarkers.set(place.id, { infoWindow, marker, position })
+            markersRef.current.push(marker)
+            bounds.extend(position)
+          })
+
+          map.setBounds(bounds)
+          setPlaces(nextPlaces)
+          if (nextPlaces[0]) {
+            openPlace(nextPlaces[0])
+          }
+          setStatusMessage(`${keyword} 검색 결과 ${nextPlaces.length}곳을 표시했어요.`)
+        }, searchOptions)
+      } catch (error) {
+        console.warn('Kakao map load failed.', error)
+        setStatusMessage('카카오맵을 불러오지 못해서 미리보기 지도를 보여드려요.')
+        setPlaces([])
+      }
+    }
+
+    renderMap()
+
+    return () => {
+      canceled = true
+      markersRef.current.forEach((marker) => marker.setMap(null))
+      markersRef.current = []
+      placeMarkers.clear()
+    }
+  }, [keyword, useCurrentLocation])
+
+  if (!kakaoMapAppKey) {
+    return <FallbackRestaurantMap fallbackRestaurants={fallbackRestaurants} />
+  }
+
+  return (
+    <div className="kakao-place-section">
+      <div className="home-map-preview has-kakao" aria-label="주변 음식점 지도">
+        <div className="kakao-map-canvas" ref={mapRef} />
+        <p className="kakao-map-status">{statusMessage}</p>
+      </div>
+      {selectedPlace && (
+        <article className="kakao-place-card">
+          <strong>{selectedPlace.place_name}</strong>
+          <span>{selectedPlace.road_address_name || selectedPlace.address_name || '주소 정보 없음'}</span>
+          <div>
+            {selectedPlace.phone && <small>{selectedPlace.phone}</small>}
+            {selectedPlace.distance && <small>{Number(selectedPlace.distance).toLocaleString('ko-KR')}m</small>}
+          </div>
+          {selectedPlace.place_url && (
+            <a href={selectedPlace.place_url} rel="noreferrer" target="_blank">상세보기</a>
+          )}
+        </article>
+      )}
+      {places.length > 0 && (
+        <div className="kakao-place-list" aria-label="주변 맛집 검색 결과">
+          {places.map((place) => {
+            const isSelected = selectedPlace?.id === place.id
+            const distanceText = place.distance ? `${Number(place.distance).toLocaleString('ko-KR')}m` : '카카오맵 장소'
+
+            return (
+              <button
+                aria-pressed={isSelected}
+                className={isSelected ? 'active' : undefined}
+                key={place.id}
+                onClick={() => openPlace(place)}
+                type="button"
+              >
+                <strong>{place.place_name}</strong>
+                <span>{place.road_address_name || place.address_name || '주소 정보 없음'}</span>
+                <small>{[place.phone, distanceText].filter(Boolean).join(' · ')}</small>
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function FallbackRestaurantMap({ fallbackRestaurants }: { fallbackRestaurants: NearbyRestaurant[] }) {
+  return (
+    <div className="home-map-preview" aria-label="주변 음식점 지도 미리보기">
+      <div className="map-road road-one" />
+      <div className="map-road road-two" />
+      <span className="map-current-location">🔵</span>
+      {fallbackRestaurants.slice(0, 3).map((restaurant, index) => (
+        <button
+          className={`map-restaurant-pin pin-${index + 1}`}
+          aria-label={`${restaurant.name} 위치`}
+          key={restaurant.id}
+          type="button"
+        >
+          {restaurant.emoji}
+        </button>
+      ))}
+      {fallbackRestaurants.length === 0 && <p>이 제철 식재료로 만든 요리를 준비하고 있어요.</p>}
+    </div>
+  )
+}
+
+function loadKakaoMapsSdk(appKey: string) {
+  if (window.kakao?.maps?.services) return Promise.resolve()
+  if (window.__kakaoMapsSdkPromise) return window.__kakaoMapsSdkPromise
+
+  window.__kakaoMapsSdkPromise = new Promise((resolve, reject) => {
+    const script = document.createElement('script')
+    script.async = true
+    script.dataset.kakaoMapSdk = 'true'
+    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${encodeURIComponent(appKey)}&libraries=services&autoload=false`
+    script.onload = () => {
+      window.kakao?.maps?.load(resolve)
+    }
+    script.onerror = () => reject(new Error('Kakao Maps SDK load failed.'))
+    document.head.appendChild(script)
+  })
+
+  return window.__kakaoMapsSdkPromise
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function getSearchCenter(useCurrentLocation: boolean) {
+  const defaultCenter = { lat: 37.5665, lng: 126.9780 }
+
+  if (!useCurrentLocation || !navigator.geolocation) {
+    return Promise.resolve(defaultCenter)
+  }
+
+  return new Promise<{ lat: number; lng: number }>((resolve) => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => resolve({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      }),
+      () => resolve(defaultCenter),
+      { enableHighAccuracy: true, maximumAge: 60000, timeout: 5000 },
+    )
+  })
 }
 
 function shoppingItemEmoji(name: string) {
