@@ -150,16 +150,16 @@ function getAccessoryFrame(name: string) {
     return { x: 15, y: 30, width: 195, height: 255 }
   }
   if (name.includes('목걸이')) {
-    return { x: 6, y: 98, width: 248, height: 104 }
+    return { x: 6, y: 88, width: 248, height: 104 }
   }
   if (name.includes('밀짚모자')) {
-    return { x: 20, y: -16, width: 220, height: 288 }
+    return { x: 46, y: 0, width: 168, height: 220 }
   }
   if (name.includes('안경') || name.includes('선글라스')) {
     return { x: 44, y: 46, width: 176, height: 86 }
   }
-  if (name.includes('머리핀') || name.includes('베레모') || name.includes('모자') || name.includes('꽃')) {
-    return { x: 68, y: 18, width: 128, height: 92 }
+  if (name.includes('머리핀') || name.includes('베레모') || name.includes('모자') || name.includes('버킷햇') || name.includes('털모자') || name.includes('꽃')) {
+    return { x: 58, y: 10, width: 144, height: 104 }
   }
   if (name.includes('가방') || name.includes('바구니') || name.includes('보틀') || name.includes('주스') || name.includes('머그') || name.includes('스푼') || name.includes('팬')) {
     return { x: 30, y: 128, width: 200, height: 126 }
