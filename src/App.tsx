@@ -189,7 +189,6 @@ function App() {
   const [screen, setScreen] = useState<Screen>('home')
   const [selectedMenuIds, setSelectedMenuIds] = useState<string[]>([])
   const [shoppingCatalogMenuIds, setShoppingCatalogMenuIds] = useState<string[]>([])
-  const [selectedMenuOpen, setSelectedMenuOpen] = useState(false)
   const [selectedSeason, setSelectedSeason] = useState<SeasonKey>('summer')
   const [selectedSeasonalIngredientId, setSelectedSeasonalIngredientId] = useState(firstSummerIngredient.id)
   // 작업: 결제 완료된 식재료를 펫에게 먹일 수 있는 재고로 저장합니다.
@@ -235,12 +234,6 @@ function App() {
       isMounted = false
     }
   }, [])
-
-  const today = new Intl.DateTimeFormat('ko-KR', {
-    month: 'long',
-    day: 'numeric',
-    weekday: 'long',
-  }).format(new Date())
 
   const selectedMenus = menus.filter((menu) => selectedMenuIds.includes(menu.id))
   const cartMenus = selectedMenus
@@ -309,7 +302,6 @@ function App() {
       }
       setRemovedCartIngredientKeys((keys) => keys.filter((key) => !key.startsWith(`${menuId}:`)))
       const next = [...current, menuId]
-      setSelectedMenuOpen(false)
       return next
     })
   }
@@ -321,16 +313,6 @@ function App() {
     setCartQuantities((quantities) => Object.fromEntries(
       Object.entries(quantities).filter(([key]) => !key.startsWith(`${menuId}:`)),
     ))
-  }
-
-  function clearMenuSelection() {
-    setSelectedMenuIds([])
-    setCheckedIngredients([])
-    setRemovedCartIngredientKeys([])
-    setCartQuantities({})
-    setShoppingCatalogMenuIds([])
-    setAppliedCouponId('')
-    setSelectedMenuOpen(false)
   }
 
   function feedPet(ingredient: FeedIngredient) {
@@ -420,7 +402,6 @@ function App() {
     setAppliedCouponId('')
     setCheckedIngredients((current) => current.filter((key) => !orderedKeys.includes(key)))
     setSelectedMenuIds([])
-    setSelectedMenuOpen(false)
     setShoppingRewardUnlocked(true)
     setShopStep('complete')
   }
@@ -459,7 +440,6 @@ function App() {
       <main className={`phone ${isScrolling ? 'is-scrolling' : ''}`}>
         {screen === 'home' && (
           <HomeScreen
-            today={today}
             seasons={seasons}
             allSeasonalIngredients={seasonalIngredients}
             allMenus={menus}
@@ -470,14 +450,11 @@ function App() {
             checkedTotal={checkedTotal}
             selectedSeason={selectedSeason}
             selectedSeasonalIngredientId={activeSeasonalIngredientId}
-            selectedMenuOpen={selectedMenuOpen}
             selectedMenus={selectedMenus}
             selectedMenuIds={selectedMenuIds}
-            onRemoveMenu={removeMenu}
             onScrollActivity={handleScrollActivity}
             onSelectSeason={changeSeason}
             onSelectSeasonalIngredient={setSelectedSeasonalIngredientId}
-            onSetSelectedMenuOpen={setSelectedMenuOpen}
             onToggleMenu={toggleMenu}
             onToggleProduct={toggleShoppingProduct}
             onOpenCart={() => {
@@ -486,16 +463,6 @@ function App() {
               setScreen('shopping')
             }}
             onOpenProfile={() => setProfileOpen(true)}
-            onCancelSelection={clearMenuSelection}
-            onStartShopping={() => {
-              if (selectedMenuIds.length === 0) {
-                showToast('먼저 메뉴를 골라주세요.')
-                return
-              }
-              setShoppingCatalogMenuIds(selectedMenuIds)
-              setShopStep('store')
-              setScreen('shopping')
-            }}
           />
         )}
 
@@ -585,7 +552,6 @@ function App() {
 }
 
 function HomeScreen({
-  today,
   seasons,
   allSeasonalIngredients,
   allMenus,
@@ -596,22 +562,16 @@ function HomeScreen({
   checkedTotal,
   selectedSeason,
   selectedSeasonalIngredientId,
-  selectedMenuOpen,
   selectedMenus,
   selectedMenuIds,
-  onRemoveMenu,
   onScrollActivity,
   onSelectSeason,
   onSelectSeasonalIngredient,
-  onSetSelectedMenuOpen,
   onToggleMenu,
   onToggleProduct,
   onOpenCart,
   onOpenProfile,
-  onCancelSelection,
-  onStartShopping,
 }: {
-  today: string
   seasons: { key: SeasonKey; label: string; accent: string }[]
   allSeasonalIngredients: SeasonalIngredient[]
   allMenus: Menu[]
@@ -622,20 +582,15 @@ function HomeScreen({
   checkedTotal: number
   selectedSeason: SeasonKey
   selectedSeasonalIngredientId: string
-  selectedMenuOpen: boolean
   selectedMenus: Menu[]
   selectedMenuIds: string[]
-  onRemoveMenu: (id: string) => void
   onScrollActivity: () => void
   onSelectSeason: (season: SeasonKey) => void
   onSelectSeasonalIngredient: (id: string) => void
-  onSetSelectedMenuOpen: (open: boolean) => void
   onToggleMenu: (id: string) => void
   onToggleProduct: (menuId: string, ingredientName: string) => void
   onOpenCart: () => void
   onOpenProfile: () => void
-  onCancelSelection: () => void
-  onStartShopping: () => void
 }) {
   const [purchaseTab, setPurchaseTab] = useState<'cook' | 'delivery'>('cook')
   const [locationPreview, setLocationPreview] = useState(false)
@@ -732,7 +687,6 @@ function HomeScreen({
       ) : (
         <>
           <header className="top-header">
-            <p>{today}</p>
             <h1>제철음식 뭐가있을까?</h1>
           </header>
 
@@ -770,42 +724,37 @@ function HomeScreen({
 
       <nav className="home-purchase-tabs" aria-label="메뉴 이용 방법">
         <button className={purchaseTab === 'cook' ? 'active' : ''} onClick={() => setPurchaseTab('cook')} type="button">
-          <span aria-hidden="true">🍳</span>
-          요리
+          <b>요리</b>
         </button>
         <button className={purchaseTab === 'delivery' ? 'active' : ''} onClick={() => setPurchaseTab('delivery')} type="button">
-          <span aria-hidden="true">🛵</span>
-          배달
+          <b>배달</b>
         </button>
       </nav>
 
       {purchaseTab === 'cook' && (
-        <>
-          <div className="section-title sub-directory-title">
-            <h2>메뉴 추천</h2>
-            <span>{selectedMenuIds.length}개 선택</span>
-          </div>
-
-          <div className="menu-list nested-menu-list">
-            {seasonalMenus.map((menu) => {
-              const selected = selectedMenuIds.includes(menu.id)
-              return (
-                <button
-                  className={`menu-card ${selected ? 'selected' : ''}`}
-                  key={menu.id}
-                  onClick={() => onToggleMenu(menu.id)}
-                  style={{ '--menu-color': menu.color } as CSSProperties}
-                  type="button"
-                >
-                  <div>
-                    <strong>{menu.name}</strong>
-                  </div>
-                  <b>{getMenuExp(menu).toLocaleString('ko-KR')}xp</b>
-                </button>
-              )
-            })}
-          </div>
-        </>
+        <div className="menu-list nested-menu-list">
+          {seasonalMenus.map((menu) => {
+            const selected = selectedMenuIds.includes(menu.id)
+            return (
+              <button
+                aria-pressed={selected}
+                className={`menu-card ${selected ? 'selected' : ''}`}
+                key={menu.id}
+                onClick={() => onToggleMenu(menu.id)}
+                style={{ '--menu-color': menu.color } as CSSProperties}
+                type="button"
+              >
+                <span className="menu-card-visual" aria-hidden="true">
+                  {shoppingItemEmoji(menu.ingredients[0]?.name ?? menu.name)}
+                </span>
+                <strong>{menu.name}</strong>
+                <small>{menu.ingredients.slice(0, 2).map((ingredient) => ingredient.name).join(' · ')}</small>
+                <b>{getMenuExp(menu).toLocaleString('ko-KR')}xp</b>
+                {selected && <span className="menu-card-selected" aria-hidden="true">✓</span>}
+              </button>
+            )
+          })}
+        </div>
       )}
 
       {purchaseTab === 'cook' && relatedProducts.length > 0 && (
@@ -894,30 +843,6 @@ function HomeScreen({
         </section>
       )}
 
-      {purchaseTab === 'cook' && selectedMenus.length > 0 && (
-        <div className={`selected-menu-widget ${selectedMenuOpen ? 'open' : ''}`}>
-          {selectedMenuOpen && (
-            <>
-              <button className="selected-menu-backdrop" aria-label="선택 메뉴 닫기" onClick={() => onSetSelectedMenuOpen(false)} type="button" />
-              <div className="selected-menu-panel variant-2">
-                {selectedMenus.map((menu) => (
-                  <div className="selected-menu-chip" key={menu.id}>
-                    <span>{menu.name}</span>
-                    <button aria-label={`${menu.name} 삭제`} onClick={() => onRemoveMenu(menu.id)} type="button">×</button>
-                  </div>
-                ))}
-                <div className="selected-menu-actions">
-                  <button className="selected-menu-shop" onClick={onStartShopping} type="button">구매하기</button>
-                  <button className="selected-menu-cancel" onClick={onCancelSelection} type="button">취소</button>
-                </div>
-              </div>
-            </>
-          )}
-          <button className="selected-menu-fab" aria-label="선택 메뉴 열기" onClick={() => onSetSelectedMenuOpen(!selectedMenuOpen)} type="button">
-            <span>{selectedMenus.length}</span>
-          </button>
-        </div>
-      )}
     </section>
   )
 }
