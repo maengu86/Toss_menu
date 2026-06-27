@@ -2247,23 +2247,23 @@
 
 .pet-action-tabs {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0;
-  margin: 0;
-  padding: 10px 10px 8px;
-  border: 0;
-  border-radius: 0;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin: 12px 0 0;
+  padding: 8px;
+  border: 1px solid #e5e8eb;
+  border-radius: 8px;
   background: #ffffff;
   box-shadow: none;
 }
 
 .pet-action-tabs button {
   min-width: 0;
-  min-height: 64px;
+  min-height: 58px;
   display: grid;
   place-items: center;
   align-content: center;
-  gap: 2px;
+  gap: 0;
   border: 0;
   border-radius: 10px;
   color: #8b95a1;
@@ -2272,8 +2272,8 @@
 }
 
 .pet-action-tab-icon {
-  width: 24px;
-  height: 24px;
+  width: 42px;
+  height: 42px;
   display: block;
   object-fit: contain;
   pointer-events: none;
@@ -2281,20 +2281,16 @@
 
 .pet-action-tabs button.active {
   color: #49372f;
-  background: transparent;
+  background: rgba(232, 135, 74, 0.16);
 }
 
 .pet-action-tabs b {
-  max-width: 100%;
+  position: absolute;
+  width: 1px;
+  height: 1px;
   overflow: hidden;
-  padding: 4px 7px;
-  border-radius: 0;
-  color: #49372f;
-  font-size: 13px;
-  line-height: 1.1;
-  text-overflow: ellipsis;
+  clip: rect(0 0 0 0);
   white-space: nowrap;
-  background: transparent;
 }
 
 .sudal-pet {
@@ -2302,8 +2298,7 @@
 }
 
 .pet-action-tabs button.active b {
-  color: #463d37;
-  background: rgba(232, 135, 74, 0.6);
+  background: transparent;
 }
 
 .pet-action-tabs button:focus {

@@ -3,14 +3,13 @@ import type { CSSProperties } from 'react'
 import './App.css'
 import PetAvatar from './components/PetAvatar'
 import { getRoomBackgroundImage } from './data/decorAssets'
-import { getSudalAccessoryPreviewImage, getSudalOutfitPreviewImage } from './data/sudalDecorImages'
+import { getSudalAccessoryPreviewImage } from './data/sudalDecorImages'
 import { getPetClearDecorIconImage, getPetShareIconImage } from './data/sudalPetIcons'
 import { fallbackAppData, loadAppData } from './services/appDataService'
 import type { DecorItem, Ingredient, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
 import petTabAccessoryIcon from './assets/sudal-tabs/accessory.png'
 import petTabAllIcon from './assets/sudal-tabs/all.png'
 import petTabFeedIcon from './assets/sudal-tabs/feed.png'
-import petTabOutfitIcon from './assets/sudal-tabs/outfit.png'
 import petTabRoomIcon from './assets/sudal-tabs/room.png'
 import discountCouponImage from '../discount-coupon-20.jpg'
 
@@ -128,6 +127,8 @@ type KakaoPlace = {
   distance?: string
 }
 
+type PetHomeDecorTab = 'all' | 'background' | 'accessory'
+
 function formatWon(value: number) {
   return value.toLocaleString('ko-KR') + '원'
 }
@@ -220,7 +221,7 @@ function App() {
   const [deliveryOption, setDeliveryOption] = useState(deliveryOptions[0])
   const [shoppingRewardUnlocked, setShoppingRewardUnlocked] = useState(false)
   const [selectedBackground, setSelectedBackground] = useState('아늑한 집안')
-  const [selectedOutfit, setSelectedOutfit] = useState('기본 앞치마')
+  const [selectedOutfit, setSelectedOutfit] = useState('')
   const [selectedAccessory, setSelectedAccessory] = useState('')
   const [toast, setToast] = useState('')
   const [isScrolling, setIsScrolling] = useState(false)
@@ -1891,25 +1892,24 @@ function PetHomeScreen({
   onShare: () => void
   onScrollActivity: () => void
 }) {
-  const [decorTab, setDecorTab] = useState<'all' | DecorItem['type']>('all')
+  const [decorTab, setDecorTab] = useState<PetHomeDecorTab>('all')
   const [petTab, setPetTab] = useState<'feed' | 'decor'>('feed')
-  const visibleItems = decorTab === 'all' ? decorItems : decorItems.filter((item) => item.type === decorTab)
-  const canClearDecor = decorTab === 'outfit' || decorTab === 'accessory'
-  const isClearSelected = decorTab === 'outfit' ? outfit === '' : accessory === ''
+  const petHomeDecorItems = decorItems.filter((item) => item.type !== 'outfit' && isPetHomeVisibleDecorItem(item))
+  const visibleItems = decorTab === 'all' ? petHomeDecorItems : petHomeDecorItems.filter((item) => item.type === decorTab)
+  const canClearDecor = decorTab === 'accessory'
+  const isClearSelected = accessory === ''
   const levelExpStatus = getLevelExpStatus(exp, level)
   const levelProgress = getLevelProgress(exp, level)
   const expLabel = `${levelExpStatus.currentExp.toLocaleString('ko-KR')}/${levelExpStatus.requiredExp.toLocaleString('ko-KR')} xp`
   const roomImage = getRoomBackgroundImage(background)
-  const decorTabs: { id: 'all' | DecorItem['type']; label: string }[] = [
+  const decorTabs: { id: PetHomeDecorTab; label: string }[] = [
     { id: 'all', label: '전체' },
     { id: 'background', label: '방' },
-    { id: 'outfit', label: '옷' },
     { id: 'accessory', label: '소품' },
   ]
   const decorTabIcons = {
     all: petTabAllIcon,
     background: petTabRoomIcon,
-    outfit: petTabOutfitIcon,
     accessory: petTabAccessoryIcon,
   } as const
 
@@ -2004,12 +2004,7 @@ function PetHomeScreen({
                 unlocked: isDecorUnlocked(item, level, shoppingRewardUnlocked),
                 selected: item.name === background || item.name === outfit || item.name === accessory,
                 itemRoomImage: item.type === 'background' ? getRoomBackgroundImage(item.name) : undefined,
-                itemDecorImage:
-                  item.type === 'outfit'
-                    ? getSudalOutfitPreviewImage(item.name)
-                    : item.type === 'accessory'
-                      ? getSudalAccessoryPreviewImage(item.name)
-                      : '',
+                itemDecorImage: item.type === 'accessory' ? getSudalAccessoryPreviewImage(item.name) : '',
                 index,
               }))
               .sort((a, b) => Number(b.unlocked) - Number(a.unlocked) || a.index - b.index)
@@ -2062,6 +2057,24 @@ function decorIcon(item: DecorItem) {
   if (item.name.includes('군고구마')) return '🍠'
   if (item.name.includes('귤')) return '🍊'
   return '🛍️'
+}
+
+const petHomeAccessoryIds = new Set([
+  'straw-hat',
+  'acorn-beret',
+  'grape-hat-piece',
+  'bell-necklace',
+  'sun-glasses',
+  'cherry-hairpin',
+  'berry-pin',
+  'mittens',
+  'rain-boots',
+])
+
+function isPetHomeVisibleDecorItem(item: DecorItem) {
+  if (item.type === 'background') return true
+  if (item.type === 'accessory') return petHomeAccessoryIds.has(item.id)
+  return false
 }
 
 function roomClass(background: string) {
