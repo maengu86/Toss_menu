@@ -5,11 +5,17 @@ export function createMenu(
   name: string,
   season: string,
   weather: string,
-  exp: number,
+  _legacyExp: number,
   color: string,
   seasonalIngredientIds: string[],
   ingredients: [string, string, number][],
 ): Menu {
+  const menuIngredients = ingredients.map(([ingredientName, quantity, price]) => ({
+    name: ingredientName,
+    quantity,
+    price,
+  }))
+
   return {
     image: '',
     imageFallback: '🍽️',
@@ -18,9 +24,9 @@ export function createMenu(
     season,
     weather,
     description: '',
-    exp,
+    exp: menuIngredients.reduce((total, ingredient) => total + ingredient.price, 0),
     color,
     seasonalIngredientIds,
-    ingredients: ingredients.map(([ingredientName, quantity, price]) => ({ name: ingredientName, quantity, price })),
+    ingredients: menuIngredients,
   }
 }
