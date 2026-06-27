@@ -1,8 +1,8 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import './App.css'
 import PetAvatar from './components/PetAvatar'
-import { decorItems, menus, seasonalIngredients, seasons } from './data'
+import { fallbackAppData, loadAppData } from './services/appDataService'
 import type { DecorItem, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
 
 const tossShoppingOptions = [
@@ -25,6 +25,8 @@ function ingredientKey(menuId: string, ingredientName: string) {
 }
 
 function App() {
+  const [appData, setAppData] = useState(fallbackAppData)
+  const { decorItems, menus, seasonalIngredients, seasons } = appData
   const firstSummerIngredient = seasonalIngredients.find((item) => item.seasonKey === 'summer') ?? seasonalIngredients[0]
   const [screen, setScreen] = useState<Screen>('home')
   const [selectedMenuIds, setSelectedMenuIds] = useState<string[]>([])
@@ -47,6 +49,31 @@ function App() {
   const [petMood, setPetMood] = useState<'idle' | 'happy'>('idle')
   const [isScrolling, setIsScrolling] = useState(false)
   const scrollTimerRef = useRef<number | undefined>(undefined)
+
+  useEffect(() => {
+    let isMounted = true
+
+    loadAppData()
+      .then((data) => {
+        if (isMounted) setAppData(data)
+      })
+      .catch((error) => {
+        console.warn('Supabase data load failed. Falling back to local data.', error)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  useEffect(() => {
+    const ingredientExists = seasonalIngredients.some((ingredient) => ingredient.id === selectedSeasonalIngredientId)
+    const firstIngredientInSeason = seasonalIngredients.find((ingredient) => ingredient.seasonKey === selectedSeason)
+
+    if (!ingredientExists && firstIngredientInSeason) {
+      setSelectedSeasonalIngredientId(firstIngredientInSeason.id)
+    }
+  }, [seasonalIngredients, selectedSeason, selectedSeasonalIngredientId])
 
   const today = new Intl.DateTimeFormat('ko-KR', {
     month: 'long',
