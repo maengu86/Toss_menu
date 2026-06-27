@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
+import type { CSSProperties } from 'react'
 import './App.css'
 import PetAvatar from './components/PetAvatar'
 import { getRoomBackgroundImage } from './data/decorAssets'
@@ -7,7 +7,7 @@ import { fallbackAppData, loadAppData } from './services/appDataService'
 import type { DecorItem, Ingredient, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
 
 const tossShoppingOptions = [
-  { name: '바로배송', eta: '오늘 밤 도착', fee: 3000, perk: '빠른 추천' },
+  { name: '토스쇼핑 배송', eta: '내일 도착 예정', fee: 0, perk: '무료 배송' },
   { name: '예약배송', eta: '내일 오전 도착', fee: 0, perk: '배송비 0원' },
   { name: '동네픽업', eta: '60분 후 픽업', fee: 0, perk: '근처 마트 수령' },
 ]
@@ -31,7 +31,7 @@ const receiptDrafts = [
   { id: 1, title: '라인형 영수증' },
 ]
 
-type ShopStep = 'cart' | 'checkout' | 'complete'
+type ShopStep = 'store' | 'detail' | 'cart' | 'checkout' | 'complete'
 
 type FeedIngredient = Ingredient & {
   id: string
@@ -41,6 +41,14 @@ type FeedIngredient = Ingredient & {
 type OrderSnapshot = {
   checkedPrice: number
   orderTotal: number
+}
+
+type OrderHistoryItem = {
+  id: number
+  orderedAt: string
+  items: { name: string; quantity: string }[]
+  total: number
+  status: '주문 완료'
 }
 
 function formatWon(value: number) {
@@ -92,6 +100,7 @@ function App() {
   const firstSummerIngredient = seasonalIngredients.find((item) => item.seasonKey === 'summer') ?? seasonalIngredients[0]
   const [screen, setScreen] = useState<Screen>('home')
   const [selectedMenuIds, setSelectedMenuIds] = useState<string[]>([])
+  const [shoppingCatalogMenuIds, setShoppingCatalogMenuIds] = useState<string[]>([])
   const [selectedMenuOpen, setSelectedMenuOpen] = useState(false)
   const [selectedSeason, setSelectedSeason] = useState<SeasonKey>('summer')
   const [selectedSeasonalIngredientId, setSelectedSeasonalIngredientId] = useState(firstSummerIngredient.id)
@@ -102,11 +111,13 @@ function App() {
   const [checkedIngredients, setCheckedIngredients] = useState<string[]>([])
   const [removedCartIngredientKeys, setRemovedCartIngredientKeys] = useState<string[]>([])
   const [lastOrder, setLastOrder] = useState<OrderSnapshot | null>(null)
+  const [orderHistory, setOrderHistory] = useState<OrderHistoryItem[]>([])
+  const [profileOpen, setProfileOpen] = useState(false)
   // 작업: 펫 경험치는 레벨별 잔여치가 아니라 누적 XP로 저장합니다.
   // 개인 수정 가능: 기본 시작 XP를 바꾸고 싶으면 0을 원하는 값으로 변경해도 됩니다.
   // 적용 위치: 펫홈 레벨 카드와 밥먹이기 후 성장 상태.
   const [exp, setExp] = useState(0)
-  const [shopStep, setShopStep] = useState<ShopStep>('cart')
+  const [shopStep, setShopStep] = useState<ShopStep>('store')
   const [paymentMethod, setPaymentMethod] = useState(paymentOptions[0])
   const [deliveryOption, setDeliveryOption] = useState(deliveryOptions[0])
   const [shoppingRewardUnlocked, setShoppingRewardUnlocked] = useState(false)
@@ -134,15 +145,6 @@ function App() {
     }
   }, [])
 
-  useEffect(() => {
-    const ingredientExists = seasonalIngredients.some((ingredient) => ingredient.id === selectedSeasonalIngredientId)
-    const firstIngredientInSeason = seasonalIngredients.find((ingredient) => ingredient.seasonKey === selectedSeason)
-
-    if (!ingredientExists && firstIngredientInSeason) {
-      setSelectedSeasonalIngredientId(firstIngredientInSeason.id)
-    }
-  }, [seasonalIngredients, selectedSeason, selectedSeasonalIngredientId])
-
   const today = new Intl.DateTimeFormat('ko-KR', {
     month: 'long',
     day: 'numeric',
@@ -157,7 +159,15 @@ function App() {
     }))
     .filter((menu) => menu.ingredients.length > 0)
   const seasonIngredients = seasonalIngredients.filter((ingredient) => ingredient.seasonKey === selectedSeason)
-  const seasonalMenus = menus.filter((menu) => menu.seasonalIngredientIds?.includes(selectedSeasonalIngredientId))
+  const activeSeasonalIngredientId = seasonIngredients.some((ingredient) => ingredient.id === selectedSeasonalIngredientId)
+    ? selectedSeasonalIngredientId
+    : (seasonIngredients[0]?.id ?? selectedSeasonalIngredientId)
+  const seasonalMenus = menus.filter((menu) => menu.seasonalIngredientIds?.includes(activeSeasonalIngredientId))
+  const seasonIngredientIds = new Set(seasonIngredients.map((ingredient) => ingredient.id))
+  const seasonCatalogMenus = menus.filter((menu) => menu.seasonalIngredientIds?.some((id) => seasonIngredientIds.has(id)))
+  const shoppingCatalogMenus = shoppingCatalogMenuIds.length > 0
+    ? menus.filter((menu) => shoppingCatalogMenuIds.includes(menu.id))
+    : seasonCatalogMenus
 
   const shoppingItems = cartMenus.flatMap((menu) => menu.ingredients.map((ingredient) => ({ menuId: menu.id, ingredient })))
   const checkedPrice = shoppingItems.reduce((sum, item) => (
@@ -188,7 +198,11 @@ function App() {
 
   function toggleMenu(menuId: string) {
     setSelectedMenuIds((current) => {
-      if (current.includes(menuId)) return current.filter((id) => id !== menuId)
+      if (current.includes(menuId)) {
+        setCheckedIngredients((keys) => keys.filter((key) => !key.startsWith(`${menuId}:`)))
+        setRemovedCartIngredientKeys((keys) => keys.filter((key) => !key.startsWith(`${menuId}:`)))
+        return current.filter((id) => id !== menuId)
+      }
       setRemovedCartIngredientKeys((keys) => keys.filter((key) => !key.startsWith(`${menuId}:`)))
       const next = [...current, menuId]
       setSelectedMenuOpen(false)
@@ -202,6 +216,14 @@ function App() {
     setRemovedCartIngredientKeys((current) => current.filter((key) => !key.startsWith(`${menuId}:`)))
   }
 
+  function clearMenuSelection() {
+    setSelectedMenuIds([])
+    setCheckedIngredients([])
+    setRemovedCartIngredientKeys([])
+    setShoppingCatalogMenuIds([])
+    setSelectedMenuOpen(false)
+  }
+
   function feedPet(ingredient: FeedIngredient) {
     setExp((current) => current + getIngredientExp(ingredient))
     setFeedIngredients((current) => current.filter((item) => item.id !== ingredient.id))
@@ -213,11 +235,28 @@ function App() {
     ))
   }
 
+  function addShoppingProduct(menuId: string, ingredientName: string) {
+    const key = ingredientKey(menuId, ingredientName)
+    setSelectedMenuIds((current) => current.includes(menuId) ? current : [...current, menuId])
+    setRemovedCartIngredientKeys((current) => current.filter((item) => item !== key))
+    setCheckedIngredients((current) => current.includes(key) ? current : [...current, key])
+    showToast(`${ingredientName}을 장바구니에 담았어요.`)
+  }
+
+  function toggleShoppingProduct(menuId: string, ingredientName: string) {
+    const key = ingredientKey(menuId, ingredientName)
+    if (checkedIngredients.includes(key)) {
+      setCheckedIngredients((current) => current.filter((item) => item !== key))
+      return
+    }
+    addShoppingProduct(menuId, ingredientName)
+  }
+
   function completeOrderFlow() {
     const checkedItems = shoppingItems.filter((item) => checkedIngredients.includes(ingredientKey(item.menuId, item.ingredient.name)))
     if (checkedItems.length === 0) {
       showToast('구매할 상품을 선택해주세요.')
-      setShopStep('cart')
+      setShopStep('store')
       return
     }
     const orderedKeys = checkedItems.map((item) => ingredientKey(item.menuId, item.ingredient.name))
@@ -225,6 +264,21 @@ function App() {
     const orderId = orderSequenceRef.current
 
     setLastOrder({ checkedPrice, orderTotal })
+    setOrderHistory((current) => [{
+      id: orderId,
+      orderedAt: new Intl.DateTimeFormat('ko-KR', {
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(new Date()),
+      items: checkedItems.map((item) => ({
+        name: item.ingredient.name,
+        quantity: item.ingredient.quantity,
+      })),
+      total: orderTotal,
+      status: '주문 완료',
+    }, ...current])
     setRemovedCartIngredientKeys((current) => Array.from(new Set([...current, ...orderedKeys])))
     setFeedIngredients((current) => [
       ...current,
@@ -246,7 +300,8 @@ function App() {
 
   function restartShoppingAfterOrder() {
     setLastOrder(null)
-    setShopStep('cart')
+    setShoppingCatalogMenuIds([])
+    setShopStep('store')
     setScreen('shopping')
   }
 
@@ -278,10 +333,15 @@ function App() {
           <HomeScreen
             today={today}
             seasons={seasons}
+            allSeasonalIngredients={seasonalIngredients}
+            allMenus={menus}
             seasonIngredients={seasonIngredients}
             seasonalMenus={seasonalMenus}
+            checkedIngredients={checkedIngredients}
+            checkedPrice={checkedPrice}
+            checkedTotal={checkedTotal}
             selectedSeason={selectedSeason}
-            selectedSeasonalIngredientId={selectedSeasonalIngredientId}
+            selectedSeasonalIngredientId={activeSeasonalIngredientId}
             selectedMenuOpen={selectedMenuOpen}
             selectedMenus={selectedMenus}
             selectedMenuIds={selectedMenuIds}
@@ -291,12 +351,21 @@ function App() {
             onSelectSeasonalIngredient={setSelectedSeasonalIngredientId}
             onSetSelectedMenuOpen={setSelectedMenuOpen}
             onToggleMenu={toggleMenu}
+            onToggleProduct={toggleShoppingProduct}
+            onOpenCart={() => {
+              setShoppingCatalogMenuIds(selectedMenuIds)
+              setShopStep('cart')
+              setScreen('shopping')
+            }}
+            onOpenProfile={() => setProfileOpen(true)}
+            onCancelSelection={clearMenuSelection}
             onStartShopping={() => {
               if (selectedMenuIds.length === 0) {
                 showToast('먼저 메뉴를 골라주세요.')
                 return
               }
-              setShopStep('cart')
+              setShoppingCatalogMenuIds(selectedMenuIds)
+              setShopStep('store')
               setScreen('shopping')
             }}
           />
@@ -310,6 +379,7 @@ function App() {
             checkedTotal={checkedTotal}
             deliveryOption={deliveryOption}
             deliveryOptions={deliveryOptions}
+            catalogMenus={shoppingCatalogMenus}
             selectedMenus={cartMenus}
             checkedPrice={displayCheckedPrice}
             deliveryTypeInfo={selectedDeliveryInfo}
@@ -318,11 +388,12 @@ function App() {
             paymentOptions={paymentOptions}
             outfit={selectedOutfit}
             step={shopStep}
-            onBackHome={() => setScreen('home')}
             onCompleteOrder={completeOrderFlow}
+            onAddProduct={addShoppingProduct}
+            onToggleProduct={toggleShoppingProduct}
             onGoHome={() => {
               setLastOrder(null)
-              setShopStep('cart')
+              setShopStep('store')
               setScreen('petHome')
             }}
             onRestartShopping={restartShoppingAfterOrder}
@@ -352,7 +423,20 @@ function App() {
           />
         )}
 
-        <TabBar current={screen} onChange={setScreen} />
+        {profileOpen && (
+          <MyPage orderHistory={orderHistory} onClose={() => setProfileOpen(false)} />
+        )}
+
+        <TabBar
+          current={screen}
+          onChange={(nextScreen) => {
+            if (nextScreen === 'shopping' && screen !== 'shopping') {
+              setShoppingCatalogMenuIds(selectedMenuIds)
+              setShopStep('store')
+            }
+            setScreen(nextScreen)
+          }}
+        />
       </main>
 
       {toast && <div className="toast">{toast}</div>}
@@ -363,8 +447,13 @@ function App() {
 function HomeScreen({
   today,
   seasons,
+  allSeasonalIngredients,
+  allMenus,
   seasonIngredients,
   seasonalMenus,
+  checkedIngredients,
+  checkedPrice,
+  checkedTotal,
   selectedSeason,
   selectedSeasonalIngredientId,
   selectedMenuOpen,
@@ -376,12 +465,21 @@ function HomeScreen({
   onSelectSeasonalIngredient,
   onSetSelectedMenuOpen,
   onToggleMenu,
+  onToggleProduct,
+  onOpenCart,
+  onOpenProfile,
+  onCancelSelection,
   onStartShopping,
 }: {
   today: string
   seasons: { key: SeasonKey; label: string; accent: string }[]
+  allSeasonalIngredients: SeasonalIngredient[]
+  allMenus: Menu[]
   seasonIngredients: SeasonalIngredient[]
   seasonalMenus: Menu[]
+  checkedIngredients: string[]
+  checkedPrice: number
+  checkedTotal: number
   selectedSeason: SeasonKey
   selectedSeasonalIngredientId: string
   selectedMenuOpen: boolean
@@ -393,71 +491,281 @@ function HomeScreen({
   onSelectSeasonalIngredient: (id: string) => void
   onSetSelectedMenuOpen: (open: boolean) => void
   onToggleMenu: (id: string) => void
+  onToggleProduct: (menuId: string, ingredientName: string) => void
+  onOpenCart: () => void
+  onOpenProfile: () => void
+  onCancelSelection: () => void
   onStartShopping: () => void
 }) {
+  const [purchaseTab, setPurchaseTab] = useState<'cook' | 'delivery'>('cook')
+  const [locationPreview, setLocationPreview] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const normalizedQuery = searchQuery.trim().toLowerCase()
+  const hasSearch = normalizedQuery.length > 0
+  const ingredientSearchResults = hasSearch
+    ? allSeasonalIngredients.filter((ingredient) => ingredient.name.toLowerCase().includes(normalizedQuery))
+    : []
+  const menuSearchResults = hasSearch
+    ? allMenus.filter((menu) => (
+      menu.name.toLowerCase().includes(normalizedQuery)
+      || menu.ingredients.some((ingredient) => ingredient.name.toLowerCase().includes(normalizedQuery))
+    ))
+    : []
+  const relatedProducts = selectedMenus
+    .flatMap((menu) => menu.ingredients.map((ingredient) => ({
+      key: ingredientKey(menu.id, ingredient.name),
+      menuId: menu.id,
+      ingredient,
+    })))
+    .filter((product, index, products) => products.findIndex((item) => item.ingredient.name === product.ingredient.name) === index)
+  const selectedSeasonalIngredient = seasonIngredients.find((ingredient) => ingredient.id === selectedSeasonalIngredientId)
+  const nearbyRestaurants = seasonalMenus.map((menu, index) => ({
+    id: `${menu.id}-restaurant`,
+    name: index === 0 ? `오늘의 ${menu.name}` : `${menu.name} 맛집`,
+    menuName: menu.name,
+    emoji: shoppingItemEmoji(menu.ingredients[0]?.name ?? ''),
+    distance: `${320 + index * 280}m`,
+    eta: `${18 + index * 7}분`,
+    rating: (4.8 - index * 0.1).toFixed(1),
+  }))
+
   return (
     <section className="screen" onScroll={onScrollActivity}>
-      <header className="top-header">
-        <p>{today}</p>
-        <h1>제철음식 뭐가있을까?</h1>
+      <header className="home-global-bar">
+        <label className="shopping-search">
+          <span aria-hidden="true">🔍</span>
+          <input
+            aria-label="제철 음식과 메뉴 검색"
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="제철 음식과 메뉴 검색"
+            type="search"
+            value={searchQuery}
+          />
+        </label>
+        <button aria-label="마이페이지 열기" onClick={onOpenProfile} type="button">👤</button>
+        <button aria-label={`장바구니 ${checkedTotal}개`} onClick={onOpenCart} type="button">
+          🛒
+          {checkedTotal > 0 && <b>{checkedTotal}</b>}
+        </button>
       </header>
 
-      <div className={`season-panel season-panel-index season-${selectedSeason}`}>
-        <div className="season-tabs" aria-label="계절 선택">
-          {seasons.map((season) => (
-            <button
-              className={selectedSeason === season.key ? 'active' : ''}
-              key={season.key}
-              onClick={() => onSelectSeason(season.key)}
-              style={{ '--season-accent': season.accent } as CSSProperties}
-              type="button"
-            >
-              <span>{season.label}</span>
+      {hasSearch ? (
+        <section className="home-search-results">
+          <div>
+            <h2>제철 식재료 <span>{ingredientSearchResults.length}</span></h2>
+            <div className="home-search-result-list">
+              {ingredientSearchResults.map((ingredient) => (
+                <button
+                  key={ingredient.id}
+                  onClick={() => {
+                    onSelectSeason(ingredient.seasonKey)
+                    onSelectSeasonalIngredient(ingredient.id)
+                  }}
+                  type="button"
+                >
+                  <em aria-hidden="true">{ingredient.emoji}</em>
+                  <span><strong>{ingredient.name}</strong><small>{ingredient.season} 제철</small></span>
+                  <b>선택</b>
+                </button>
+              ))}
+              {ingredientSearchResults.length === 0 && <p>일치하는 제철 식재료가 없어요.</p>}
+            </div>
+          </div>
+
+          <div>
+            <h2>메뉴 <span>{menuSearchResults.length}</span></h2>
+            <div className="home-search-result-list">
+              {menuSearchResults.map((menu) => {
+                const selected = selectedMenuIds.includes(menu.id)
+                return (
+                  <button className={selected ? 'selected' : ''} key={menu.id} onClick={() => onToggleMenu(menu.id)} type="button">
+                    <em aria-hidden="true">{shoppingItemEmoji(menu.ingredients[0]?.name ?? '')}</em>
+                    <span><strong>{menu.name}</strong><small>{menu.ingredients.map((ingredient) => ingredient.name).join(' · ')}</small></span>
+                    <b>{selected ? '선택됨' : '선택'}</b>
+                  </button>
+                )
+              })}
+              {menuSearchResults.length === 0 && <p>일치하는 메뉴가 없어요.</p>}
+            </div>
+          </div>
+        </section>
+      ) : (
+        <>
+          <header className="top-header">
+            <p>{today}</p>
+            <h1>제철음식 뭐가있을까?</h1>
+          </header>
+
+          <div className={`season-panel season-panel-index season-${selectedSeason}`}>
+            <div className="season-tabs" aria-label="계절 선택">
+              {seasons.map((season) => (
+                <button
+                  className={selectedSeason === season.key ? 'active' : ''}
+                  key={season.key}
+                  onClick={() => onSelectSeason(season.key)}
+                  style={{ '--season-accent': season.accent } as CSSProperties}
+                  type="button"
+                >
+                  <span>{season.label}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className="seasonal-grid" aria-label="제철 식재료" onScroll={onScrollActivity}>
+              {seasonIngredients.map((ingredient) => (
+                <button
+                  className={`seasonal-tile ${selectedSeasonalIngredientId === ingredient.id ? 'active' : ''}`}
+                  key={ingredient.id}
+                  onClick={() => onSelectSeasonalIngredient(ingredient.id)}
+                  type="button"
+                >
+                  <span className="food-emoji" aria-hidden="true">{ingredient.emoji}</span>
+                  <strong>{ingredient.name}</strong>
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
+      <nav className="home-purchase-tabs" aria-label="메뉴 이용 방법">
+        <button className={purchaseTab === 'cook' ? 'active' : ''} onClick={() => setPurchaseTab('cook')} type="button">
+          <span aria-hidden="true">🍳</span>
+          요리
+        </button>
+        <button className={purchaseTab === 'delivery' ? 'active' : ''} onClick={() => setPurchaseTab('delivery')} type="button">
+          <span aria-hidden="true">🛵</span>
+          배달
+        </button>
+      </nav>
+
+      {purchaseTab === 'cook' && (
+        <>
+          <div className="section-title sub-directory-title">
+            <h2>메뉴 추천</h2>
+            <span>{selectedMenuIds.length}개 선택</span>
+          </div>
+
+          <div className="menu-list nested-menu-list">
+            {seasonalMenus.map((menu) => {
+              const selected = selectedMenuIds.includes(menu.id)
+              return (
+                <button
+                  className={`menu-card ${selected ? 'selected' : ''}`}
+                  key={menu.id}
+                  onClick={() => onToggleMenu(menu.id)}
+                  style={{ '--menu-color': menu.color } as CSSProperties}
+                  type="button"
+                >
+                  <div>
+                    <strong>{menu.name}</strong>
+                  </div>
+                  <b>{getMenuExp(menu)}xp</b>
+                </button>
+              )
+            })}
+          </div>
+        </>
+      )}
+
+      {purchaseTab === 'cook' && relatedProducts.length > 0 && (
+        <section className="home-shopping-products">
+          <div className="shopping-section-title">
+            <div>
+              <span>선택한 메뉴의 재료</span>
+              <h2>같이 구매하면 좋은 상품</h2>
+            </div>
+            <small>{checkedTotal}개 선택</small>
+          </div>
+          <div className="shopping-product-grid">
+            {relatedProducts.map((product, index) => {
+              const selected = checkedIngredients.includes(product.key)
+              const discount = 38 + ((index * 7) % 48)
+              return (
+                <article className={`shopping-product-card tone-${index % 6} ${selected ? 'selected' : ''}`} key={product.key}>
+                  <button className="shopping-product-main" onClick={() => onToggleProduct(product.menuId, product.ingredient.name)} type="button">
+                    <span className="shopping-discount">{discount}% 특가</span>
+                    <em aria-hidden="true">{shoppingItemEmoji(product.ingredient.name)}</em>
+                    <strong>{product.ingredient.name}, {product.ingredient.quantity}</strong>
+                    <small>★ {(4.5 + (index % 4) * 0.1).toFixed(1)} · 무료배송</small>
+                    <p>{formatWon(product.ingredient.price)}</p>
+                  </button>
+                  <button
+                    className={`shopping-card-cart ${selected ? 'added' : ''}`}
+                    aria-label={`${product.ingredient.name} ${selected ? '선택 해제' : '선택'}`}
+                    onClick={() => onToggleProduct(product.menuId, product.ingredient.name)}
+                    type="button"
+                  >
+                    {selected ? '✅' : '🛒'}
+                  </button>
+                </article>
+              )
+            })}
+          </div>
+          {checkedTotal > 0 && (
+            <button className="home-shopping-cart-button" onClick={onOpenCart} type="button">
+              {checkedTotal}개 상품 장바구니 보기 · {formatWon(checkedPrice)}
             </button>
-          ))}
+          )}
+        </section>
+      )}
+
+      {purchaseTab === 'cook' && relatedProducts.length === 0 && (
+        <div className="home-purchase-empty">
+          <span aria-hidden="true">🥕</span>
+          <strong>메뉴를 고르면 필요한 재료를 보여드려요</strong>
+          <p>제철 식재료와 간편하게 요리할 수 있는 밀키트를 함께 추천해요.</p>
         </div>
+      )}
 
-        <div className="seasonal-grid" aria-label="제철 식재료" onScroll={onScrollActivity}>
-          {seasonIngredients.map((ingredient) => (
-            <button
-              className={`seasonal-tile ${selectedSeasonalIngredientId === ingredient.id ? 'active' : ''}`}
-              key={ingredient.id}
-              onClick={() => onSelectSeasonalIngredient(ingredient.id)}
-              type="button"
-            >
-              <span className="food-emoji" aria-hidden="true">{ingredient.emoji}</span>
-              <strong>{ingredient.name}</strong>
-            </button>
-          ))}
-        </div>
-      </div>
+      {purchaseTab === 'delivery' && (
+        <section className="home-delivery-panel">
+          <div className="home-delivery-heading">
+            <div>
+              <span>총 {seasonalMenus.length}개 요리 · 내 주변 제철 맛집</span>
+              <h2>{selectedSeasonalIngredient?.name ?? '제철 식재료'}로 만든 모든 요리</h2>
+            </div>
+            <button onClick={() => setLocationPreview(true)} type="button">📍 내 위치</button>
+          </div>
 
-      <div className="section-title sub-directory-title">
-        <h2>메뉴 추천</h2>
-        <span>{selectedMenuIds.length}개 선택</span>
-      </div>
+          <div className="home-map-preview" aria-label="주변 음식점 지도 미리보기">
+            <div className="map-road road-one" />
+            <div className="map-road road-two" />
+            <span className="map-current-location">🔵</span>
+            {nearbyRestaurants.slice(0, 3).map((restaurant, index) => (
+              <button
+                className={`map-restaurant-pin pin-${index + 1}`}
+                aria-label={`${restaurant.name} 위치`}
+                key={restaurant.id}
+                type="button"
+              >
+                {restaurant.emoji}
+              </button>
+            ))}
+            {nearbyRestaurants.length === 0 && <p>이 제철 식재료로 만든 요리를 준비하고 있어요.</p>}
+          </div>
 
-      <div className="menu-list nested-menu-list">
-        {seasonalMenus.map((menu) => {
-          const selected = selectedMenuIds.includes(menu.id)
-          return (
-            <button
-              className={`menu-card ${selected ? 'selected' : ''}`}
-              key={menu.id}
-              onClick={() => onToggleMenu(menu.id)}
-              style={{ '--menu-color': menu.color } as CSSProperties}
-              type="button"
-            >
-              <div>
-                <strong>{menu.name}</strong>
-              </div>
-              <b>{getMenuExp(menu)}xp</b>
-            </button>
-          )
-        })}
-      </div>
+          <p className="home-location-status">
+            {locationPreview ? 'GPS API 연결 전 위치 기반 화면 미리보기예요.' : '현재 위치를 허용하면 가까운 순서로 보여드릴 예정이에요.'}
+          </p>
 
-      {selectedMenus.length > 0 && (
+          <div className="home-restaurant-list">
+            {nearbyRestaurants.map((restaurant) => (
+              <article key={restaurant.id}>
+                <em aria-hidden="true">{restaurant.emoji}</em>
+                <div>
+                  <span>배달 가능 · API 연동 전 예시</span>
+                  <strong>{restaurant.name}</strong>
+                  <p>{restaurant.menuName} · ⭐ {restaurant.rating} · {restaurant.distance}</p>
+                </div>
+                <button type="button">{restaurant.eta}</button>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {purchaseTab === 'cook' && selectedMenus.length > 0 && (
         <div className={`selected-menu-widget ${selectedMenuOpen ? 'open' : ''}`}>
           {selectedMenuOpen && (
             <>
@@ -469,7 +777,10 @@ function HomeScreen({
                     <button aria-label={`${menu.name} 삭제`} onClick={() => onRemoveMenu(menu.id)} type="button">×</button>
                   </div>
                 ))}
-                <button className="selected-menu-shop" onClick={onStartShopping} type="button">구매하기</button>
+                <div className="selected-menu-actions">
+                  <button className="selected-menu-shop" onClick={onStartShopping} type="button">구매하기</button>
+                  <button className="selected-menu-cancel" onClick={onCancelSelection} type="button">취소</button>
+                </div>
               </div>
             </>
           )}
@@ -485,6 +796,7 @@ function HomeScreen({
 function ShoppingScreen({
   background,
   accessory,
+  catalogMenus,
   selectedMenus,
   checkedIngredients,
   checkedTotal,
@@ -498,10 +810,11 @@ function ShoppingScreen({
   deliveryOption,
   deliveryOptions,
   onToggleIngredient,
+  onAddProduct,
+  onToggleProduct,
   onSelectPayment,
   onSelectDelivery,
   onSetStep,
-  onBackHome,
   onCompleteOrder,
   onGoHome,
   onRestartShopping,
@@ -510,6 +823,7 @@ function ShoppingScreen({
 }: {
   background: string
   accessory: string
+  catalogMenus: Menu[]
   selectedMenus: Menu[]
   checkedIngredients: string[]
   checkedTotal: number
@@ -523,10 +837,11 @@ function ShoppingScreen({
   deliveryOption: string
   deliveryOptions: string[]
   onToggleIngredient: (name: string) => void
+  onAddProduct: (menuId: string, ingredientName: string) => void
+  onToggleProduct: (menuId: string, ingredientName: string) => void
   onSelectPayment: (method: string) => void
   onSelectDelivery: (option: string) => void
   onSetStep: (step: ShopStep) => void
-  onBackHome: () => void
   onCompleteOrder: () => void
   onGoHome: () => void
   onRestartShopping: () => void
@@ -536,15 +851,134 @@ function ShoppingScreen({
   const canContinue = checkedTotal > 0
   const allIngredientKeys = selectedMenus.flatMap((menu) => menu.ingredients.map((item) => ingredientKey(menu.id, item.name)))
   const allChecked = allIngredientKeys.length > 0 && allIngredientKeys.every((key) => checkedIngredients.includes(key))
+  const catalogProducts = catalogMenus
+    .flatMap((menu) => menu.ingredients.map((ingredient) => ({
+      key: ingredientKey(menu.id, ingredient.name),
+      menuId: menu.id,
+      menuName: menu.name,
+      ingredient,
+    })))
+    .filter((product, index, products) => products.findIndex((item) => item.ingredient.name === product.ingredient.name) === index)
+  const [selectedProductKey, setSelectedProductKey] = useState('')
+  const selectedProduct = catalogProducts.find((product) => product.key === selectedProductKey) ?? catalogProducts[0]
+  const selectedCartProducts = selectedMenus.flatMap((menu) => menu.ingredients
+    .filter((ingredient) => checkedIngredients.includes(ingredientKey(menu.id, ingredient.name)))
+    .map((ingredient) => ({ menu, ingredient })))
+
+  function openProduct(productKey: string) {
+    setSelectedProductKey(productKey)
+    onSetStep('detail')
+  }
 
   return (
     <section className="screen toss-screen" onScroll={onScrollActivity}>
-      <div className="toss-back-row">
-        <button aria-label="홈으로 돌아가기" onClick={onBackHome} type="button">‹</button>
-      </div>
+      {step === 'store' && (
+        <div className="shopping-home">
+          <nav className="shopping-category-tabs" aria-label="쇼핑 카테고리">
+            <button className="active" type="button">쇼핑 홈</button>
+            <button type="button">제철 식재료</button>
+            <button type="button">특가</button>
+            <button type="button">인기 상품</button>
+          </nav>
+
+          <button className="shopping-hero" onClick={() => catalogProducts[0] && openProduct(catalogProducts[0].key)} type="button">
+            <span>이번 주 제철 특가</span>
+            <strong>{catalogProducts[0]?.ingredient.name ?? '제철 식재료'}<br />최대 58% 할인</strong>
+            <small>선택한 메뉴에 꼭 필요한 재료만 모았어요</small>
+            <em aria-hidden="true">{shoppingItemEmoji(catalogProducts[0]?.ingredient.name ?? '')}</em>
+          </button>
+
+          <section className="shopping-recommendations">
+            <div className="shopping-section-title">
+              <h2>제철 메뉴를 위한 추천 상품</h2>
+              <small>AI 추천</small>
+            </div>
+            <div className="shopping-product-grid">
+              {catalogProducts.map((product, index) => {
+                const discount = 38 + ((index * 7) % 48)
+                return (
+                  <article className={`shopping-product-card tone-${index % 6}`} key={product.key}>
+                    <button className="shopping-product-main" onClick={() => openProduct(product.key)} type="button">
+                      <span className="shopping-discount">{discount}% 특가</span>
+                      <em aria-hidden="true">{shoppingItemEmoji(product.ingredient.name)}</em>
+                      <strong>{product.ingredient.name}, {product.ingredient.quantity}</strong>
+                      <small>● {(6.7 + index * 1.3).toFixed(1)}만 명 · ★ {(4.5 + (index % 4) * 0.1).toFixed(1)}</small>
+                      <p>지금 30일 내 최저가 ↓</p>
+                    </button>
+                    <button
+                      className={`shopping-card-cart ${checkedIngredients.includes(product.key) ? 'added' : ''}`}
+                      aria-label={`${product.ingredient.name} ${checkedIngredients.includes(product.key) ? '선택 해제' : '선택'}`}
+                      onClick={() => onToggleProduct(product.menuId, product.ingredient.name)}
+                      type="button"
+                    >
+                      {checkedIngredients.includes(product.key) ? '✅' : '🛒'}
+                    </button>
+                  </article>
+                )
+              })}
+            </div>
+          </section>
+          {checkedTotal > 0 && (
+            <div className="shopping-home-buybar">
+              <button onClick={() => onSetStep('cart')} type="button">
+                {checkedTotal}개 상품 구매하기 · {formatWon(checkedPrice)}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {step === 'detail' && selectedProduct && (
+        <div className="shopping-detail">
+          <header className="shopping-sub-header">
+            <button aria-label="쇼핑 홈으로" onClick={() => onSetStep('store')} type="button">←</button>
+            <div>
+              <button aria-label="공유" type="button">📤</button>
+              <button aria-label="검색" type="button">🔍</button>
+              <button aria-label="장바구니" onClick={() => onSetStep('cart')} type="button">🛒</button>
+            </div>
+          </header>
+          <div className="shopping-detail-visual">
+            <em aria-hidden="true">{shoppingItemEmoji(selectedProduct.ingredient.name)}</em>
+            <span>1 / 2</span>
+          </div>
+          <div className="shopping-detail-copy">
+            <div className="shopping-detail-badges">
+              <span>내일도착</span><span>늦으면보상</span><span>신선식품 1위</span>
+            </div>
+            <h1>{selectedProduct.ingredient.name}, {selectedProduct.ingredient.quantity}</h1>
+            <p className="shopping-original-price">58% <del>{formatWon(Math.round(selectedProduct.ingredient.price / 0.42 / 100) * 100)}</del></p>
+            <strong className="shopping-sale-price">{formatWon(selectedProduct.ingredient.price)}</strong>
+            <p>무료배송</p>
+            <dl>
+              <div><dt>평점 · 리뷰</dt><dd>⭐ 4.7 (3,527)</dd></div>
+              <div><dt>배송일정</dt><dd>내일 도착</dd></div>
+              <div><dt>판매자</dt><dd>오늘의 제철마켓 · 공식</dd></div>
+            </dl>
+          </div>
+          <div className="shopping-product-info">
+            <div><span>중량, 수량</span><strong>{selectedProduct.ingredient.quantity}</strong></div>
+            <h2>이 상품의 모든 상점 리뷰</h2>
+            <div className="shopping-rating">⭐⭐⭐⭐⭐ <b>4.7</b> <span>(3,527개)</span></div>
+            <blockquote>신선하고 포장도 꼼꼼해요. 제철 메뉴를 만들기 딱 좋은 재료예요.</blockquote>
+          </div>
+          <div className="shopping-detail-actions">
+            <button aria-label="찜하기" type="button">🤍</button>
+            <button onClick={() => onAddProduct(selectedProduct.menuId, selectedProduct.ingredient.name)} type="button">장바구니</button>
+            <button onClick={() => {
+              onAddProduct(selectedProduct.menuId, selectedProduct.ingredient.name)
+              onSetStep('checkout')
+            }} type="button">구매하기</button>
+          </div>
+        </div>
+      )}
 
       {step === 'cart' && (
         <>
+          <div className="shopping-cart-head">
+            <button aria-label="쇼핑 홈으로" onClick={() => onSetStep('store')} type="button">←</button>
+            <div><strong>장바구니 {checkedTotal}</strong><span>최근 본 상품</span><span>찜한 상품</span></div>
+          </div>
           <div className="toss-menu-list">
             {selectedMenus.length === 0 && (
               <div className="empty-cart-pet">
@@ -552,7 +986,7 @@ function ShoppingScreen({
                 <h2>배고파요...</h2>
                 <p>오늘은 뭐 먹을래요?</p>
                 <div>
-                  <button className="toss-primary" onClick={onBackHome} type="button">장보러가기</button>
+                  <button className="toss-primary" onClick={() => onSetStep('store')} type="button">장보러가기</button>
                   <button className="toss-secondary" onClick={onGoHome} type="button">펫 관리하기</button>
                 </div>
               </div>
@@ -588,10 +1022,10 @@ function ShoppingScreen({
                           }}
                           type="checkbox"
                         />
-                        <strong>{menu.name}</strong>
+                        <strong>오늘의 제철마켓</strong>
                       </label>
                       <button className="toss-menu-remove" onClick={() => onRemoveMenu(menu.id)} type="button">
-                        메뉴 빼기
+                        선택삭제
                       </button>
                     </div>
                     <div className="ingredient-list toss-list toss-product-list">
@@ -602,9 +1036,10 @@ function ShoppingScreen({
                             <input checked={checkedIngredients.includes(key)} onChange={() => onToggleIngredient(key)} type="checkbox" />
                             <em aria-hidden="true">{shoppingItemEmoji(item.name)}</em>
                             <span>
-                              <strong>{item.name}</strong>
+                              <strong>내일 도착 예정</strong>
+                              <small>{item.name}, {item.quantity}</small>
                             </span>
-                            <b>{formatWon(item.price)}</b>
+                            <b><del>{formatWon(Math.round(item.price * 1.7 / 100) * 100)}</del>{formatWon(item.price)}</b>
                           </label>
                         )
                       })}
@@ -620,42 +1055,54 @@ function ShoppingScreen({
               <strong>{formatWon(checkedPrice)}</strong>
             </div>
             <button className="toss-primary toss-cart-continue" disabled={!canContinue} onClick={() => onSetStep('checkout')} type="button">
-              주문하기
+              {checkedTotal}건 · {formatWon(checkedPrice)} 주문하기
             </button>
           </div>
         </>
       )}
 
       {step === 'checkout' && (
-        <>
-          <div className="checkout-card">
-            <div>
-              <span>토스쇼핑 배송</span>
-              <strong>{deliveryTypeInfo.name}</strong>
-              <p>{deliveryTypeInfo.eta}</p>
+        <div className="shopping-checkout">
+          <header className="shopping-sub-header">
+            <button aria-label="장바구니로" onClick={() => onSetStep('cart')} type="button">←</button>
+          </header>
+          <section className="shopping-address">
+            <h1><span>집</span>으로 배송</h1>
+            <p>서울특별시 중구 세종대로 110</p>
+            <small>구매자 · 010-0000-0000</small>
+            <button type="button">변경</button>
+            <select aria-label="배송 시 요청사항" value={deliveryOption} onChange={(event) => onSelectDelivery(event.target.value)}>
+              {deliveryOptions.map((option) => <option key={option}>{option}</option>)}
+            </select>
+          </section>
+          <section className="shopping-order-products">
+            <h2>주문상품 {selectedCartProducts.length}건</h2>
+            {selectedCartProducts.map(({ menu, ingredient }) => (
+              <article key={ingredientKey(menu.id, ingredient.name)}>
+                <em aria-hidden="true">{shoppingItemEmoji(ingredient.name)}</em>
+                <div><strong>내일 도착 예정</strong><span>{ingredient.name}, {ingredient.quantity}</span><b>{formatWon(ingredient.price)} · 1개</b><small>무료 배송</small></div>
+              </article>
+            ))}
+          </section>
+          <section className="shopping-payment-section">
+            <div className="shopping-coupon"><strong>쿠폰</strong><span>최대 할인 적용 중</span></div>
+            <h2>결제수단</h2>
+            <div className="shopping-payment-options">
+              {paymentOptions.map((option) => (
+                <button className={paymentMethod === option ? 'active' : ''} key={option} onClick={() => onSelectPayment(option)} type="button">
+                  {option}<span>{paymentMethod === option ? '✓' : ''}</span>
+                </button>
+              ))}
             </div>
-            <b>{formatWon(orderTotal)}</b>
+            <h2>토스포인트 사용</h2>
+            <div className="shopping-points"><span>0</span><b>원</b></div>
+            <div className="shopping-total"><strong>총 결제 금액</strong><b>{formatWon(orderTotal)}</b><span>총 주문 금액</span><span>{formatWon(checkedPrice)}</span></div>
+          </section>
+          <div className="shopping-paybar">
+            <button onClick={onCompleteOrder} type="button">{formatWon(orderTotal)} 결제하기</button>
+            <small>실제 결제와 주문은 발생하지 않는 MVP 체험 화면입니다.</small>
           </div>
-          <OptionGroup title="배송 요청">
-            {deliveryOptions.map((option) => (
-              <button className={deliveryOption === option ? 'active' : ''} key={option} onClick={() => onSelectDelivery(option)} type="button">{option}</button>
-            ))}
-          </OptionGroup>
-          <OptionGroup title="결제 수단">
-            {paymentOptions.map((option) => (
-              <button className={paymentMethod === option ? 'active' : ''} key={option} onClick={() => onSelectPayment(option)} type="button">{option}</button>
-            ))}
-          </OptionGroup>
-          <div className="price-sheet">
-            <div><span>상품 금액</span><b>{formatWon(checkedPrice)}</b></div>
-            <div><span>배송비</span><b>{formatWon(deliveryTypeInfo.fee)}</b></div>
-            <div className="total"><span>총 결제 금액</span><b>{formatWon(orderTotal)}</b></div>
-          </div>
-          <div className="toss-button-row">
-            <button className="toss-secondary" onClick={() => onSetStep('cart')} type="button">이전</button>
-            <button className="toss-primary" onClick={onCompleteOrder} type="button">{formatWon(orderTotal)} 결제하기</button>
-          </div>
-        </>
+        </div>
       )}
 
       {step === 'complete' && (
@@ -707,15 +1154,6 @@ function ShoppingScreen({
   )
 }
 
-function OptionGroup({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <div className="option-group">
-      <h2>{title}</h2>
-      <div>{children}</div>
-    </div>
-  )
-}
-
 function shoppingItemEmoji(name: string) {
   if (name.includes('수박')) return '🍉'
   if (name.includes('콩국수') || name.includes('소면') || name.includes('파스타')) return '🍜'
@@ -723,19 +1161,113 @@ function shoppingItemEmoji(name: string) {
   if (name.includes('복숭아')) return '🍑'
   if (name.includes('옥수수')) return '🌽'
   if (name.includes('토마토')) return '🍅'
-  if (name.includes('오이')) return '🥒'
+  if (name.includes('오이') || name.includes('애호박')) return '🥒'
   if (name.includes('가지')) return '🍆'
-  if (name.includes('귤')) return '🍊'
-  if (name.includes('배추')) return '🥬'
-  if (name.includes('굴')) return '🦪'
-  if (name.includes('무')) return '⚪'
+  if (name.includes('귤') || name.includes('한라봉')) return '🍊'
+  if (name.includes('배추') || name.includes('샐러드') || name.includes('깻잎') || name.includes('루꼴라') || name.includes('시금치') || name.includes('무순')) return '🥬'
+  if (name.includes('굴') || name.includes('꼬막') || name.includes('바지락')) return '🦪'
+  if (name === '무' || name.startsWith('무 ')) return '🌱'
   if (name.includes('고구마')) return '🍠'
   if (name.includes('버섯')) return '🍄'
   if (name.includes('딸기')) return '🍓'
-  if (name.includes('샐러드')) return '🥗'
-  if (name.includes('치즈')) return '🧀'
+  if (name.includes('치즈') || name.includes('리코타') || name.includes('모차렐라')) return '🧀'
   if (name.includes('쌀') || name.includes('밥')) return '🍚'
-  return '🛒'
+  if (name.includes('참외')) return '🍈'
+  if (name.includes('고추')) return '🌶️'
+  if (name.includes('감자')) return '🥔'
+  if (name.includes('달걀')) return '🥚'
+  if (name.includes('양파') || name.includes('대파') || name.includes('쪽파') || name.includes('부추')) return '🧅'
+  if (name.includes('버터')) return '🧈'
+  if (name.includes('두부')) return '⬜'
+  if (name.includes('미역') || name.includes('김')) return '🌿'
+  if (name.includes('밀가루') || name.includes('가루') || name.includes('그래놀라')) return '🌾'
+  if (name.includes('꿀') || name.includes('올리고당')) return '🍯'
+  if (name.includes('자두')) return '🟣'
+  if (name.includes('포도')) return '🍇'
+  if (name.includes('탄산수')) return '🥤'
+  if (name.includes('사과')) return '🍎'
+  if (name.includes('배')) return '🍐'
+  if (name.includes('레몬')) return '🍋'
+  if (name.includes('감')) return '🟠'
+  if (name.includes('무화과')) return '🫐'
+  if (name.includes('밤')) return '🌰'
+  if (name.includes('단호박')) return '🎃'
+  if (name.includes('견과')) return '🥜'
+  if (name.includes('대하') || name.includes('새우')) return '🦐'
+  if (name.includes('오징어')) return '🦑'
+  if (name.includes('장어') || name.includes('전어') || name.includes('고등어') || name.includes('대구') || name.includes('방어')) return '🐟'
+  if (name.includes('고기') || name.includes('돼지') || name.includes('소고기')) return '🥩'
+  if (name.includes('두릅') || name.includes('미나리') || name.includes('쑥') || name.includes('죽순') || name.includes('쑥갓') || name.includes('연근') || name.includes('우엉')) return '🌿'
+  if (name.includes('간장') || name.includes('고추장') || name.includes('된장') || name.includes('쌈장') || name.includes('소스')) return '🫙'
+  if (name.includes('오일') || name.includes('식초') || name.includes('참기름') || name.includes('마요네즈')) return '🧴'
+  if (name.includes('젤라틴')) return '🍮'
+  if (name.includes('소금') || name.includes('깨')) return '🧂'
+  return '🛍️'
+}
+
+function MyPage({
+  orderHistory,
+  onClose,
+}: {
+  orderHistory: OrderHistoryItem[]
+  onClose: () => void
+}) {
+  const totalSpent = orderHistory.reduce((sum, order) => sum + order.total, 0)
+
+  return (
+    <section className="my-page">
+      <header className="my-page-header">
+        <button aria-label="마이페이지 닫기" onClick={onClose} type="button">←</button>
+        <h1>마이페이지</h1>
+        <span />
+      </header>
+
+      <div className="my-page-profile">
+        <span aria-hidden="true">👤</span>
+        <div>
+          <strong>제철 미식가</strong>
+          <p>오늘도 맛있는 제철 음식을 골라보세요.</p>
+        </div>
+      </div>
+
+      <div className="my-page-summary">
+        <div><span>주문</span><strong>{orderHistory.length}건</strong></div>
+        <div><span>총 주문금액</span><strong>{formatWon(totalSpent)}</strong></div>
+      </div>
+
+      <section className="my-order-history">
+        <div className="my-order-title">
+          <h2>내 주문 내역</h2>
+          <span>최근 주문순</span>
+        </div>
+
+        {orderHistory.length === 0 && (
+          <div className="my-order-empty">
+            <span aria-hidden="true">🧾</span>
+            <strong>아직 주문 내역이 없어요</strong>
+            <p>상품을 구매하면 주문 내역이 여기에 쌓여요.</p>
+          </div>
+        )}
+
+        {orderHistory.map((order) => (
+          <article className="my-order-card" key={order.id}>
+            <div className="my-order-card-head">
+              <span>{order.orderedAt}</span>
+              <strong>{order.status}</strong>
+            </div>
+            <div className="my-order-items">
+              <em aria-hidden="true">{shoppingItemEmoji(order.items[0]?.name ?? '')}</em>
+              <div>
+                <strong>{order.items[0]?.name ?? '제철 상품'}{order.items.length > 1 ? ` 외 ${order.items.length - 1}개` : ''}</strong>
+                <p>{order.items.map((item) => `${item.name} ${item.quantity}`).join(' · ')}</p>
+              </div>
+            </div>
+            <div className="my-order-total"><span>결제 금액</span><b>{formatWon(order.total)}</b></div>
+          </article>
+        ))}
+      </section>
+    </section>
+  )
 }
 
 function PetHomeScreen({
@@ -916,8 +1448,7 @@ function roomClass(background: string) {
 
 function TabBar({ current, onChange }: { current: Screen; onChange: (screen: Screen) => void }) {
   const tabs: { id: Screen; label: string; icon: string }[] = [
-    { id: 'home', label: '홈', icon: '🌿' },
-    { id: 'shopping', label: '장보기', icon: '🛍️' },
+    { id: 'home', label: '제철홈', icon: '🌿' },
     { id: 'petHome', label: '펫홈', icon: '💛' },
   ]
 
