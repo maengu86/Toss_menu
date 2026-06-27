@@ -2575,7 +2575,7 @@
   border-radius: 999px;
   color: #ffffff;
   font-size: 10px;
-  background: #f04452;
+  background: var(--orange);
 }
 
 .shopping-home-header > button,
@@ -2604,7 +2604,7 @@
   border-radius: 999px;
   color: #ffffff;
   font-size: 10px;
-  background: #f04452;
+  background: var(--orange);
 }
 
 .shopping-search {
@@ -2688,7 +2688,7 @@
 .shopping-hero span {
   display: block;
   margin-bottom: 8px;
-  color: #f04452;
+  color: var(--orange);
   font-size: 16px;
   font-weight: 900;
 }
@@ -2783,7 +2783,7 @@
   color: #ffffff;
   font-size: 11px;
   font-weight: 900;
-  background: #f04452;
+  background: var(--orange);
 }
 
 .shopping-product-main em {
@@ -2836,8 +2836,8 @@
 }
 
 .shopping-card-cart.added {
-  border-color: #3182f6;
-  background: #e8f3ff;
+  border-color: var(--orange);
+  background: #fff7f1;
 }
 
 .shopping-home-buybar {
@@ -2861,7 +2861,7 @@
   color: #ffffff;
   font-size: 16px;
   font-weight: 900;
-  background: #3182f6;
+  background: var(--orange);
 }
 
 .home-shopping-products {
@@ -2906,9 +2906,9 @@
   display: grid;
   place-items: center;
   border-radius: 999px;
-  color: #3182f6;
+  color: var(--orange);
   font-size: 11px;
-  background: #e8f3ff;
+  background: #fff7f1;
 }
 
 .home-search-result-list {
@@ -2931,8 +2931,8 @@
 }
 
 .home-search-result-list > button.selected {
-  border-color: #3182f6;
-  background: #f5f9ff;
+  border-color: var(--orange);
+  background: #fff7f1;
 }
 
 .home-search-result-list em {
@@ -2972,9 +2972,9 @@
   min-width: max-content;
   padding: 7px 9px;
   border-radius: 9px;
-  color: #1b64da;
+  color: var(--orange);
   font-size: 11px;
-  background: #e8f3ff;
+  background: #fff7f1;
 }
 
 .home-search-result-list > p {
@@ -3050,7 +3050,7 @@
 }
 
 .home-shopping-products .shopping-section-title span {
-  color: #3182f6;
+  color: var(--orange);
   font-size: 12px;
   font-weight: 900;
 }
@@ -3067,7 +3067,7 @@
 }
 
 .home-shopping-products .shopping-product-card.selected {
-  outline: 2px solid #3182f6;
+  outline: 2px solid var(--orange);
   outline-offset: -2px;
 }
 
@@ -3085,7 +3085,7 @@
   color: #ffffff;
   font-size: 15px;
   font-weight: 900;
-  background: #3182f6;
+  background: var(--orange);
 }
 
 .home-delivery-panel {
@@ -3107,7 +3107,7 @@
 }
 
 .home-delivery-heading span {
-  color: #3182f6;
+  color: var(--orange);
   font-size: 12px;
   font-weight: 900;
 }
@@ -3124,10 +3124,10 @@
   padding: 0 11px;
   border: 0;
   border-radius: 11px;
-  color: #1b64da;
+  color: var(--orange);
   font-size: 12px;
   font-weight: 900;
-  background: #e8f3ff;
+  background: #fff7f1;
 }
 
 .home-map-preview {
@@ -3214,7 +3214,7 @@
 
 .kakao-place-card a {
   width: fit-content;
-  color: #1b64da;
+  color: var(--orange);
   font-size: 12px;
   font-weight: 900;
   text-decoration: none;
@@ -3242,8 +3242,8 @@
 }
 
 .kakao-place-list button.active {
-  border-color: #8cbcff;
-  background: #f2f7ff;
+  border-color: #f2b093;
+  background: #fff7f1;
 }
 
 .kakao-place-list strong,
@@ -3267,7 +3267,7 @@
 }
 
 .kakao-place-list small {
-  color: #1b64da;
+  color: var(--orange);
   font-size: 11px;
   font-weight: 900;
 }
@@ -3341,7 +3341,7 @@
   border: 3px solid #ffffff;
   border-radius: 50% 50% 50% 8px;
   font-size: 24px;
-  background: #3182f6;
+  background: var(--orange);
   box-shadow: 0 5px 12px rgba(25, 31, 40, 0.2);
 }
 
@@ -3409,7 +3409,7 @@
 }
 
 .home-restaurant-list span {
-  color: #3182f6;
+  color: var(--orange);
   font-size: 10px;
   font-weight: 900;
 }
@@ -3434,10 +3434,10 @@
   padding: 0 8px;
   border: 0;
   border-radius: 10px;
-  color: #1b64da;
+  color: var(--orange);
   font-size: 11px;
   font-weight: 900;
-  background: #e8f3ff;
+  background: #fff7f1;
 }
 
 .shopping-sub-header {
@@ -3510,7 +3510,7 @@
 }
 
 .shopping-detail-badges span:nth-child(2) {
-  color: #f04452;
+  color: var(--orange);
   background: #fff0f1;
 }
 
@@ -3541,7 +3541,7 @@
 .shopping-sale-price {
   display: inline-block;
   margin: 4px 0 8px;
-  color: #f04452;
+  color: var(--orange);
   font-size: 30px;
 }
 
@@ -3584,7 +3584,7 @@
 }
 
 .shopping-product-info > div:first-child strong {
-  color: #3182f6;
+  color: var(--orange);
 }
 
 .shopping-product-info h2 {
@@ -3634,9 +3634,9 @@
   height: 52px;
   border: 0;
   border-radius: 15px;
-  color: #1b64da;
+  color: var(--orange);
   font-weight: 900;
-  background: #e8f3ff;
+  background: #fff7f1;
 }
 
 .shopping-detail-actions button:first-child {
@@ -3647,7 +3647,7 @@
 
 .shopping-detail-actions button:last-child {
   color: #ffffff;
-  background: #3182f6;
+  background: var(--orange);
 }
 
 .shopping-cart-head {
@@ -3660,37 +3660,15 @@
 }
 
 .shopping-cart-head > div {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  align-items: end;
+  display: flex;
+  align-items: center;
   margin-top: 10px;
-  border-bottom: 1px solid #dfe3e7;
-}
-
-.shopping-cart-head strong,
-.shopping-cart-head span {
-  min-height: 48px;
-  display: grid;
-  place-items: center;
-  color: #8b95a1;
-  font-size: 13px;
 }
 
 .shopping-cart-head strong {
-  position: relative;
   color: #333d4b;
-  font-size: 15px;
-}
-
-.shopping-cart-head strong::after {
-  content: "";
-  height: 3px;
-  position: absolute;
-  right: 8px;
-  bottom: -1px;
-  left: 8px;
-  border-radius: 999px;
-  background: #333d4b;
+  font-size: 22px;
+  font-weight: 900;
 }
 
 .shopping-cart-head + .toss-menu-list {
@@ -3770,7 +3748,7 @@
   min-height: 56px;
   border-radius: 17px;
   font-size: 16px;
-  background: #3182f6;
+  background: var(--orange);
 }
 
 .shopping-checkout {
@@ -3794,7 +3772,7 @@
 }
 
 .shopping-address h1 span {
-  color: #3182f6;
+  color: var(--orange);
 }
 
 .shopping-address p,
@@ -3816,9 +3794,9 @@
   padding: 10px 12px;
   border: 0;
   border-radius: 10px;
-  color: #1b64da;
+  color: var(--orange);
   font-weight: 900;
-  background: #e8f3ff;
+  background: #fff7f1;
 }
 
 .shopping-address select {
@@ -3922,13 +3900,13 @@
 }
 
 .shopping-payment-options button.active {
-  border-color: #3182f6;
-  color: #1b64da;
-  background: #f5f9ff;
+  border-color: var(--orange);
+  color: var(--orange);
+  background: #fff7f1;
 }
 
 .shopping-payment-options button span {
-  color: #3182f6;
+  color: var(--orange);
 }
 
 .shopping-points {
@@ -3977,7 +3955,7 @@
   color: #ffffff;
   font-size: 18px;
   font-weight: 900;
-  background: #3182f6;
+  background: var(--orange);
 }
 
 .shopping-paybar small {
@@ -4043,7 +4021,7 @@
   place-items: center;
   border-radius: 22px;
   font-size: 31px;
-  background: #e8f3ff;
+  background: #fff7f1;
 }
 
 .my-page-profile div {
@@ -4155,7 +4133,7 @@
 }
 
 .my-order-card-head strong {
-  color: #3182f6;
+  color: var(--orange);
   font-size: 12px;
 }
 
@@ -4225,5 +4203,4 @@
     margin-left: -16px;
   }
 }
-
 
