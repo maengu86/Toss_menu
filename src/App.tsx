@@ -651,10 +651,6 @@ function HomeScreen({
         </section>
       ) : (
         <>
-          <header className="top-header home-menu-header">
-            <h1>제철음식 뭐가있을까?</h1>
-          </header>
-
           <div className={`season-panel season-panel-index season-${selectedSeason}`}>
             <div className="season-tabs" aria-label="계절 선택">
               {seasons.map((season) => (
