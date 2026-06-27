@@ -50,8 +50,6 @@ export function SudalOutfitLayer({ name }: DecorLayerProps) {
 
 export function SudalAccessoryLayer({ name }: DecorLayerProps) {
   switch (name) {
-    case '밀짚모자': return <StrawHat />
-    case '밤톨 베레모': return <AcornBeret />
     case '여름용 튜브': return <SwimTube />
     case '단풍잎 부채': return <MapleFan />
     case '호빵 바구니': return <Basket kind="bun" />
@@ -60,7 +58,6 @@ export function SudalAccessoryLayer({ name }: DecorLayerProps) {
     case '과일바구니': return <Basket kind="fruit" />
     case '우산': return <Umbrella />
     case '체리 바구니': return <Basket kind="cherry" />
-    case '포도송이 모자장식': return <GrapeHatPiece />
     case '호빵 찜통': return <BunSteamer />
     case '딸기 우유팩': return <StrawberryMilk />
     case '케이크 한 조각': return <Dessert kind="cake" />
@@ -107,9 +104,6 @@ function Sweater({ color, accent }: { color: string; accent: string }) {
   return <g stroke={outline} strokeWidth="3" strokeLinejoin="round"><path d="M85 151c28-16 62-16 90 0l4 88c-28 13-70 13-98 0z" fill={color} /><path d="M88 164l-21 45M172 164l21 45" stroke={color} strokeWidth="20" strokeLinecap="round" /><path d="M130 176v42M109 197h42M115 182l30 30M145 182l-30 30" stroke={accent} strokeWidth="5" /><path d="M88 226h84" stroke={accent} strokeWidth="7" /></g>
 }
 
-function StrawHat() {
-  return <g stroke={outline} strokeWidth="3" strokeLinejoin="round"><ellipse cx="130" cy="61" rx="73" ry="18" fill="#e6bf67" /><path d="M92 58c3-37 73-37 76 0z" fill="#efcf7b" /><path d="M94 48c24 9 48 9 72 0" fill="none" stroke="#b96945" strokeWidth="8" /></g>
-}
 
 function RainSet() {
   return <g stroke={outline} strokeWidth="3" strokeLinejoin="round"><path d="M88 145c25-17 59-17 84 0l12 93c-30 15-78 15-108 0z" fill="#e4b845" /><path d="M102 139c10-20 46-20 56 0l-10 27h-36z" fill="#e4b845" /><circle cx="137" cy="184" r="4" fill="#fff2b3" /><circle cx="137" cy="207" r="4" fill="#fff2b3" /><path d="M75 270h43v26H67c-3-12 0-21 8-26zM185 270h-43v26h51c3-12 0-21-8-26z" fill="#c56c43" /></g>
@@ -147,7 +141,6 @@ function Swimsuit() {
   return <g stroke={outline} strokeWidth="3" strokeLinejoin="round"><path d="M94 171c22-10 50-10 72 0l9 78c-27 12-63 12-90 0z" fill="#d85f50" /><path d="M99 178c13 16 49 16 62 0M91 217h78" fill="none" stroke="#ffe6a5" strokeWidth="7" /><circle cx="112" cy="198" r="4" fill="#ffe6a5" stroke="none" /><circle cx="147" cy="231" r="4" fill="#ffe6a5" stroke="none" /></g>
 }
 
-function AcornBeret() { return <g stroke={outline} strokeWidth="3" strokeLinejoin="round"><path d="M83 58c12-40 82-43 96 0-22 13-74 13-96 0z" fill="#8c5839" /><path d="M105 30c16 8 34 8 50 0" fill="none" stroke="#bf8b51" strokeWidth="8" /><path d="M132 22l8-12" strokeLinecap="round" /></g> }
 function SwimTube() { return <g stroke={outline} strokeWidth="4"><ellipse cx="130" cy="220" rx="77" ry="37" fill="#f2b745" /><ellipse cx="130" cy="220" rx="42" ry="16" fill="none" /><path d="M70 201l23 15M166 218l24 17" stroke="#fff1b8" strokeWidth="9" /></g> }
 function MapleFan() { return <g transform="translate(184 173) rotate(12)" stroke={outline} strokeWidth="3" strokeLinejoin="round"><path d="M22 4l8 15 15-8-5 18 17 3-16 12 10 13-21-4-8 20-8-20-21 4 10-13-16-12 17-3-5-18 15 8z" fill="#cf633d" /><path d="M22 53v44" strokeWidth="7" strokeLinecap="round" /></g> }
 
@@ -158,7 +151,6 @@ function Basket({ kind }: { kind: 'bun' | 'fruit' | 'cherry' }) {
 function SnowmanMug() { return <g transform="translate(190 180)" stroke={outline} strokeWidth="3"><path d="M2 5h45v54H2z" fill="#f7f5eb" /><path d="M47 17h8c18 0 18 29 0 29h-8" fill="none" strokeWidth="6" /><circle cx="18" cy="25" r="3" /><circle cx="31" cy="25" r="3" /><path d="M20 37c6 5 10 5 16 0" fill="none" /><path d="M8 8c12-8 24-8 36 0" stroke="#b9544d" strokeWidth="7" /></g> }
 function Dessert({ kind }: { kind: 'pie' | 'cake' }) { return <g transform="translate(186 204)" stroke={outline} strokeWidth="3" strokeLinejoin="round">{kind === 'pie' ? <><path d="M2 39l64-23-15 47H11z" fill="#d9a15d" /><path d="M12 36l47-17" stroke="#f4d18d" strokeWidth="9" /><circle cx="36" cy="31" r="5" fill="#bf4650" /></> : <><path d="M4 22h58v43H4z" fill="#f1b7ac" /><path d="M4 22l28-17 30 17z" fill="#fff4df" /><path d="M9 39h49" stroke="#fff4df" strokeWidth="7" /><circle cx="34" cy="9" r="6" fill="#c94548" /></>}</g> }
 function Umbrella() { return <g transform="translate(176 139)" stroke={outline} strokeWidth="4" strokeLinejoin="round"><path d="M3 49c8-53 72-53 80 0-13-7-27-7-40 0-13-7-27-7-40 0z" fill="#e8927f" /><path d="M43 49v96c0 19 24 19 24 2" fill="none" strokeWidth="7" strokeLinecap="round" /><path d="M43 3v-13" strokeWidth="6" /></g> }
-function GrapeHatPiece() { return <g transform="translate(169 43)" stroke={outline} strokeWidth="2"><path d="M18 8c9-14 21-14 31-5-8 10-18 12-31 5z" fill="#638953" /><path d="M20 9c-11 10-10 21 2 25" fill="none" stroke="#638953" strokeWidth="5" />{[[14,27],[28,28],[42,28],[21,41],[35,42],[28,55]].map(([x,y])=><circle key={`${x}-${y}`} cx={x} cy={y} r="9" fill="#79618d" />)}</g> }
 function BunSteamer() { return <g transform="translate(181 193)" stroke={outline} strokeWidth="3"><ellipse cx="35" cy="18" rx="35" ry="14" fill="#c88d50" /><path d="M0 18v47c8 14 62 14 70 0V18" fill="#d6a15e" /><path d="M6 41h58" /><ellipse cx="35" cy="18" rx="21" ry="8" fill="#f4dfc5" /><path d="M35 10v16" /></g> }
 function StrawberryMilk() { return <g transform="translate(190 187)" stroke={outline} strokeWidth="3" strokeLinejoin="round"><path d="M4 12l12-12h34l12 12v62H4z" fill="#f3a6a3" /><path d="M16 0l10 14h36M26 14v60" fill="none" /><path d="M34 37c8-9 20 0 13 11-7 11-17 11-23 0-6-11 2-16 10-11z" fill="#d84e52" /><path d="M31 35l8-7 8 8" fill="#668b51" /></g> }
 function FloralEdition() { return <g fill="#f1a6a0" stroke={outline} strokeWidth="2">{[[77,78],[98,62],[126,57],[154,62],[178,79]].map(([x,y])=><g key={`${x}-${y}`} transform={`translate(${x} ${y})`}><circle cx="0" cy="-6" r="7"/><circle cx="6" cy="0" r="7"/><circle cx="0" cy="6" r="7"/><circle cx="-6" cy="0" r="7"/><circle r="4" fill="#f5d270"/></g>)}</g> }

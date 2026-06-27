@@ -1896,13 +1896,7 @@ function decorIcon(item: DecorItem) {
 }
 
 const petHomeAccessoryIds = new Set([
-  'straw-hat',
-  'acorn-beret',
-  'spring-blossom-hat',
   'summer-shell-hat',
-  'autumn-maple-beret',
-  'winter-snow-knit-hat',
-  'grape-hat-piece',
   'bell-necklace',
   'sun-glasses',
   'pearl-blossom-necklace',
