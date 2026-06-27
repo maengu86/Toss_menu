@@ -4,7 +4,7 @@ import type { CSSProperties, ReactNode, RefObject } from 'react'
 import './App.css'
 import PetAvatar from './components/PetAvatar'
 import { getRoomBackgroundImage } from './data/decorAssets'
-import { getSudalAccessoryImage, getSudalOutfitImage } from './data/sudalDecorImages'
+import { getSudalAccessoryPreviewImage, getSudalOutfitPreviewImage } from './data/sudalDecorImages'
 import { getPetDecorIconImage, getPetFeedIconImage, getPetShareIconImage } from './data/sudalPetIcons'
 import { fallbackAppData, loadAppData } from './services/appDataService'
 import type { DecorItem, Ingredient, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
@@ -979,9 +979,9 @@ function PetHomeScreen({
               const itemRoomImage = item.type === 'background' ? getRoomBackgroundImage(item.name) : undefined
               const itemDecorImage =
                 item.type === 'outfit'
-                  ? getSudalOutfitImage(item.name)
+                  ? getSudalOutfitPreviewImage(item.name)
                   : item.type === 'accessory'
-                    ? getSudalAccessoryImage(item.name)
+                    ? getSudalAccessoryPreviewImage(item.name)
                     : ''
               return (
                 <button className={`decor-card ${selected ? 'selected' : ''} ${unlocked ? '' : 'locked'}`} key={item.id} onClick={() => onSelectDecor(item)} type="button">

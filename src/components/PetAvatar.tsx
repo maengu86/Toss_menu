@@ -1,5 +1,5 @@
 import sudalMain from './sudal/sudal_main.png'
-import { getSudalAccessoryImage, getSudalOutfitImage } from '../data/sudalDecorImages'
+import { getSudalAccessoryWornImage, getSudalOutfitWornImage } from '../data/sudalDecorImages'
 
 type PetAvatarProps = {
   outfit?: string
@@ -33,8 +33,8 @@ function PetAvatar({
                   : ''
 
   if (body === 'sudal') {
-    const outfitImage = getSudalOutfitImage(outfit)
-    const accessoryImage = getSudalAccessoryImage(accessory)
+    const outfitImage = getSudalOutfitWornImage(outfit)
+    const accessoryImage = getSudalAccessoryWornImage(accessory)
 
     return (
       <div className={`pet-stage pet-dress-stage ${stageClass}`}>
