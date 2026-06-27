@@ -1886,7 +1886,6 @@ function decorIcon(item: DecorItem) {
   }
   if (item.name.includes('머그')) return '☕'
   if (item.name.includes('딸기')) return '🍓'
-  if (item.name.includes('선글라스')) return '🕶️'
   if (item.name.includes('숟가락')) return '🥄'
   if (item.name.includes('선풍기')) return '🪭'
   if (item.name.includes('주스')) return '🧃'
@@ -1896,17 +1895,11 @@ function decorIcon(item: DecorItem) {
 }
 
 const petHomeAccessoryIds = new Set([
-  'summer-shell-hat',
   'bell-necklace',
-  'sun-glasses',
   'pearl-blossom-necklace',
   'shell-necklace',
   'acorn-maple-necklace',
   'snow-pearl-necklace',
-  'strawberry-flower-necklace',
-  'citrus-bead-necklace',
-  'moon-shell-necklace',
-  'grape-ribbon-necklace',
 ])
 
 function isPetHomeVisibleDecorItem(item: DecorItem) {
