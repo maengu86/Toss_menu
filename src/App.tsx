@@ -2070,6 +2070,10 @@ const petHomeAccessoryIds = new Set([
   'cherry-hairpin',
   'berry-pin',
   'mittens',
+  'pearl-blossom-necklace',
+  'shell-necklace',
+  'acorn-maple-necklace',
+  'snow-pearl-necklace',
 ])
 
 function isPetHomeVisibleDecorItem(item: DecorItem) {
