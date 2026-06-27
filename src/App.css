@@ -1263,7 +1263,7 @@
 }
 
 .tab-bar button.active .tab-label {
-  background: color-mix(in srgb, #dff1cf 60%, transparent);
+  background: rgba(223, 241, 207, 0.6);
 }
 
 .toast {

@@ -143,10 +143,13 @@ const ingredientIcons: Record<string, string> = {
     <path d="M102 148c8 8 14 10 26 10 10 0 16-2 26-10" fill="none" stroke="#fff1df" stroke-width="7" stroke-linecap="round"/>
   `),
   camera: badge(`
-    <path d="M78 112h34l12-18h38c12 0 18 6 18 18v58c0 12-6 18-18 18H78c-12 0-18-6-18-18v-40c0-12 6-18 18-18z" fill="#f6e9dc" stroke="#6f5a45" stroke-width="7" stroke-linejoin="round"/>
-    <circle cx="128" cy="148" r="26" fill="#fff8f2" stroke="#6f5a45" stroke-width="7"/>
-    <circle cx="128" cy="148" r="14" fill="#e8a46b" stroke="#6f5a45" stroke-width="6"/>
-    <path d="M98 102h18l8-14h28" fill="none" stroke="#6f5a45" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="58" y="92" width="140" height="96" rx="24" fill="#f8ede1" stroke="#6f5a45" stroke-width="7"/>
+    <path d="M78 104h34l10-16h28c12 0 20 8 20 20" fill="none" stroke="#6f5a45" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="81" y="118" width="16" height="10" rx="5" fill="#e7c2a1" stroke="#6f5a45" stroke-width="4"/>
+    <circle cx="128" cy="140" r="28" fill="#fff8f0" stroke="#6f5a45" stroke-width="7"/>
+    <circle cx="128" cy="140" r="15" fill="#eea86a" stroke="#6f5a45" stroke-width="6"/>
+    <circle cx="122" cy="134" r="4" fill="#fff5e9"/>
+    <path d="M151 116c8 2 14 8 17 15" fill="none" stroke="#6f5a45" stroke-width="6" stroke-linecap="round"/>
   `),
 }
 
