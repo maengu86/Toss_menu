@@ -115,9 +115,10 @@ export async function loadAppData(): Promise<AppData> {
     throw new Error(errors.map((error) => error?.message).join('\n'))
   }
 
-  const decorItems = ((decorItemsResult.data ?? []) as DecorItemRow[])
+  const remoteDecorItems = ((decorItemsResult.data ?? []) as DecorItemRow[])
     .map(mapDecorItem)
     .sort((a, b) => compareByKnownOrder(a.id, b.id, decorItemOrder))
+  const decorItems = mergeDecorItems(remoteDecorItems)
 
   const menus = ((menusResult.data ?? []) as MenuRow[])
     .map(mapMenu)
@@ -177,6 +178,18 @@ function mapDecorItem(row: DecorItemRow): DecorItem {
     unlockLevel: row.unlock_level ?? undefined,
     unlockByShopping: row.unlock_by_shopping ?? undefined,
   }
+}
+
+function mergeDecorItems(remoteItems: DecorItem[]) {
+  const remoteById = new Map(remoteItems.map((item) => [item.id, item]))
+  const localIds = new Set(fallbackDecorItems.map((item) => item.id))
+  const knownItems = fallbackDecorItems.map((localItem) => ({
+    ...localItem,
+    ...remoteById.get(localItem.id),
+    badge: localItem.badge,
+  }))
+
+  return [...knownItems, ...remoteItems.filter((item) => !localIds.has(item.id))]
 }
 
 function createOrderMap(items: { id: string }[]) {

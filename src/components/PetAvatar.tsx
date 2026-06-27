@@ -1,4 +1,5 @@
 import sudalMain from './sudal/sudal_main.png'
+import { SudalAccessoryLayer, SudalOutfitLayer } from './PetDecorLayers'
 
 type PetAvatarProps = {
   outfit?: string
@@ -50,6 +51,8 @@ function PetAvatar({
         <svg className="pet-svg dress-pet sudal-pet" viewBox="0 0 260 340" role="img" aria-label="먹보 수달 펫">
           <image href={sudalMain} x="18" y="5" width="224" height="324" preserveAspectRatio="xMidYMid meet" />
 
+          <SudalOutfitLayer name={outfit} />
+
           {hasScarf && (
             <>
               <path d="M75 117c34 14 76 14 110 0l2 17c-42 15-72 15-114 0z" fill="#ef6b55" />
@@ -92,6 +95,7 @@ function PetAvatar({
           {hasJuice && <AccessoryJuice />}
           {hasSweetPotato && <AccessorySweetPotato />}
           {hasMandarin && <AccessoryMandarin />}
+          <SudalAccessoryLayer name={accessory} />
         </svg>
       </div>
     )

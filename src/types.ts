@@ -34,6 +34,7 @@ export type DecorItem = {
   id: string
   name: string
   type: 'background' | 'outfit' | 'accessory'
+  badge?: string
   unlockLevel?: number
   unlockByShopping?: boolean
 }
