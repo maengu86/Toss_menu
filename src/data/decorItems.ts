@@ -51,7 +51,6 @@ export const decorItems: DecorItem[] = [
   { id: 'cake-slice', name: '케이크 한 조각', type: 'accessory' },
   { id: 'floral-edition', name: '꽃무늬 에디션', type: 'accessory' },
   { id: 'bell-necklace', name: '방울 목걸이', type: 'accessory' },
-  { id: 'rain-boots', name: '장화 신발', type: 'accessory' },
   { id: 'eco-bag', name: '에코백', type: 'accessory' },
   { id: 'bread-board-knife', name: '나무 도마+빵칼', type: 'accessory' },
   { id: 'yarn-needle', name: '털실 뭉치+바늘', type: 'accessory' },

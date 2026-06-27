@@ -2245,25 +2245,34 @@
   object-fit: contain;
 }
 
-.pet-action-tabs {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 6px;
+.pet-action-panel {
   margin: 12px 0 0;
-  padding: 8px;
+  overflow: hidden;
   border: 1px solid #e5e8eb;
   border-radius: 8px;
   background: #ffffff;
   box-shadow: none;
 }
 
+.pet-action-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 8px;
+  border: 0;
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: none;
+}
+
 .pet-action-tabs button {
   min-width: 0;
-  min-height: 58px;
+  min-height: 70px;
   display: grid;
   place-items: center;
   align-content: center;
-  gap: 0;
+  gap: 3px;
   border: 0;
   border-radius: 10px;
   color: #8b95a1;
@@ -2285,12 +2294,14 @@
 }
 
 .pet-action-tabs b {
-  position: absolute;
-  width: 1px;
-  height: 1px;
+  max-width: 100%;
   overflow: hidden;
-  clip: rect(0 0 0 0);
+  color: #49372f;
+  font-size: 12px;
+  line-height: 1.1;
+  text-overflow: ellipsis;
   white-space: nowrap;
+  background: transparent;
 }
 
 .sudal-pet {
@@ -2317,7 +2328,7 @@
   display: grid;
   gap: 10px;
   margin: 0;
-  padding: 12px 12px 18px;
+  padding: 4px 12px 16px;
   border: 0;
   border-radius: 0;
   background: #ffffff;
@@ -2524,7 +2535,7 @@
 }
 
 .decor-grid {
-  padding: 12px 12px 0;
+  padding: 4px 12px 0;
 }
 
 .decor-grid > .clear-card {

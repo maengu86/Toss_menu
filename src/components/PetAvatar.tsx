@@ -149,8 +149,8 @@ function getAccessoryFrame(name: string) {
   if (name.includes('딸기 우유팩')) {
     return { x: 15, y: 30, width: 195, height: 255 }
   }
-  if (name.includes('장화')) {
-    return { x: 29, y: 235, width: 202, height: 76 }
+  if (name.includes('목걸이')) {
+    return { x: 34, y: 62, width: 192, height: 176 }
   }
   if (name.includes('밀짚모자')) {
     return { x: 20, y: -16, width: 220, height: 288 }

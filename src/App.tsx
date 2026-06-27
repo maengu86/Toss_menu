@@ -290,7 +290,7 @@ function App() {
   const level = getPetLevel(exp)
   function showToast(message: string) {
     setToast(message)
-    window.setTimeout(() => setToast(''), 2200)
+    window.setTimeout(() => setToast(''), 1200)
   }
 
   function handleScrollActivity() {
@@ -1926,104 +1926,106 @@ function PetHomeScreen({
         <PetAvatar outfit={outfit} background={background} accessory={accessory} body="sudal" />
       </div>
 
-      <div className="pet-action-tabs" aria-label="펫홈 작업">
-        <button className={petTab === 'feed' ? 'active' : ''} onClick={() => setPetTab('feed')} type="button">
-          <img className="pet-action-tab-icon" alt="" aria-hidden="true" src={petTabFeedIcon} />
-          <b>밥먹기</b>
-        </button>
-        {decorTabs.map((tab) => (
-          <button
-            className={petTab === 'decor' && decorTab === tab.id ? 'active' : ''}
-            key={tab.id}
-            onClick={() => {
-              setPetTab('decor')
-              setDecorTab(tab.id)
-            }}
-            type="button"
-          >
-            <img className="pet-action-tab-icon" alt="" aria-hidden="true" src={decorTabIcons[tab.id]} />
-            <b>{tab.label}</b>
+      <div className="pet-action-panel">
+        <div className="pet-action-tabs" aria-label="펫홈 작업">
+          <button className={petTab === 'feed' ? 'active' : ''} onClick={() => setPetTab('feed')} type="button">
+            <img className="pet-action-tab-icon" alt="" aria-hidden="true" src={petTabFeedIcon} />
+            <b>밥먹기</b>
           </button>
-        ))}
-      </div>
+          {decorTabs.map((tab) => (
+            <button
+              className={petTab === 'decor' && decorTab === tab.id ? 'active' : ''}
+              key={tab.id}
+              onClick={() => {
+                setPetTab('decor')
+                setDecorTab(tab.id)
+              }}
+              type="button"
+            >
+              <img className="pet-action-tab-icon" alt="" aria-hidden="true" src={decorTabIcons[tab.id]} />
+              <b>{tab.label}</b>
+            </button>
+          ))}
+        </div>
 
-      {petTab === 'feed' && (
-        <section className="pet-feed-panel">
-          <div className="level-card">
-            <div className="pet-level-card-main">
-              <div className="pet-level-mark">
-                <small>LEVEL</small>
-                <strong>{level}</strong>
+        {petTab === 'feed' && (
+          <section className="pet-feed-panel">
+            <div className="level-card">
+              <div className="pet-level-card-main">
+                <div className="pet-level-mark">
+                  <small>LEVEL</small>
+                  <strong>{level}</strong>
+                </div>
+                <div className="pet-level-copy">
+                  <span>{expLabel}</span>
+                </div>
               </div>
-              <div className="pet-level-copy">
-                <span>{expLabel}</span>
+              <div className="pet-level-progress-row">
+                <div className="progress-track">
+                  <div className="progress-fill" style={{ width: `${levelProgress}%` }} />
+                </div>
+                <b>{Math.round(levelProgress)}%</b>
               </div>
             </div>
-            <div className="pet-level-progress-row">
-              <div className="progress-track">
-                <div className="progress-fill" style={{ width: `${levelProgress}%` }} />
-              </div>
-              <b>{Math.round(levelProgress)}%</b>
-            </div>
-          </div>
-          <div className="feed-list compact-feed-list">
-            {feedIngredients.length === 0 && (
-              <p className="empty">메뉴를 주문해 주세요</p>
-            )}
-            {feedIngredients.map((ingredient) => (
-              <button className="feed-card" key={ingredient.id} onClick={() => onFeed(ingredient)} type="button">
-                <span className="feed-card-icon" aria-hidden="true">{shoppingItemEmoji(ingredient.name)}</span>
-                <span>
-                  <strong>{ingredient.name}</strong>
-                  <small>{ingredient.menuName}</small>
-                </span>
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {petTab === 'decor' && (
-        <div className="pet-inventory">
-          <div className="decor-grid">
-            {canClearDecor && (
-              <button
-                className={`decor-card clear-card ${isClearSelected ? 'selected' : ''}`}
-                onClick={() => onClearDecor(decorTab)}
-                type="button"
-              >
-                <span className="decor-card-visual decor-card-empty" aria-hidden="true">
-                  <img alt="" src={getPetClearDecorIconImage()} />
-                </span>
-                <strong>미착용</strong>
-              </button>
-            )}
-            {visibleItems
-              .map((item, index) => ({
-                item,
-                unlocked: isDecorUnlocked(item, level, shoppingRewardUnlocked),
-                selected: item.name === background || item.name === outfit || item.name === accessory,
-                itemRoomImage: item.type === 'background' ? getRoomBackgroundImage(item.name) : undefined,
-                itemDecorImage: item.type === 'accessory' ? getSudalAccessoryPreviewImage(item.name) : '',
-                index,
-              }))
-              .sort((a, b) => Number(b.unlocked) - Number(a.unlocked) || a.index - b.index)
-              .map(({ item, unlocked, selected, itemRoomImage, itemDecorImage }) => (
-                <button className={`decor-card ${selected ? 'selected' : ''} ${unlocked ? '' : 'locked'}`} key={item.id} onClick={() => onSelectDecor(item)} type="button">
-                  <span
-                    className={itemRoomImage ? 'decor-card-visual room-thumbnail' : 'decor-card-visual'}
-                    style={itemRoomImage ? { backgroundImage: `url(${itemRoomImage})` } : undefined}
-                  >
-                    {!itemRoomImage && itemDecorImage && <img alt="" src={itemDecorImage} />}
-                    {!itemRoomImage && !itemDecorImage && decorIcon(item)}
+            <div className="feed-list compact-feed-list">
+              {feedIngredients.length === 0 && (
+                <p className="empty">메뉴를 주문해 주세요</p>
+              )}
+              {feedIngredients.map((ingredient) => (
+                <button className="feed-card" key={ingredient.id} onClick={() => onFeed(ingredient)} type="button">
+                  <span className="feed-card-icon" aria-hidden="true">{shoppingItemEmoji(ingredient.name)}</span>
+                  <span>
+                    <strong>{ingredient.name}</strong>
+                    <small>{ingredient.menuName}</small>
                   </span>
-                  <strong>{item.name}</strong>
-                  <small>{unlocked ? item.badge ?? '' : item.unlockByShopping ? '장보기 보상' : `Lv.${item.unlockLevel}`}</small>
                 </button>
               ))}
+            </div>
+          </section>
+        )}
+
+        {petTab === 'decor' && (
+          <div className="pet-inventory">
+            <div className="decor-grid">
+              {canClearDecor && (
+                <button
+                  className={`decor-card clear-card ${isClearSelected ? 'selected' : ''}`}
+                  onClick={() => onClearDecor(decorTab)}
+                  type="button"
+                >
+                  <span className="decor-card-visual decor-card-empty" aria-hidden="true">
+                    <img alt="" src={getPetClearDecorIconImage()} />
+                  </span>
+                  <strong>미착용</strong>
+                </button>
+              )}
+              {visibleItems
+                .map((item, index) => ({
+                  item,
+                  unlocked: isDecorUnlocked(item, level, shoppingRewardUnlocked),
+                  selected: item.name === background || item.name === outfit || item.name === accessory,
+                  itemRoomImage: item.type === 'background' ? getRoomBackgroundImage(item.name) : undefined,
+                  itemDecorImage: item.type === 'accessory' ? getSudalAccessoryPreviewImage(item.name) : '',
+                  index,
+                }))
+                .sort((a, b) => Number(b.unlocked) - Number(a.unlocked) || a.index - b.index)
+                .map(({ item, unlocked, selected, itemRoomImage, itemDecorImage }) => (
+                  <button className={`decor-card ${selected ? 'selected' : ''} ${unlocked ? '' : 'locked'}`} key={item.id} onClick={() => onSelectDecor(item)} type="button">
+                    <span
+                      className={itemRoomImage ? 'decor-card-visual room-thumbnail' : 'decor-card-visual'}
+                      style={itemRoomImage ? { backgroundImage: `url(${itemRoomImage})` } : undefined}
+                    >
+                      {!itemRoomImage && itemDecorImage && <img alt="" src={itemDecorImage} />}
+                      {!itemRoomImage && !itemDecorImage && decorIcon(item)}
+                    </span>
+                    <strong>{item.name}</strong>
+                    <small>{unlocked ? item.badge ?? '' : item.unlockByShopping ? '장보기 보상' : `Lv.${item.unlockLevel}`}</small>
+                  </button>
+                ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
       </div>
     </section>
   )
@@ -2068,7 +2070,6 @@ const petHomeAccessoryIds = new Set([
   'cherry-hairpin',
   'berry-pin',
   'mittens',
-  'rain-boots',
 ])
 
 function isPetHomeVisibleDecorItem(item: DecorItem) {
