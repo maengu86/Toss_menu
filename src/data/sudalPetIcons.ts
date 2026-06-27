@@ -20,7 +20,7 @@ function pickIngredientIconKey(name: string) {
   if (name.includes('오이') || name.includes('애호박') || name.includes('주키니')) return 'cucumber'
   if (name.includes('가지')) return 'eggplant'
   if (name.includes('귤') || name.includes('한라봉')) return 'citrus'
-  if (name.includes('배추') || name.includes('봄동') || name.includes('열무') || name.includes('시금치') || name.includes('아스파라거스')) return 'greens'
+  if (name.includes('배추') || name.includes('봄동') || name.includes('열무') || name.includes('시금치')) return 'greens'
   if (name.includes('굴') || name.includes('바지락') || name.includes('꼬막')) return 'shell'
   if (name.includes('무')) return 'radish'
   if (name.includes('고구마')) return 'sweetPotato'

@@ -62,10 +62,13 @@ type DecorItemRow = {
   unlock_by_shopping: boolean | null
 }
 
+const hiddenSeasonalIngredientIds = new Set(['asparagus'])
+const hiddenMenuNameWords = ['아스파라거스']
+
 export const fallbackAppData: AppData = {
   decorItems: fallbackDecorItems,
-  menus: fallbackMenus,
-  seasonalIngredients: fallbackSeasonalIngredients,
+  menus: normalizeMenuCatalog(fallbackMenus),
+  seasonalIngredients: filterVisibleSeasonalIngredients(fallbackSeasonalIngredients),
   seasons: fallbackSeasons,
 }
 
@@ -131,16 +134,16 @@ export async function loadAppData(): Promise<AppData> {
   const remoteMenus = ((menusResult.data ?? []) as MenuRow[])
     .map(mapMenu)
     .sort((a, b) => compareByKnownOrder(a.id, b.id, menuOrder))
-  const menus = mergeMenus(remoteMenus)
+  const menus = normalizeMenuCatalog(mergeMenus(remoteMenus))
 
-  const seasonalIngredients = ((seasonalIngredientsResult.data ?? []) as SeasonalIngredientRow[])
+  const seasonalIngredients = filterVisibleSeasonalIngredients(((seasonalIngredientsResult.data ?? []) as SeasonalIngredientRow[])
     .map(mapSeasonalIngredient)
-    .sort((a, b) => compareByKnownOrder(a.id, b.id, seasonalIngredientOrder))
+    .sort((a, b) => compareByKnownOrder(a.id, b.id, seasonalIngredientOrder)))
 
   return {
     decorItems: decorItems.length > 0 ? decorItems : fallbackDecorItems,
-    menus: menus.length > 0 ? menus : fallbackMenus,
-    seasonalIngredients: seasonalIngredients.length > 0 ? seasonalIngredients : fallbackSeasonalIngredients,
+    menus: menus.length > 0 ? menus : fallbackAppData.menus,
+    seasonalIngredients: seasonalIngredients.length > 0 ? seasonalIngredients : fallbackAppData.seasonalIngredients,
     seasons: seasonsResult.data && seasonsResult.data.length > 0 ? (seasonsResult.data as SeasonRow[]) : fallbackSeasons,
   }
 }
@@ -220,6 +223,83 @@ function mergeMenus(remoteMenus: Menu[]) {
     }))
 
   return [...knownMenus, ...remoteOnlyMenus]
+}
+
+function normalizeMenuCatalog(menus: Menu[]) {
+  const standaloneNames = new Set(menus
+    .filter((menu) => !isHiddenMenu(menu) && !hasCombinedMenuName(menu.name))
+    .map((menu) => getMenuNameKey(menu.name)))
+  const normalizedMenus: Menu[] = []
+  const usedIds = new Set<string>()
+  const usedNames = new Set<string>()
+
+  for (const menu of menus) {
+    if (isHiddenMenu(menu)) continue
+
+    const menuNames = splitCombinedMenuName(menu.name)
+    if (menuNames.length <= 1) {
+      addMenu(menu)
+      continue
+    }
+
+    menuNames.forEach((name, index) => {
+      if (standaloneNames.has(name)) return
+
+      addMenu({
+        ...menu,
+        id: createSplitMenuId(menu.id, index, usedIds),
+        name,
+      })
+    })
+  }
+
+  return normalizedMenus
+
+  function addMenu(menu: Menu) {
+    const key = getMenuNameKey(menu.name)
+    if (usedNames.has(key)) return
+
+    normalizedMenus.push(menu)
+    usedIds.add(menu.id)
+    usedNames.add(key)
+  }
+}
+
+function filterVisibleSeasonalIngredients(ingredients: SeasonalIngredient[]) {
+  return ingredients.filter((ingredient) => !hiddenSeasonalIngredientIds.has(ingredient.id))
+}
+
+function isHiddenMenu(menu: Menu) {
+  return menu.seasonalIngredientIds?.some((id) => hiddenSeasonalIngredientIds.has(id))
+    || hiddenMenuNameWords.some((word) => menu.name.includes(word))
+    || menu.ingredients.some((ingredient) => hiddenMenuNameWords.some((word) => ingredient.name.includes(word)))
+}
+
+function hasCombinedMenuName(name: string) {
+  return /[/／]/.test(name)
+}
+
+function splitCombinedMenuName(name: string) {
+  return name
+    .split(/[/／]/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+}
+
+function getMenuNameKey(name: string) {
+  return name
+    .normalize('NFKC')
+    .replace(/[\s·ㆍ,，/／_-]+/g, '')
+    .toLowerCase()
+}
+
+function createSplitMenuId(baseId: string, index: number, usedIds: Set<string>) {
+  const baseSplitId = `${baseId}-part-${index + 1}`
+  if (!usedIds.has(baseSplitId)) return baseSplitId
+
+  let suffix = 2
+  while (usedIds.has(`${baseSplitId}-${suffix}`)) suffix += 1
+  return `${baseSplitId}-${suffix}`
 }
 
 function mapDecorItem(row: DecorItemRow): DecorItem {

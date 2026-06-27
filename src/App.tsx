@@ -643,7 +643,7 @@ function HomeScreen({
         </section>
       ) : (
         <>
-          <header className="top-header">
+          <header className="top-header home-menu-header">
             <h1>제철음식 뭐가있을까?</h1>
           </header>
 
@@ -706,7 +706,6 @@ function HomeScreen({
                     {shoppingItemEmoji(menu.ingredients[0]?.name ?? menu.name)}
                   </span>
                   <strong>{menu.name}</strong>
-                  <small>{menu.ingredients.slice(0, 2).map((ingredient) => ingredient.name).join(' · ')}</small>
                   <b>{getMenuExp(menu).toLocaleString('ko-KR')}xp</b>
                   {selected && <span className="menu-card-selected" aria-hidden="true">✓</span>}
                 </button>
