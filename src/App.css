@@ -346,12 +346,17 @@
 }
 
 .season-panel-index {
+  --season-index-height: 184px;
   display: grid;
   grid-template-columns: 90px minmax(0, 1fr);
+  align-items: stretch;
   box-shadow: none;
 }
 
 .season-panel-index .season-tabs {
+  height: var(--season-index-height);
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  box-sizing: border-box;
   padding: 8px 0 8px 8px;
   border-right: 0;
   background: #ffffff;
@@ -362,12 +367,15 @@
 }
 
 .season-panel-index .seasonal-grid {
+  height: var(--season-index-height);
+  max-height: none;
+  box-sizing: border-box;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: 66px;
   justify-content: stretch;
   align-content: start;
   gap: 7px;
-  max-height: 146px;
   padding: 7px;
   background: #ffffff;
   overflow-x: hidden;
