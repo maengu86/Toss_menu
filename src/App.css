@@ -1047,7 +1047,7 @@
 .tab-bar {
   height: 82px;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 6px;
   position: absolute;
   z-index: 200;
@@ -1076,9 +1076,26 @@
   min-width: auto;
   min-height: auto;
   display: block;
+  position: relative;
   color: #6f665f;
   font-size: 17px;
   line-height: 1;
+}
+
+.tab-bar .tab-icon b {
+  min-width: 17px;
+  height: 17px;
+  position: absolute;
+  top: -8px;
+  right: -12px;
+  display: grid;
+  place-items: center;
+  padding: 0 4px;
+  border-radius: 999px;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 900;
+  background: var(--orange);
 }
 
 .tab-bar .tab-label {
@@ -2359,7 +2376,7 @@
 
 .home-global-bar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 42px 42px;
+  grid-template-columns: minmax(0, 1fr) 42px;
   gap: 8px;
   align-items: center;
   position: sticky;
@@ -2692,8 +2709,8 @@
 }
 
 .home-purchase-section {
-  margin-top: 24px;
-  padding: 8px 10px 14px;
+  margin-top: 16px;
+  padding: 6px 10px 4px;
   border: 1px solid #e5e8eb;
   border-radius: 22px;
   background: #ffffff;
@@ -2705,7 +2722,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 0;
   margin-top: 0;
-  padding: 8px;
+  padding: 4px 8px 6px;
   border: 0;
   background: transparent;
 }
@@ -2860,8 +2877,8 @@
 .nested-menu-list {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 12px;
+  gap: 8px;
+  margin-top: 6px;
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -2870,15 +2887,15 @@
 
 .nested-menu-list .menu-card {
   min-width: 0;
-  min-height: 166px;
+  min-height: 146px;
   display: grid;
   grid-template-columns: 1fr;
   grid-template-rows: auto auto auto auto;
   justify-items: center;
   align-content: center;
-  gap: 7px;
+  gap: 6px;
   position: relative;
-  padding: 12px 8px;
+  padding: 10px 7px;
   border: 1px solid #e5e8eb;
   border-radius: 16px;
   color: #333d4b;
@@ -2895,12 +2912,12 @@
 }
 
 .menu-card-visual {
-  width: 58px;
-  height: 58px;
+  width: 50px;
+  height: 50px;
   display: grid;
   place-items: center;
   border-radius: 18px;
-  font-size: 34px;
+  font-size: 30px;
   background: color-mix(in srgb, var(--menu-color) 18%, #ffffff);
 }
 
@@ -3483,6 +3500,57 @@
 .shopping-detail-copy > p:not(.shopping-original-price) {
   margin: 0 0 16px;
   color: #4e5968;
+}
+
+.shopping-detail-ingredients {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0 4px;
+}
+
+.shopping-detail-ingredients > span {
+  color: #333d4b;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.shopping-detail-ingredients > div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.shopping-detail-ingredients button {
+  min-width: 0;
+  min-height: 78px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 5px;
+  padding: 8px 6px;
+  border: 1px solid #e5e8eb;
+  border-radius: 12px;
+  color: #333d4b;
+  background: #ffffff;
+}
+
+.shopping-detail-ingredients button.active {
+  border-color: var(--orange);
+  background: #fff7f1;
+}
+
+.shopping-detail-ingredients em {
+  font-size: 24px;
+  font-style: normal;
+  line-height: 1;
+}
+
+.shopping-detail-ingredients strong {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .shopping-detail-copy dl {
