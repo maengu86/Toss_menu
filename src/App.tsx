@@ -74,6 +74,14 @@ type OrderSnapshot = {
   orderTotal: number
 }
 
+type OrderHistoryItem = {
+  id: number
+  orderedAt: string
+  items: { name: string; quantity: string }[]
+  total: number
+  status: '주문 완료'
+}
+
 function formatWon(value: number) {
   return value.toLocaleString('ko-KR') + '원'
 }
@@ -132,6 +140,8 @@ function App() {
   const [checkedIngredients, setCheckedIngredients] = useState<string[]>([])
   const [removedCartIngredientKeys, setRemovedCartIngredientKeys] = useState<string[]>([])
   const [lastOrder, setLastOrder] = useState<OrderSnapshot | null>(null)
+  const [orderHistory, setOrderHistory] = useState<OrderHistoryItem[]>([])
+  const [profileOpen, setProfileOpen] = useState(false)
   // 작업: 펫 경험치는 레벨별 잔여치가 아니라 누적 XP로 저장합니다.
   // 개인 수정 가능: 기본 시작 XP를 바꾸고 싶으면 0을 원하는 값으로 변경해도 됩니다.
   // 적용 위치: 펫홈 레벨 카드와 밥먹이기 후 성장 상태.
@@ -216,6 +226,14 @@ function App() {
     setRemovedCartIngredientKeys((current) => current.filter((key) => !key.startsWith(`${menuId}:`)))
   }
 
+  function clearMenuSelection() {
+    setSelectedMenuIds([])
+    setCheckedIngredients([])
+    setRemovedCartIngredientKeys([])
+    setShoppingCatalogMenuIds([])
+    setSelectedMenuOpen(false)
+  }
+
   function feedPet(ingredient: FeedIngredient) {
     setExp((current) => current + getIngredientExp(ingredient))
     setFeedIngredients((current) => current.filter((item) => item.id !== ingredient.id))
@@ -256,6 +274,21 @@ function App() {
     const orderId = orderSequenceRef.current
 
     setLastOrder({ checkedPrice, orderTotal })
+    setOrderHistory((current) => [{
+      id: orderId,
+      orderedAt: new Intl.DateTimeFormat('ko-KR', {
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(new Date()),
+      items: checkedItems.map((item) => ({
+        name: item.ingredient.name,
+        quantity: item.ingredient.quantity,
+      })),
+      total: orderTotal,
+      status: '주문 완료',
+    }, ...current])
     setRemovedCartIngredientKeys((current) => Array.from(new Set([...current, ...orderedKeys])))
     setFeedIngredients((current) => [
       ...current,
@@ -332,6 +365,8 @@ function App() {
               setShopStep('cart')
               setScreen('shopping')
             }}
+            onOpenProfile={() => setProfileOpen(true)}
+            onCancelSelection={clearMenuSelection}
             onStartShopping={() => {
               if (selectedMenuIds.length === 0) {
                 showToast('먼저 메뉴를 골라주세요.')
@@ -396,6 +431,10 @@ function App() {
           />
         )}
 
+        {profileOpen && (
+          <MyPage orderHistory={orderHistory} onClose={() => setProfileOpen(false)} />
+        )}
+
         <TabBar
           current={screen}
           onChange={(nextScreen) => {
@@ -434,6 +473,8 @@ function HomeScreen({
   onToggleMenu,
   onToggleProduct,
   onOpenCart,
+  onOpenProfile,
+  onCancelSelection,
   onStartShopping,
 }: {
   today: string
@@ -456,10 +497,24 @@ function HomeScreen({
   onToggleMenu: (id: string) => void
   onToggleProduct: (menuId: string, ingredientName: string) => void
   onOpenCart: () => void
+  onOpenProfile: () => void
+  onCancelSelection: () => void
   onStartShopping: () => void
 }) {
   const [purchaseTab, setPurchaseTab] = useState<'cook' | 'delivery'>('cook')
   const [locationPreview, setLocationPreview] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const normalizedQuery = searchQuery.trim().toLowerCase()
+  const hasSearch = normalizedQuery.length > 0
+  const ingredientSearchResults = hasSearch
+    ? seasonalIngredients.filter((ingredient) => ingredient.name.toLowerCase().includes(normalizedQuery))
+    : []
+  const menuSearchResults = hasSearch
+    ? menus.filter((menu) => (
+      menu.name.toLowerCase().includes(normalizedQuery)
+      || menu.ingredients.some((ingredient) => ingredient.name.toLowerCase().includes(normalizedQuery))
+    ))
+    : []
   const relatedProducts = selectedMenus
     .flatMap((menu) => menu.ingredients.map((ingredient) => ({
       key: ingredientKey(menu.id, ingredient.name),
@@ -480,40 +535,102 @@ function HomeScreen({
 
   return (
     <section className="screen" onScroll={onScrollActivity}>
-      <header className="top-header">
-        <p>{today}</p>
-        <h1>제철음식 뭐가있을까?</h1>
+      <header className="home-global-bar">
+        <label className="shopping-search">
+          <span aria-hidden="true">🔍</span>
+          <input
+            aria-label="제철 음식과 메뉴 검색"
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="제철 음식과 메뉴 검색"
+            type="search"
+            value={searchQuery}
+          />
+        </label>
+        <button aria-label="마이페이지 열기" onClick={onOpenProfile} type="button">👤</button>
+        <button aria-label={`장바구니 ${checkedTotal}개`} onClick={onOpenCart} type="button">
+          🛒
+          {checkedTotal > 0 && <b>{checkedTotal}</b>}
+        </button>
       </header>
 
-      <div className={`season-panel season-panel-index season-${selectedSeason}`}>
-        <div className="season-tabs" aria-label="계절 선택">
-          {seasons.map((season) => (
-            <button
-              className={selectedSeason === season.key ? 'active' : ''}
-              key={season.key}
-              onClick={() => onSelectSeason(season.key)}
-              style={{ '--season-accent': season.accent } as CSSProperties}
-              type="button"
-            >
-              <span>{season.label}</span>
-            </button>
-          ))}
-        </div>
+      {hasSearch ? (
+        <section className="home-search-results">
+          <div>
+            <h2>제철 식재료 <span>{ingredientSearchResults.length}</span></h2>
+            <div className="home-search-result-list">
+              {ingredientSearchResults.map((ingredient) => (
+                <button
+                  key={ingredient.id}
+                  onClick={() => {
+                    onSelectSeason(ingredient.seasonKey)
+                    onSelectSeasonalIngredient(ingredient.id)
+                  }}
+                  type="button"
+                >
+                  <em aria-hidden="true">{ingredient.emoji}</em>
+                  <span><strong>{ingredient.name}</strong><small>{ingredient.season} 제철</small></span>
+                  <b>선택</b>
+                </button>
+              ))}
+              {ingredientSearchResults.length === 0 && <p>일치하는 제철 식재료가 없어요.</p>}
+            </div>
+          </div>
 
-        <div className="seasonal-grid" aria-label="제철 식재료" onScroll={onScrollActivity}>
-          {seasonIngredients.map((ingredient) => (
-            <button
-              className={`seasonal-tile ${selectedSeasonalIngredientId === ingredient.id ? 'active' : ''}`}
-              key={ingredient.id}
-              onClick={() => onSelectSeasonalIngredient(ingredient.id)}
-              type="button"
-            >
-              <span className="food-emoji" aria-hidden="true">{ingredient.emoji}</span>
-              <strong>{ingredient.name}</strong>
-            </button>
-          ))}
-        </div>
-      </div>
+          <div>
+            <h2>메뉴 <span>{menuSearchResults.length}</span></h2>
+            <div className="home-search-result-list">
+              {menuSearchResults.map((menu) => {
+                const selected = selectedMenuIds.includes(menu.id)
+                return (
+                  <button className={selected ? 'selected' : ''} key={menu.id} onClick={() => onToggleMenu(menu.id)} type="button">
+                    <em aria-hidden="true">{shoppingItemEmoji(menu.ingredients[0]?.name ?? '')}</em>
+                    <span><strong>{menu.name}</strong><small>{menu.ingredients.map((ingredient) => ingredient.name).join(' · ')}</small></span>
+                    <b>{selected ? '선택됨' : '선택'}</b>
+                  </button>
+                )
+              })}
+              {menuSearchResults.length === 0 && <p>일치하는 메뉴가 없어요.</p>}
+            </div>
+          </div>
+        </section>
+      ) : (
+        <>
+          <header className="top-header">
+            <p>{today}</p>
+            <h1>제철음식 뭐가있을까?</h1>
+          </header>
+
+          <div className={`season-panel season-panel-index season-${selectedSeason}`}>
+            <div className="season-tabs" aria-label="계절 선택">
+              {seasons.map((season) => (
+                <button
+                  className={selectedSeason === season.key ? 'active' : ''}
+                  key={season.key}
+                  onClick={() => onSelectSeason(season.key)}
+                  style={{ '--season-accent': season.accent } as CSSProperties}
+                  type="button"
+                >
+                  <span>{season.label}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className="seasonal-grid" aria-label="제철 식재료" onScroll={onScrollActivity}>
+              {seasonIngredients.map((ingredient) => (
+                <button
+                  className={`seasonal-tile ${selectedSeasonalIngredientId === ingredient.id ? 'active' : ''}`}
+                  key={ingredient.id}
+                  onClick={() => onSelectSeasonalIngredient(ingredient.id)}
+                  type="button"
+                >
+                  <span className="food-emoji" aria-hidden="true">{ingredient.emoji}</span>
+                  <strong>{ingredient.name}</strong>
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
 
       <nav className="home-purchase-tabs" aria-label="메뉴 이용 방법">
         <button className={purchaseTab === 'cook' ? 'active' : ''} onClick={() => setPurchaseTab('cook')} type="button">
@@ -664,7 +781,10 @@ function HomeScreen({
                     <button aria-label={`${menu.name} 삭제`} onClick={() => onRemoveMenu(menu.id)} type="button">×</button>
                   </div>
                 ))}
-                <button className="selected-menu-shop" onClick={onStartShopping} type="button">구매하기</button>
+                <div className="selected-menu-actions">
+                  <button className="selected-menu-shop" onClick={onStartShopping} type="button">구매하기</button>
+                  <button className="selected-menu-cancel" onClick={onCancelSelection} type="button">취소</button>
+                </div>
               </div>
             </>
           )}
@@ -758,18 +878,6 @@ function ShoppingScreen({
     <section className="screen toss-screen" onScroll={onScrollActivity}>
       {step === 'store' && (
         <div className="shopping-home">
-          <header className="shopping-home-header">
-            <label className="shopping-search">
-              <span aria-hidden="true">🔍</span>
-              <input aria-label="상품 검색" placeholder="제철 재료 검색하기" type="search" />
-            </label>
-            <button aria-label="내 정보" type="button">👤</button>
-            <button aria-label={`장바구니 ${checkedTotal}개`} onClick={() => onSetStep('cart')} type="button">
-              🛒
-              {checkedTotal > 0 && <b>{checkedTotal}</b>}
-            </button>
-          </header>
-
           <nav className="shopping-category-tabs" aria-label="쇼핑 카테고리">
             <button className="active" type="button">쇼핑 홈</button>
             <button type="button">제철 식재료</button>
@@ -1101,6 +1209,71 @@ function shoppingItemEmoji(name: string) {
   return '🛍️'
 }
 
+function MyPage({
+  orderHistory,
+  onClose,
+}: {
+  orderHistory: OrderHistoryItem[]
+  onClose: () => void
+}) {
+  const totalSpent = orderHistory.reduce((sum, order) => sum + order.total, 0)
+
+  return (
+    <section className="my-page">
+      <header className="my-page-header">
+        <button aria-label="마이페이지 닫기" onClick={onClose} type="button">←</button>
+        <h1>마이페이지</h1>
+        <span />
+      </header>
+
+      <div className="my-page-profile">
+        <span aria-hidden="true">👤</span>
+        <div>
+          <strong>제철 미식가</strong>
+          <p>오늘도 맛있는 제철 음식을 골라보세요.</p>
+        </div>
+      </div>
+
+      <div className="my-page-summary">
+        <div><span>주문</span><strong>{orderHistory.length}건</strong></div>
+        <div><span>총 주문금액</span><strong>{formatWon(totalSpent)}</strong></div>
+      </div>
+
+      <section className="my-order-history">
+        <div className="my-order-title">
+          <h2>내 주문 내역</h2>
+          <span>최근 주문순</span>
+        </div>
+
+        {orderHistory.length === 0 && (
+          <div className="my-order-empty">
+            <span aria-hidden="true">🧾</span>
+            <strong>아직 주문 내역이 없어요</strong>
+            <p>상품을 구매하면 주문 내역이 여기에 쌓여요.</p>
+          </div>
+        )}
+
+        {orderHistory.map((order) => (
+          <article className="my-order-card" key={order.id}>
+            <div className="my-order-card-head">
+              <span>{order.orderedAt}</span>
+              <strong>{order.status}</strong>
+            </div>
+            <div className="my-order-items">
+              <em aria-hidden="true">{shoppingItemEmoji(order.items[0]?.name ?? '')}</em>
+              <div>
+                <strong>{order.items[0]?.name ?? '제철 상품'}{order.items.length > 1 ? ` 외 ${order.items.length - 1}개` : ''}</strong>
+                <p>{order.items.map((item) => `${item.name} ${item.quantity}`).join(' · ')}</p>
+              </div>
+            </div>
+            <div className="my-order-total"><span>결제 금액</span><b>{formatWon(order.total)}</b></div>
+          </article>
+        ))}
+      </section>
+    </section>
+  )
+}
+
 function PetHomeScreen({
   level,
   exp,
@@ -1307,8 +1480,7 @@ function roomClass(background: string) {
 
 function TabBar({ current, onChange }: { current: Screen; onChange: (screen: Screen) => void }) {
   const tabs: { id: Screen; label: string; icon: string }[] = [
-    { id: 'home', label: '홈', icon: '🌿' },
-    { id: 'shopping', label: '장보기', icon: '🛍️' },
+    { id: 'home', label: '제철홈', icon: '🌿' },
     { id: 'petHome', label: '펫홈', icon: '💛' },
   ]
 
