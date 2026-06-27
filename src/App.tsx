@@ -7,6 +7,11 @@ import { getSudalAccessoryPreviewImage, getSudalOutfitPreviewImage } from './dat
 import { getPetClearDecorIconImage, getPetShareIconImage } from './data/sudalPetIcons'
 import { fallbackAppData, loadAppData } from './services/appDataService'
 import type { DecorItem, Ingredient, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
+import petTabAccessoryIcon from './assets/sudal-tabs/accessory.png'
+import petTabAllIcon from './assets/sudal-tabs/all.png'
+import petTabFeedIcon from './assets/sudal-tabs/feed.png'
+import petTabOutfitIcon from './assets/sudal-tabs/outfit.png'
+import petTabRoomIcon from './assets/sudal-tabs/room.png'
 import discountCouponImage from '../discount-coupon-20.jpg'
 
 type KakaoLatLng = object
@@ -216,7 +221,7 @@ function App() {
   const [shoppingRewardUnlocked, setShoppingRewardUnlocked] = useState(false)
   const [selectedBackground, setSelectedBackground] = useState('아늑한 집안')
   const [selectedOutfit, setSelectedOutfit] = useState('기본 앞치마')
-  const [selectedAccessory, setSelectedAccessory] = useState('장바구니')
+  const [selectedAccessory, setSelectedAccessory] = useState('')
   const [toast, setToast] = useState('')
   const [isScrolling, setIsScrolling] = useState(false)
   const scrollTimerRef = useRef<number | undefined>(undefined)
@@ -1901,6 +1906,12 @@ function PetHomeScreen({
     { id: 'outfit', label: '옷' },
     { id: 'accessory', label: '소품' },
   ]
+  const decorTabIcons = {
+    all: petTabAllIcon,
+    background: petTabRoomIcon,
+    outfit: petTabOutfitIcon,
+    accessory: petTabAccessoryIcon,
+  } as const
 
   return (
     <section className="screen pet-home-screen" onScroll={onScrollActivity}>
@@ -1917,6 +1928,7 @@ function PetHomeScreen({
 
       <div className="pet-action-tabs" aria-label="펫홈 작업">
         <button className={petTab === 'feed' ? 'active' : ''} onClick={() => setPetTab('feed')} type="button">
+          <img className="pet-action-tab-icon" alt="" aria-hidden="true" src={petTabFeedIcon} />
           <b>밥먹기</b>
         </button>
         {decorTabs.map((tab) => (
@@ -1929,6 +1941,7 @@ function PetHomeScreen({
             }}
             type="button"
           >
+            <img className="pet-action-tab-icon" alt="" aria-hidden="true" src={decorTabIcons[tab.id]} />
             <b>{tab.label}</b>
           </button>
         ))}

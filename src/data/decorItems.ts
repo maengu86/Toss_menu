@@ -13,7 +13,7 @@ export const decorItems: DecorItem[] = [
   { id: 'strawberry-pajamas', name: '딸기 잠옷', type: 'outfit' },
   { id: 'maple-poncho', name: '단풍잎 판초', type: 'outfit' },
   { id: 'snow-knit', name: '눈꽃 니트', type: 'outfit' },
-  { id: 'straw-hat-overalls', name: '밀짚 멜빵바지', type: 'outfit' },
+  { id: 'straw-hat-overalls', name: '농부 멜빵', type: 'outfit' },
   { id: 'raincoat-boots', name: '비옷+장화', type: 'outfit' },
   { id: 'cherry-blossom-cardigan', name: '벚꽃 가디건', type: 'outfit' },
   { id: 'rose-garden-shirt', name: '장미 정원 드레스셔츠', type: 'outfit' },

@@ -18,6 +18,7 @@ export function SudalOutfitLayer({ name }: DecorLayerProps) {
       return <Poncho color="#c9693f" accent="#f2b34f" />
     case '눈꽃 니트':
       return <Sweater color="#b65f58" accent="#fff6df" />
+    case '농부 멜빵':
     case '밀짚 멜빵바지':
       return <Overalls color="#6f9a62" accent="#f5df9a" motif="button" />
     case '비옷+장화':

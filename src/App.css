@@ -2259,16 +2259,24 @@
 
 .pet-action-tabs button {
   min-width: 0;
-  min-height: 52px;
+  min-height: 64px;
   display: grid;
   place-items: center;
   align-content: center;
-  gap: 0;
+  gap: 2px;
   border: 0;
   border-radius: 10px;
   color: #8b95a1;
   font-weight: 900;
   background: transparent;
+}
+
+.pet-action-tab-icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+  object-fit: contain;
+  pointer-events: none;
 }
 
 .pet-action-tabs button.active {

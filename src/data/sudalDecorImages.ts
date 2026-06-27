@@ -67,7 +67,7 @@ const accessoryWornImages = Object.fromEntries(
 )
 
 export function getSudalOutfitImage(name: string) {
-  return outfitImages[name] ?? ''
+  return outfitImages[name] ?? outfitImages[getOutfitImageAlias(name)] ?? ''
 }
 
 export function getSudalAccessoryImage(name: string) {
@@ -75,11 +75,11 @@ export function getSudalAccessoryImage(name: string) {
 }
 
 export function getSudalOutfitPreviewImage(name: string) {
-  return outfitPreviewImages[name] ?? outfitImages[name] ?? ''
+  return outfitPreviewImages[name] ?? outfitPreviewImages[getOutfitImageAlias(name)] ?? outfitImages[name] ?? outfitImages[getOutfitImageAlias(name)] ?? ''
 }
 
 export function getSudalOutfitWornImage(name: string) {
-  return outfitWornImages[name] ?? outfitImages[name] ?? ''
+  return outfitWornImages[name] ?? outfitWornImages[getOutfitImageAlias(name)] ?? outfitImages[name] ?? outfitImages[getOutfitImageAlias(name)] ?? ''
 }
 
 export function getSudalAccessoryPreviewImage(name: string) {
@@ -88,4 +88,9 @@ export function getSudalAccessoryPreviewImage(name: string) {
 
 export function getSudalAccessoryWornImage(name: string) {
   return accessoryWornImages[name] ?? accessoryImages[name] ?? ''
+}
+
+function getOutfitImageAlias(name: string) {
+  if (name === '밀짚 멜빵바지') return '농부 멜빵'
+  return name
 }

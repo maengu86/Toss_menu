@@ -1,4 +1,5 @@
 import sudalMain from './sudal/sudal_main.png'
+import gripHandImage from '../assets/sudal-decor/accessories/grip-hand.png'
 import { getSudalAccessoryWornImage, getSudalOutfitWornImage } from '../data/sudalDecorImages'
 
 type PetAvatarProps = {
@@ -37,6 +38,7 @@ function PetAvatar({
     const accessoryImage = getSudalAccessoryWornImage(accessory)
     const outfitFrame = getOutfitFrame(outfit)
     const accessoryFrame = getAccessoryFrame(accessory)
+    const gripHandFrame = getGripHandFrame(accessory)
 
     return (
       <div className={`pet-stage pet-dress-stage ${stageClass}`}>
@@ -59,6 +61,16 @@ function PetAvatar({
               y={accessoryFrame.y}
               width={accessoryFrame.width}
               height={accessoryFrame.height}
+              preserveAspectRatio="xMidYMid meet"
+            />
+          )}
+          {gripHandFrame && (
+            <image
+              href={gripHandImage}
+              x={gripHandFrame.x}
+              y={gripHandFrame.y}
+              width={gripHandFrame.width}
+              height={gripHandFrame.height}
               preserveAspectRatio="xMidYMid meet"
             />
           )}
@@ -134,9 +146,9 @@ export default PetAvatar
 
 function getOutfitFrame(name: string) {
   if (name.includes('딸기 잠옷')) {
-    return { x: 0, y: 0, width: 260, height: 340 }
+    return { x: 0, y: 8, width: 260, height: 332 }
   }
-  if (name.includes('밀짚 멜빵바지')) {
+  if (name.includes('농부 멜빵') || name.includes('밀짚 멜빵바지')) {
     return { x: 0, y: 0, width: 260, height: 340 }
   }
   return { x: 34, y: 92, width: 192, height: 170 }
@@ -147,7 +159,7 @@ function getAccessoryFrame(name: string) {
     return { x: 0, y: 0, width: 260, height: 340 }
   }
   if (name.includes('딸기 우유팩')) {
-    return { x: 3, y: 42, width: 195, height: 255 }
+    return { x: 15, y: 30, width: 195, height: 255 }
   }
   if (name.includes('밀짚모자')) {
     return { x: 20, y: -16, width: 220, height: 288 }
@@ -162,4 +174,14 @@ function getAccessoryFrame(name: string) {
     return { x: 30, y: 128, width: 200, height: 126 }
   }
   return { x: 46, y: 54, width: 168, height: 104 }
+}
+
+function getGripHandFrame(name: string) {
+  if (name.includes('수박 주스')) {
+    return { x: 42, y: 181, width: 38, height: 35 }
+  }
+  if (name.includes('딸기 우유팩')) {
+    return { x: 42, y: 184, width: 38, height: 35 }
+  }
+  return null
 }
