@@ -856,8 +856,6 @@ function ShoppingScreen({
           <header className="shopping-sub-header">
             <button aria-label="제철홈으로" onClick={onGoHome} type="button">←</button>
             <div>
-              <button aria-label="공유" type="button"><img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('share')} /></button>
-              <button aria-label="검색" type="button"><img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('search')} /></button>
               <button aria-label="장바구니" onClick={() => onSetStep('cart')} type="button"><img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('cart')} /></button>
             </div>
           </header>
@@ -865,11 +863,7 @@ function ShoppingScreen({
             <em aria-hidden="true">{ingredientIconImage(detailMenu.ingredients[0]?.name ?? detailMenu.name)}</em>
           </div>
           <div className="shopping-detail-copy">
-            <div className="shopping-detail-badges">
-              <span>{detailMenu.season} 제철</span><span>{detailMenu.weather}</span>
-            </div>
             <h1>{detailMenu.name}</h1>
-            <p>{detailMenu.description || `${detailMenu.ingredients.map((ingredient) => ingredient.name).join(', ')}로 만드는 제철 요리예요.`}</p>
             <div className="shopping-detail-ingredients" aria-label="메뉴 재료 선택">
               <span>장바구니에 담을 재료를 선택해주세요</span>
               <div>
@@ -887,7 +881,6 @@ function ShoppingScreen({
                       <em aria-hidden="true">{ingredientIconImage(ingredient.name)}</em>
                       <strong>{ingredient.name}</strong>
                       <small>{formatWon(ingredient.price)}</small>
-                      {selected && <span aria-hidden="true">✓</span>}
                     </button>
                   )
                 })}
