@@ -191,14 +191,11 @@ function mapDecorItem(row: DecorItemRow): DecorItem {
 
 function mergeDecorItems(remoteItems: DecorItem[]) {
   const remoteById = new Map(remoteItems.map((item) => [item.id, item]))
-  const localIds = new Set(fallbackDecorItems.map((item) => item.id))
-  const knownItems = fallbackDecorItems.map((localItem) => ({
+  return fallbackDecorItems.map((localItem) => ({
     ...localItem,
     ...remoteById.get(localItem.id),
     badge: localItem.badge,
   }))
-
-  return [...knownItems, ...remoteItems.filter((item) => !localIds.has(item.id))]
 }
 
 function createOrderMap(items: { id: string }[]) {
