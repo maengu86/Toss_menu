@@ -10,6 +10,11 @@ const decorIcons = import.meta.glob('../assets/sudal-icons/decor/*.png', {
   import: 'default',
 }) as Record<string, string>
 
+const uiIcons = import.meta.glob('../assets/sudal-icons/ui/*.png', {
+  eager: true,
+  import: 'default',
+}) as Record<string, string>
+
 function pickIngredientIconKey(name: string) {
   if (name.includes('수박')) return 'watermelon'
   if (name.includes('콩국수') || name.includes('소면') || name.includes('파스타')) return 'noodle'
@@ -67,8 +72,12 @@ export function getPetDecorIconImage(item: DecorItem) {
   return resolveAsset(decorIcons, `decor/${key}.png`)
 }
 
+export function getPetUiIconImage(key: string) {
+  return resolveAsset(uiIcons, `ui/${key}.png`)
+}
+
 export function getPetShareIconImage() {
-  return resolveAsset(ingredientIcons, 'ingredients/camera.png')
+  return getPetUiIconImage('camera') || resolveAsset(ingredientIcons, 'ingredients/camera.png')
 }
 
 export function getPetClearDecorIconImage() {

@@ -509,9 +509,55 @@
 
 .food-emoji {
   display: block;
-  font-size: 20px;
+  line-height: 1;
   line-height: 1;
   background: transparent;
+}
+
+.sudal-ui-icon,
+.sudal-ingredient-icon,
+.food-icon-image,
+.feed-card-icon-image,
+.sudal-modal-icon,
+.sudal-map-pin-icon,
+.sudal-decor-fallback-icon {
+  display: block;
+  object-fit: contain;
+  background: transparent;
+}
+
+.sudal-ui-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.sudal-ingredient-icon,
+.food-icon-image {
+  width: 34px;
+  height: 34px;
+  margin: 0 auto;
+}
+
+.feed-card-icon-image {
+  width: 42px;
+  height: 42px;
+}
+
+.sudal-modal-icon {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto;
+}
+
+.sudal-map-pin-icon {
+  width: 30px;
+  height: 30px;
+}
+
+.sudal-decor-fallback-icon {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto;
 }
 
 .sub-directory-title {
@@ -1044,7 +1090,7 @@
 }
 
 .decor-card.locked::after {
-  content: "🔒";
+  content: "";
   position: absolute;
   right: 10px;
   top: 10px;
@@ -1095,6 +1141,13 @@
   color: #6f665f;
   font-size: 17px;
   line-height: 1;
+}
+
+.tab-bar .tab-icon img {
+  width: 25px;
+  height: 25px;
+  display: block;
+  object-fit: contain;
 }
 
 .tab-bar .tab-icon b {
