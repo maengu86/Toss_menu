@@ -2684,20 +2684,28 @@
 }
 
 .home-shopping-products {
-  margin: 24px -4px 8px;
-  padding: 22px 4px;
-  border-top: 10px solid #f2f4f6;
+  margin: 22px 0 0;
+  padding: 22px 0 0;
+  border-top: 1px solid #edf0f3;
+}
+
+.home-purchase-section {
+  margin-top: 24px;
+  padding: 8px 10px 14px;
+  border: 1px solid #e5e8eb;
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(25, 31, 40, 0.06);
 }
 
 .home-purchase-tabs {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0;
-  margin-top: 24px;
+  margin-top: 0;
   padding: 8px;
-  border-top: 1px solid rgba(229, 232, 235, 0.95);
-  border-bottom: 1px solid rgba(229, 232, 235, 0.95);
-  background: #ffffff;
+  border: 0;
+  background: transparent;
 }
 
 .home-search-results {
@@ -3014,8 +3022,8 @@
 }
 
 .home-delivery-panel {
-  margin: 14px -4px 8px;
-  padding: 18px 4px 4px;
+  margin: 12px 0 0;
+  padding: 12px 0 4px;
 }
 
 .home-delivery-heading {

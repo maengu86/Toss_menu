@@ -722,40 +722,41 @@ function HomeScreen({
         </>
       )}
 
-      <nav className="home-purchase-tabs" aria-label="메뉴 이용 방법">
-        <button className={purchaseTab === 'cook' ? 'active' : ''} onClick={() => setPurchaseTab('cook')} type="button">
-          <b>요리</b>
-        </button>
-        <button className={purchaseTab === 'delivery' ? 'active' : ''} onClick={() => setPurchaseTab('delivery')} type="button">
-          <b>배달</b>
-        </button>
-      </nav>
+      <section className="home-purchase-section">
+        <nav className="home-purchase-tabs" aria-label="메뉴 이용 방법">
+          <button className={purchaseTab === 'cook' ? 'active' : ''} onClick={() => setPurchaseTab('cook')} type="button">
+            <b>요리</b>
+          </button>
+          <button className={purchaseTab === 'delivery' ? 'active' : ''} onClick={() => setPurchaseTab('delivery')} type="button">
+            <b>배달</b>
+          </button>
+        </nav>
 
-      {purchaseTab === 'cook' && (
-        <div className="menu-list nested-menu-list">
-          {seasonalMenus.map((menu) => {
-            const selected = selectedMenuIds.includes(menu.id)
-            return (
-              <button
-                aria-pressed={selected}
-                className={`menu-card ${selected ? 'selected' : ''}`}
-                key={menu.id}
-                onClick={() => onToggleMenu(menu.id)}
-                style={{ '--menu-color': menu.color } as CSSProperties}
-                type="button"
-              >
-                <span className="menu-card-visual" aria-hidden="true">
-                  {shoppingItemEmoji(menu.ingredients[0]?.name ?? menu.name)}
-                </span>
-                <strong>{menu.name}</strong>
-                <small>{menu.ingredients.slice(0, 2).map((ingredient) => ingredient.name).join(' · ')}</small>
-                <b>{getMenuExp(menu).toLocaleString('ko-KR')}xp</b>
-                {selected && <span className="menu-card-selected" aria-hidden="true">✓</span>}
-              </button>
-            )
-          })}
-        </div>
-      )}
+        {purchaseTab === 'cook' && (
+          <div className="menu-list nested-menu-list">
+            {seasonalMenus.map((menu) => {
+              const selected = selectedMenuIds.includes(menu.id)
+              return (
+                <button
+                  aria-pressed={selected}
+                  className={`menu-card ${selected ? 'selected' : ''}`}
+                  key={menu.id}
+                  onClick={() => onToggleMenu(menu.id)}
+                  style={{ '--menu-color': menu.color } as CSSProperties}
+                  type="button"
+                >
+                  <span className="menu-card-visual" aria-hidden="true">
+                    {shoppingItemEmoji(menu.ingredients[0]?.name ?? menu.name)}
+                  </span>
+                  <strong>{menu.name}</strong>
+                  <small>{menu.ingredients.slice(0, 2).map((ingredient) => ingredient.name).join(' · ')}</small>
+                  <b>{getMenuExp(menu).toLocaleString('ko-KR')}xp</b>
+                  {selected && <span className="menu-card-selected" aria-hidden="true">✓</span>}
+                </button>
+              )
+            })}
+          </div>
+        )}
 
       {purchaseTab === 'cook' && relatedProducts.length > 0 && (
         <section className="home-shopping-products">
@@ -807,8 +808,8 @@ function HomeScreen({
         </div>
       )}
 
-      {purchaseTab === 'delivery' && (
-        <section className="home-delivery-panel">
+        {purchaseTab === 'delivery' && (
+          <section className="home-delivery-panel">
           <div className="home-delivery-heading">
             <div>
               <span>총 {seasonalMenus.length}개 요리 · 내 주변 제철 맛집</span>
@@ -840,8 +841,9 @@ function HomeScreen({
               </article>
             ))}
           </div>
-        </section>
-      )}
+          </section>
+        )}
+      </section>
 
     </section>
   )
