@@ -1905,8 +1905,6 @@ const petHomeAccessoryIds = new Set([
   'grape-hat-piece',
   'bell-necklace',
   'sun-glasses',
-  'cherry-hairpin',
-  'berry-pin',
   'pearl-blossom-necklace',
   'shell-necklace',
   'acorn-maple-necklace',

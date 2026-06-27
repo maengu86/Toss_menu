@@ -50,7 +50,6 @@ export function SudalOutfitLayer({ name }: DecorLayerProps) {
 
 export function SudalAccessoryLayer({ name }: DecorLayerProps) {
   switch (name) {
-    case '체리 머리핀': return <CherryHairpin />
     case '밀짚모자': return <StrawHat />
     case '밤톨 베레모': return <AcornBeret />
     case '여름용 튜브': return <SwimTube />
@@ -148,7 +147,6 @@ function Swimsuit() {
   return <g stroke={outline} strokeWidth="3" strokeLinejoin="round"><path d="M94 171c22-10 50-10 72 0l9 78c-27 12-63 12-90 0z" fill="#d85f50" /><path d="M99 178c13 16 49 16 62 0M91 217h78" fill="none" stroke="#ffe6a5" strokeWidth="7" /><circle cx="112" cy="198" r="4" fill="#ffe6a5" stroke="none" /><circle cx="147" cy="231" r="4" fill="#ffe6a5" stroke="none" /></g>
 }
 
-function CherryHairpin() { return <g transform="translate(169 26)" stroke={outline} strokeWidth="2"><path d="M12 6c-2 12-9 16-15 18M12 6c6 8 13 10 20 12" fill="none" stroke="#587a49" /><circle cx="-4" cy="25" r="8" fill="#c94848" /><circle cx="31" cy="19" r="8" fill="#d9584f" /><path d="M10 4c7-5 13-3 16 2-7 4-12 4-16-2z" fill="#6e9659" /></g> }
 function AcornBeret() { return <g stroke={outline} strokeWidth="3" strokeLinejoin="round"><path d="M83 58c12-40 82-43 96 0-22 13-74 13-96 0z" fill="#8c5839" /><path d="M105 30c16 8 34 8 50 0" fill="none" stroke="#bf8b51" strokeWidth="8" /><path d="M132 22l8-12" strokeLinecap="round" /></g> }
 function SwimTube() { return <g stroke={outline} strokeWidth="4"><ellipse cx="130" cy="220" rx="77" ry="37" fill="#f2b745" /><ellipse cx="130" cy="220" rx="42" ry="16" fill="none" /><path d="M70 201l23 15M166 218l24 17" stroke="#fff1b8" strokeWidth="9" /></g> }
 function MapleFan() { return <g transform="translate(184 173) rotate(12)" stroke={outline} strokeWidth="3" strokeLinejoin="round"><path d="M22 4l8 15 15-8-5 18 17 3-16 12 10 13-21-4-8 20-8-20-21 4 10-13-16-12 17-3-5-18 15 8z" fill="#cf633d" /><path d="M22 53v44" strokeWidth="7" strokeLinecap="round" /></g> }
