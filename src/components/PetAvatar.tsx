@@ -35,13 +35,33 @@ function PetAvatar({
   if (body === 'sudal') {
     const outfitImage = getSudalOutfitWornImage(outfit)
     const accessoryImage = getSudalAccessoryWornImage(accessory)
+    const outfitFrame = { x: 34, y: 92, width: 192, height: 170 }
+    const accessoryFrame = getAccessoryFrame(accessory)
 
     return (
       <div className={`pet-stage pet-dress-stage ${stageClass}`}>
         <svg className="pet-svg dress-pet sudal-pet" viewBox="0 0 260 340" role="img" aria-label="먹보 수달 펫">
           <image href={sudalMain} x="18" y="5" width="224" height="324" preserveAspectRatio="xMidYMid meet" />
-          {outfitImage && <image href={outfitImage} x="0" y="0" width="260" height="340" preserveAspectRatio="xMidYMid meet" />}
-          {accessoryImage && <image href={accessoryImage} x="0" y="0" width="260" height="340" preserveAspectRatio="xMidYMid meet" />}
+          {outfitImage && (
+            <image
+              href={outfitImage}
+              x={outfitFrame.x}
+              y={outfitFrame.y}
+              width={outfitFrame.width}
+              height={outfitFrame.height}
+              preserveAspectRatio="xMidYMid meet"
+            />
+          )}
+          {accessoryImage && (
+            <image
+              href={accessoryImage}
+              x={accessoryFrame.x}
+              y={accessoryFrame.y}
+              width={accessoryFrame.width}
+              height={accessoryFrame.height}
+              preserveAspectRatio="xMidYMid meet"
+            />
+          )}
         </svg>
       </div>
     )
@@ -111,3 +131,16 @@ function PetAvatar({
 }
 
 export default PetAvatar
+
+function getAccessoryFrame(name: string) {
+  if (name.includes('안경') || name.includes('선글라스')) {
+    return { x: 44, y: 46, width: 176, height: 86 }
+  }
+  if (name.includes('머리핀') || name.includes('베레모') || name.includes('모자') || name.includes('꽃')) {
+    return { x: 68, y: 18, width: 128, height: 92 }
+  }
+  if (name.includes('가방') || name.includes('바구니') || name.includes('보틀') || name.includes('주스') || name.includes('머그') || name.includes('스푼') || name.includes('팬')) {
+    return { x: 30, y: 128, width: 200, height: 126 }
+  }
+  return { x: 46, y: 54, width: 168, height: 104 }
+}

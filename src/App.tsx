@@ -214,7 +214,7 @@ function App() {
   const [paymentMethod, setPaymentMethod] = useState(paymentOptions[0])
   const [deliveryOption, setDeliveryOption] = useState(deliveryOptions[0])
   const [shoppingRewardUnlocked, setShoppingRewardUnlocked] = useState(false)
-  const [selectedBackground, setSelectedBackground] = useState('햇살 주방')
+  const [selectedBackground, setSelectedBackground] = useState('아늑한 집안')
   const [selectedOutfit, setSelectedOutfit] = useState('기본 앞치마')
   const [selectedAccessory, setSelectedAccessory] = useState('장바구니')
   const [toast, setToast] = useState('')
@@ -446,6 +446,12 @@ function App() {
     if (item.type === 'accessory') setSelectedAccessory(item.name)
   }
 
+  function clearDecor(type: 'outfit' | 'accessory') {
+    if (type === 'outfit') setSelectedOutfit('')
+    if (type === 'accessory') setSelectedAccessory('')
+    showToast('착용을 해제했어요.')
+  }
+
   async function copyShareLink() {
     const url = window.location.href
     try {
@@ -543,20 +549,21 @@ function App() {
         )}
 
         {screen === 'petHome' && (
-          <PetHomeScreen
-            background={selectedBackground}
-            accessory={selectedAccessory}
-            decorItems={decorItems}
-            exp={exp}
-            feedIngredients={feedIngredients}
-            level={level}
-            outfit={selectedOutfit}
-            shoppingRewardUnlocked={shoppingRewardUnlocked}
-            onFeed={feedPet}
-            onSelectDecor={selectDecor}
-            onShare={copyShareLink}
-            onScrollActivity={handleScrollActivity}
-          />
+            <PetHomeScreen
+              background={selectedBackground}
+              accessory={selectedAccessory}
+              decorItems={decorItems}
+              exp={exp}
+              feedIngredients={feedIngredients}
+              level={level}
+              outfit={selectedOutfit}
+              shoppingRewardUnlocked={shoppingRewardUnlocked}
+              onClearDecor={clearDecor}
+              onFeed={feedPet}
+              onSelectDecor={selectDecor}
+              onShare={copyShareLink}
+              onScrollActivity={handleScrollActivity}
+            />
         )}
 
         {profileOpen && (
@@ -1859,6 +1866,7 @@ function PetHomeScreen({
   feedIngredients,
   decorItems,
   shoppingRewardUnlocked,
+  onClearDecor,
   onFeed,
   onSelectDecor,
   onShare,
@@ -1872,6 +1880,7 @@ function PetHomeScreen({
   feedIngredients: FeedIngredient[]
   decorItems: DecorItem[]
   shoppingRewardUnlocked: boolean
+  onClearDecor: (type: 'outfit' | 'accessory') => void
   onFeed: (ingredient: FeedIngredient) => void
   onSelectDecor: (item: DecorItem) => void
   onShare: () => void
@@ -1880,6 +1889,8 @@ function PetHomeScreen({
   const [decorTab, setDecorTab] = useState<'all' | DecorItem['type']>('all')
   const [petTab, setPetTab] = useState<'feed' | 'decor'>('feed')
   const visibleItems = decorTab === 'all' ? decorItems : decorItems.filter((item) => item.type === decorTab)
+  const canClearDecor = decorTab === 'outfit' || decorTab === 'accessory'
+  const isClearSelected = decorTab === 'outfit' ? outfit === '' : accessory === ''
   const levelExpStatus = getLevelExpStatus(exp, level)
   const levelProgress = getLevelProgress(exp, level)
   const expLabel = `${levelExpStatus.currentExp.toLocaleString('ko-KR')}/${levelExpStatus.requiredExp.toLocaleString('ko-KR')} xp`
@@ -1931,7 +1942,7 @@ function PetHomeScreen({
                 <strong>{level}</strong>
               </div>
               <div className="pet-level-copy">
-                <strong>먹보가 자라고 있어요</strong>
+                <strong>성장 현황</strong>
                 <span>{expLabel}</span>
               </div>
             </div>
@@ -1962,17 +1973,32 @@ function PetHomeScreen({
       {petTab === 'decor' && (
         <div className="pet-inventory">
           <div className="decor-grid">
-            {visibleItems.map((item) => {
-              const unlocked = isDecorUnlocked(item, level, shoppingRewardUnlocked)
-              const selected = item.name === background || item.name === outfit || item.name === accessory
-              const itemRoomImage = item.type === 'background' ? getRoomBackgroundImage(item.name) : undefined
-              const itemDecorImage =
-                item.type === 'outfit'
-                  ? getSudalOutfitPreviewImage(item.name)
-                  : item.type === 'accessory'
-                    ? getSudalAccessoryPreviewImage(item.name)
-                    : ''
-              return (
+            {canClearDecor && (
+              <button
+                className={`decor-card clear-card ${isClearSelected ? 'selected' : ''}`}
+                onClick={() => onClearDecor(decorTab)}
+                type="button"
+              >
+                <span className="decor-card-visual decor-card-empty" aria-hidden="true">-</span>
+                <strong>해제</strong>
+              </button>
+            )}
+            {visibleItems
+              .map((item, index) => ({
+                item,
+                unlocked: isDecorUnlocked(item, level, shoppingRewardUnlocked),
+                selected: item.name === background || item.name === outfit || item.name === accessory,
+                itemRoomImage: item.type === 'background' ? getRoomBackgroundImage(item.name) : undefined,
+                itemDecorImage:
+                  item.type === 'outfit'
+                    ? getSudalOutfitPreviewImage(item.name)
+                    : item.type === 'accessory'
+                      ? getSudalAccessoryPreviewImage(item.name)
+                      : '',
+                index,
+              }))
+              .sort((a, b) => Number(b.unlocked) - Number(a.unlocked) || a.index - b.index)
+              .map(({ item, unlocked, selected, itemRoomImage, itemDecorImage }) => (
                 <button className={`decor-card ${selected ? 'selected' : ''} ${unlocked ? '' : 'locked'}`} key={item.id} onClick={() => onSelectDecor(item)} type="button">
                   <span
                     className={itemRoomImage ? 'decor-card-visual room-thumbnail' : 'decor-card-visual'}
@@ -1982,10 +2008,9 @@ function PetHomeScreen({
                     {!itemRoomImage && !itemDecorImage && decorIcon(item)}
                   </span>
                   <strong>{item.name}</strong>
-                  <small>{unlocked ? (selected ? '착용중' : item.badge ?? '') : item.unlockByShopping ? '장보기 보상' : `Lv.${item.unlockLevel}`}</small>
+                  <small>{unlocked ? item.badge ?? '' : item.unlockByShopping ? '장보기 보상' : `Lv.${item.unlockLevel}`}</small>
                 </button>
-              )
-            })}
+              ))}
           </div>
         </div>
       )}
