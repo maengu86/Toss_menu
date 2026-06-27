@@ -1,5 +1,4 @@
 import sudalMain from './sudal/sudal_main.png'
-import gripHandImage from '../assets/sudal-decor/accessories/grip-hand.png'
 import { getSudalAccessoryWornImage, getSudalOutfitWornImage } from '../data/sudalDecorImages'
 
 type PetAvatarProps = {
@@ -38,7 +37,6 @@ function PetAvatar({
     const accessoryImage = getSudalAccessoryWornImage(accessory)
     const outfitFrame = getOutfitFrame(outfit)
     const accessoryFrame = getAccessoryFrame(accessory)
-    const gripHandFrame = getGripHandFrame(accessory)
 
     return (
       <div className={`pet-stage pet-dress-stage ${stageClass}`}>
@@ -61,16 +59,6 @@ function PetAvatar({
               y={accessoryFrame.y}
               width={accessoryFrame.width}
               height={accessoryFrame.height}
-              preserveAspectRatio="xMidYMid meet"
-            />
-          )}
-          {gripHandFrame && (
-            <image
-              href={gripHandImage}
-              x={gripHandFrame.x}
-              y={gripHandFrame.y}
-              width={gripHandFrame.width}
-              height={gripHandFrame.height}
               preserveAspectRatio="xMidYMid meet"
             />
           )}
@@ -174,14 +162,4 @@ function getAccessoryFrame(name: string) {
     return { x: 30, y: 128, width: 200, height: 126 }
   }
   return { x: 46, y: 54, width: 168, height: 104 }
-}
-
-function getGripHandFrame(name: string) {
-  if (name.includes('수박 주스')) {
-    return { x: 42, y: 181, width: 38, height: 35 }
-  }
-  if (name.includes('딸기 우유팩')) {
-    return { x: 42, y: 184, width: 38, height: 35 }
-  }
-  return null
 }
