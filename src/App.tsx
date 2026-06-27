@@ -4,6 +4,7 @@ import type { CSSProperties, ReactNode, RefObject } from 'react'
 import './App.css'
 import PetAvatar from './components/PetAvatar'
 import { getRoomBackgroundImage } from './data/decorAssets'
+import { getSudalAccessoryImage, getSudalOutfitImage } from './data/sudalDecorImages'
 import { getPetDecorIconImage, getPetFeedIconImage, getPetShareIconImage } from './data/sudalPetIcons'
 import { fallbackAppData, loadAppData } from './services/appDataService'
 import type { DecorItem, Ingredient, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
@@ -976,13 +977,20 @@ function PetHomeScreen({
               const unlocked = isDecorUnlocked(item, level, shoppingRewardUnlocked, seasonSpendBySeason)
               const selected = item.name === background || item.name === outfit || item.name === accessory
               const itemRoomImage = item.type === 'background' ? getRoomBackgroundImage(item.name) : undefined
+              const itemDecorImage =
+                item.type === 'outfit'
+                  ? getSudalOutfitImage(item.name)
+                  : item.type === 'accessory'
+                    ? getSudalAccessoryImage(item.name)
+                    : ''
               return (
                 <button className={`decor-card ${selected ? 'selected' : ''} ${unlocked ? '' : 'locked'}`} key={item.id} onClick={() => onSelectDecor(item)} type="button">
                   <span
                     className={itemRoomImage ? 'decor-card-visual room-thumbnail' : 'decor-card-visual'}
                     style={itemRoomImage ? { backgroundImage: `url(${itemRoomImage})` } : undefined}
                   >
-                    {!itemRoomImage && <img alt="" src={getPetDecorIconImage(item)} />}
+                    {!itemRoomImage && itemDecorImage && <img alt="" src={itemDecorImage} />}
+                    {!itemRoomImage && !itemDecorImage && <img alt="" src={getPetDecorIconImage(item)} />}
                   </span>
                   <strong>{item.name}</strong>
                   <small>{selected ? '착용중' : ''}</small>
