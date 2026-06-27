@@ -8,11 +8,9 @@ import type { DecorItem, Ingredient, Menu, Screen, SeasonalIngredient, SeasonKey
 import discountCouponImage from '../discount-coupon-20.jpg'
 
 type KakaoLatLng = object
-type KakaoMapBounds = { extend: (position: KakaoLatLng) => void }
 type KakaoMapInstance = {
   addControl: (control: object, position: unknown) => void
   panTo: (position: KakaoLatLng) => void
-  setBounds: (bounds: KakaoMapBounds) => void
 }
 type KakaoMapMarker = { setMap: (map: KakaoMapInstance | null) => void }
 type KakaoInfoWindow = {
@@ -27,7 +25,6 @@ type KakaoMapsSdk = {
     ControlPosition: { RIGHT: unknown }
     Marker: new (options: { map: KakaoMapInstance; position: KakaoLatLng }) => KakaoMapMarker
     InfoWindow: new (options: { content: string }) => KakaoInfoWindow
-    LatLngBounds: new () => KakaoMapBounds
     services: {
       Places: new () => {
         keywordSearch: (
@@ -70,6 +67,7 @@ const receiptDrafts = [
 ]
 
 const kakaoMapAppKey = import.meta.env.VITE_KAKAO_MAP_APP_KEY as string | undefined
+const kakaoMapDefaultLevel = 3
 
 type ShopStep = 'store' | 'detail' | 'cart' | 'checkout' | 'complete'
 
@@ -290,22 +288,6 @@ function App() {
     if (firstIngredient) setSelectedSeasonalIngredientId(firstIngredient.id)
   }
 
-  function toggleMenu(menuId: string) {
-    setSelectedMenuIds((current) => {
-      if (current.includes(menuId)) {
-        setCheckedIngredients((keys) => keys.filter((key) => !key.startsWith(`${menuId}:`)))
-        setRemovedCartIngredientKeys((keys) => keys.filter((key) => !key.startsWith(`${menuId}:`)))
-        setCartQuantities((quantities) => Object.fromEntries(
-          Object.entries(quantities).filter(([key]) => !key.startsWith(`${menuId}:`)),
-        ))
-        return current.filter((id) => id !== menuId)
-      }
-      setRemovedCartIngredientKeys((keys) => keys.filter((key) => !key.startsWith(`${menuId}:`)))
-      const next = [...current, menuId]
-      return next
-    })
-  }
-
   function removeMenu(menuId: string) {
     setSelectedMenuIds((current) => current.filter((id) => id !== menuId))
     setCheckedIngredients((current) => current.filter((key) => !key.startsWith(`${menuId}:`)))
@@ -445,17 +427,15 @@ function App() {
             allMenus={menus}
             seasonIngredients={seasonIngredients}
             seasonalMenus={seasonalMenus}
-            checkedTotal={checkedTotal}
             selectedSeason={selectedSeason}
             selectedSeasonalIngredientId={activeSeasonalIngredientId}
             selectedMenuIds={selectedMenuIds}
             onScrollActivity={handleScrollActivity}
             onSelectSeason={changeSeason}
             onSelectSeasonalIngredient={setSelectedSeasonalIngredientId}
-            onToggleMenu={toggleMenu}
-            onOpenCart={() => {
-              setShoppingCatalogMenuIds(selectedMenuIds)
-              setShopStep('cart')
+            onOpenMenuDetail={(menuId) => {
+              setShoppingCatalogMenuIds([menuId])
+              setShopStep('detail')
               setScreen('shopping')
             }}
             onOpenProfile={() => setProfileOpen(true)}
@@ -491,7 +471,7 @@ function App() {
             onGoHome={() => {
               setLastOrder(null)
               setShopStep('store')
-              setScreen('petHome')
+              setScreen('home')
             }}
             onRestartShopping={restartShoppingAfterOrder}
             onRemoveMenu={removeMenu}
@@ -532,10 +512,11 @@ function App() {
 
         <TabBar
           current={screen}
+          cartCount={checkedTotal}
           onChange={(nextScreen) => {
-            if (nextScreen === 'shopping' && screen !== 'shopping') {
+            if (nextScreen === 'shopping') {
               setShoppingCatalogMenuIds(selectedMenuIds)
-              setShopStep('store')
+              setShopStep('cart')
             }
             setScreen(nextScreen)
           }}
@@ -553,15 +534,13 @@ function HomeScreen({
   allMenus,
   seasonIngredients,
   seasonalMenus,
-  checkedTotal,
   selectedSeason,
   selectedSeasonalIngredientId,
   selectedMenuIds,
   onScrollActivity,
   onSelectSeason,
   onSelectSeasonalIngredient,
-  onToggleMenu,
-  onOpenCart,
+  onOpenMenuDetail,
   onOpenProfile,
 }: {
   seasons: { key: SeasonKey; label: string; accent: string }[]
@@ -569,15 +548,13 @@ function HomeScreen({
   allMenus: Menu[]
   seasonIngredients: SeasonalIngredient[]
   seasonalMenus: Menu[]
-  checkedTotal: number
   selectedSeason: SeasonKey
   selectedSeasonalIngredientId: string
   selectedMenuIds: string[]
   onScrollActivity: () => void
   onSelectSeason: (season: SeasonKey) => void
   onSelectSeasonalIngredient: (id: string) => void
-  onToggleMenu: (id: string) => void
-  onOpenCart: () => void
+  onOpenMenuDetail: (id: string) => void
   onOpenProfile: () => void
 }) {
   const [purchaseTab, setPurchaseTab] = useState<'cook' | 'delivery'>('cook')
@@ -619,10 +596,6 @@ function HomeScreen({
           />
         </label>
         <button aria-label="마이페이지 열기" onClick={onOpenProfile} type="button">👤</button>
-        <button aria-label={`장바구니 ${checkedTotal}개`} onClick={onOpenCart} type="button">
-          🛒
-          {checkedTotal > 0 && <b>{checkedTotal}</b>}
-        </button>
       </header>
 
       {hasSearch ? (
@@ -654,10 +627,10 @@ function HomeScreen({
               {menuSearchResults.map((menu) => {
                 const selected = selectedMenuIds.includes(menu.id)
                 return (
-                  <button className={selected ? 'selected' : ''} key={menu.id} onClick={() => onToggleMenu(menu.id)} type="button">
+                  <button className={selected ? 'selected' : ''} key={menu.id} onClick={() => onOpenMenuDetail(menu.id)} type="button">
                     <em aria-hidden="true">{shoppingItemEmoji(menu.ingredients[0]?.name ?? '')}</em>
                     <span><strong>{menu.name}</strong><small>{menu.ingredients.map((ingredient) => ingredient.name).join(' · ')}</small></span>
-                    <b>{selected ? '선택됨' : '선택'}</b>
+                    <b>{selected ? '열기' : '보기'}</b>
                   </button>
                 )
               })}
@@ -722,7 +695,7 @@ function HomeScreen({
                   aria-pressed={selected}
                   className={`menu-card ${selected ? 'selected' : ''}`}
                   key={menu.id}
-                  onClick={() => onToggleMenu(menu.id)}
+                  onClick={() => onOpenMenuDetail(menu.id)}
                   style={{ '--menu-color': menu.color } as CSSProperties}
                   type="button"
                 >
@@ -940,6 +913,26 @@ function ShoppingScreen({
             <p className="shopping-original-price">58% <del>{formatWon(Math.round(selectedProduct.ingredient.price / 0.42 / 100) * 100)}</del></p>
             <strong className="shopping-sale-price">{formatWon(selectedProduct.ingredient.price)}</strong>
             <p>무료배송</p>
+            <div className="shopping-detail-ingredients" aria-label="메뉴 재료 선택">
+              <span>{selectedProduct.menuName} 재료</span>
+              <div>
+                {catalogProducts.map((product) => {
+                  const selected = product.key === selectedProduct.key
+                  return (
+                    <button
+                      aria-pressed={selected}
+                      className={selected ? 'active' : undefined}
+                      key={product.key}
+                      onClick={() => setSelectedProductKey(product.key)}
+                      type="button"
+                    >
+                      <em aria-hidden="true">{shoppingItemEmoji(product.ingredient.name)}</em>
+                      <strong>{product.ingredient.name}</strong>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
             <dl>
               <div><dt>평점 · 리뷰</dt><dd>⭐ 4.7 (3,527)</dd></div>
               <div><dt>배송일정</dt><dd>내일 도착</dd></div>
@@ -1256,8 +1249,8 @@ function KakaoRestaurantMap({
     const appKey = kakaoMapAppKey ?? ''
     if (!appKey || !mapRef.current) return
 
-    const placeMarkers = placeMarkerRef.current
     let canceled = false
+    const placeMarkers = placeMarkerRef.current
     setSelectedPlace(null)
     setPlaces([])
 
@@ -1273,13 +1266,13 @@ function KakaoRestaurantMap({
         const centerLatLng = new kakao.maps.LatLng(center.lat, center.lng)
         const map = new kakao.maps.Map(mapRef.current, {
           center: centerLatLng,
-          level: 5,
+          level: kakaoMapDefaultLevel,
         })
         mapInstanceRef.current = map
         map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT)
         const places = new kakao.maps.services.Places()
         const searchOptions = useCurrentLocation
-          ? { location: centerLatLng, radius: 5000 }
+          ? { location: centerLatLng, radius: 100000 }
           : undefined
 
         markersRef.current.forEach((marker) => marker.setMap(null))
@@ -1301,7 +1294,6 @@ function KakaoRestaurantMap({
           }
 
           const nextPlaces = results.slice(0, 8)
-          const bounds = new kakao.maps.LatLngBounds()
           nextPlaces.forEach((place) => {
             const position = new kakao.maps.LatLng(Number(place.y), Number(place.x))
             const marker = new kakao.maps.Marker({ map, position })
@@ -1315,10 +1307,8 @@ function KakaoRestaurantMap({
 
             placeMarkers.set(place.id, { infoWindow, marker, position })
             markersRef.current.push(marker)
-            bounds.extend(position)
           })
 
-          map.setBounds(bounds)
           setPlaces(nextPlaces)
           if (nextPlaces[0]) {
             openPlace(nextPlaces[0])
@@ -1868,9 +1858,10 @@ function roomClass(background: string) {
   return 'sunny'
 }
 
-function TabBar({ current, onChange }: { current: Screen; onChange: (screen: Screen) => void }) {
+function TabBar({ current, cartCount, onChange }: { current: Screen; cartCount: number; onChange: (screen: Screen) => void }) {
   const tabs: { id: Screen; label: string; icon: string }[] = [
     { id: 'home', label: '제철홈', icon: '🌿' },
+    { id: 'shopping', label: '장바구니', icon: '🛒' },
     { id: 'petHome', label: '펫홈', icon: '💛' },
   ]
 
@@ -1878,7 +1869,10 @@ function TabBar({ current, onChange }: { current: Screen; onChange: (screen: Scr
     <nav className="tab-bar" aria-label="하단 탭">
       {tabs.map((tab) => (
         <button className={current === tab.id ? 'active' : ''} key={tab.id} onClick={() => onChange(tab.id)} type="button">
-          <span className="tab-icon" aria-hidden="true">{tab.icon}</span>
+          <span className="tab-icon" aria-hidden="true">
+            {tab.icon}
+            {tab.id === 'shopping' && cartCount > 0 && <b>{cartCount}</b>}
+          </span>
           <span className="tab-label">{tab.label}</span>
         </button>
       ))}
