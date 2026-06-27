@@ -57,6 +57,7 @@ type DecorItemRow = {
   id: string
   name: string
   type: DecorItem['type']
+  badge: string | null
   unlock_level: number | null
   unlock_by_shopping: boolean | null
 }
@@ -75,7 +76,7 @@ const decorItemOrder = createOrderMap(fallbackDecorItems)
 export async function loadAppData(): Promise<AppData> {
   if (!supabase) return fallbackAppData
 
-  const [seasonsResult, seasonalIngredientsResult, menusResult, decorItemsResult] = await Promise.all([
+  const [seasonsResult, seasonalIngredientsResult, menusResult] = await Promise.all([
     supabase.from('seasons').select('key, label, accent').order('sort_order'),
     supabase.from('seasonal_ingredients').select('id, name, season, season_key, emoji').order('id'),
     supabase
@@ -101,8 +102,15 @@ export async function loadAppData(): Promise<AppData> {
         )
       `)
       .order('id'),
-    supabase.from('decor_items').select('id, name, type, unlock_level, unlock_by_shopping').order('id'),
   ])
+  let decorItemsResult: { data: unknown[] | null; error: { message: string } | null } = await supabase
+    .from('decor_items')
+    .select('id, name, type, badge, unlock_level, unlock_by_shopping')
+    .order('id')
+
+  if (decorItemsResult.error && decorItemsResult.error.message.includes('badge')) {
+    decorItemsResult = await supabase.from('decor_items').select('id, name, type, unlock_level, unlock_by_shopping').order('id')
+  }
 
   const errors = [
     seasonsResult.error,
@@ -175,6 +183,7 @@ function mapDecorItem(row: DecorItemRow): DecorItem {
     id: row.id,
     name: row.name,
     type: row.type,
+    badge: row.badge ?? undefined,
     unlockLevel: row.unlock_level ?? undefined,
     unlockByShopping: row.unlock_by_shopping ?? undefined,
   }
