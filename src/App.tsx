@@ -1823,7 +1823,7 @@ function PetHomeScreen({
             <div className="decor-grid">
               {canClearDecor && (
                 <button
-                  className={`decor-card clear-card ${isClearSelected ? 'selected' : ''}`}
+                  className={`decor-card pet-decor-card clear-card ${isClearSelected ? 'selected' : ''}`}
                   onClick={() => onClearDecor(decorTab)}
                   type="button"
                 >
@@ -1844,7 +1844,7 @@ function PetHomeScreen({
                 }))
                 .sort((a, b) => Number(b.unlocked) - Number(a.unlocked) || a.index - b.index)
                 .map(({ item, unlocked, selected, itemRoomImage, itemDecorImage }) => (
-                  <button className={`decor-card ${selected ? 'selected' : ''} ${unlocked ? '' : 'locked'}`} key={item.id} onClick={() => onSelectDecor(item)} type="button">
+                  <button className={`decor-card pet-decor-card ${selected ? 'selected' : ''} ${unlocked ? '' : 'locked'}`} key={item.id} onClick={() => onSelectDecor(item)} type="button">
                     <span
                       className={itemRoomImage ? 'decor-card-visual room-thumbnail' : 'decor-card-visual'}
                       style={itemRoomImage ? { backgroundImage: `url(${itemRoomImage})` } : undefined}
