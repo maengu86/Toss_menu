@@ -21,6 +21,24 @@ type KakaoMapInstance = {
   addControl: (control: object, position: unknown) => void
   panTo: (position: KakaoLatLng) => void
 }
+import './App.css'
+import PetAvatar from './components/PetAvatar'
+import { getRoomBackgroundImage } from './data/decorAssets'
+import { getSudalAccessoryPreviewImage } from './data/sudalDecorImages'
+import { getPetClearDecorIconImage, getPetDecorIconImage, getPetFeedIconImage, getPetShareIconImage, getPetUiIconImage } from './data/sudalPetIcons'
+import { fallbackAppData, loadAppData } from './services/appDataService'
+import type { DecorItem, Ingredient, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
+import petTabAccessoryIcon from './assets/sudal-tabs/accessory.png'
+import petTabAllIcon from './assets/sudal-tabs/all.png'
+import petTabFeedIcon from './assets/sudal-tabs/feed.png'
+import petTabRoomIcon from './assets/sudal-tabs/room.png'
+import discountCouponImage from '../discount-coupon-20.jpg'
+
+type KakaoLatLng = object
+type KakaoMapInstance = {
+  addControl: (control: object, position: unknown) => void
+  panTo: (position: KakaoLatLng) => void
+}
 type KakaoMapMarker = { setMap: (map: KakaoMapInstance | null) => void }
 type KakaoInfoWindow = {
   close: () => void
@@ -70,10 +88,6 @@ const couponRewardExp = petLevelExpRequirements.reduce((total, requirement) => t
 
 // 작업: 메뉴와 식재료 가격을 동일한 수치의 XP로 사용합니다.
 // 적용 위치: 메뉴 카드 XP 표시, 밥먹이기 버튼, 실제 펫 경험치 증가량.
-
-const receiptDrafts = [
-  { id: 1, title: '라인형 영수증' },
-]
 
 const kakaoMapAppKey = import.meta.env.VITE_KAKAO_MAP_APP_KEY as string | undefined
 const kakaoMapDefaultLevel = 3
@@ -616,6 +630,17 @@ function HomeScreen({
           <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('profile')} />
         </button>
       </header>
+            aria-label="제철 음식과 메뉴 검색"
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="제철 음식과 메뉴 검색"
+            type="search"
+            value={searchQuery}
+          />
+        </label>
+        <button aria-label="마이페이지 열기" onClick={onOpenProfile} type="button">
+          <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('profile')} />
+        </button>
+      </header>
 
       {hasSearch ? (
         <section className="home-search-results">
@@ -633,6 +658,9 @@ function HomeScreen({
                 >
                   <em aria-hidden="true">{ingredientIconImage(ingredient.name)}</em>
                   <span><strong>{ingredient.name}</strong></span>
+                  <em aria-hidden="true">{ingredientIconImage(ingredient.name)}</em>
+                  <span><strong>{ingredient.name}</strong><small>{ingredient.season} 제철</small></span>
+                  <b>선택</b>
                 </button>
               ))}
               {ingredientSearchResults.length === 0 && <p>일치하는 제철 식재료가 없어요.</p>}
@@ -648,6 +676,10 @@ function HomeScreen({
                   <button className={selected ? 'selected' : ''} key={menu.id} onClick={() => onOpenMenuDetail(menu.id)} type="button">
                     <em aria-hidden="true">{ingredientIconImage(menu.ingredients[0]?.name ?? '')}</em>
                     <span><strong>{menu.name}</strong></span>
+                  <button className={selected ? 'selected' : ''} key={menu.id} onClick={() => onOpenMenuDetail(menu.id)} type="button">
+                    <em aria-hidden="true">{ingredientIconImage(menu.ingredients[0]?.name ?? '')}</em>
+                    <span><strong>{menu.name}</strong><small>{menu.ingredients.map((ingredient) => ingredient.name).join(' · ')}</small></span>
+                    <b>{selected ? '열기' : '보기'}</b>
                   </button>
                 )
               })}
@@ -714,6 +746,9 @@ function HomeScreen({
                 >
                   <span className="menu-card-visual" aria-hidden="true">
                     {menuCardVisualImage(menu)}
+                  </span>
+                  <span className="menu-card-visual" aria-hidden="true">
+                    {ingredientIconImage(menu.ingredients[0]?.name ?? menu.name)}
                   </span>
                   <strong>{menu.name}</strong>
                   <b>{getMenuExp(menu).toLocaleString('ko-KR')}xp</b>
@@ -862,8 +897,6 @@ function ShoppingScreen({
           <header className="shopping-sub-header">
             <button aria-label="제철홈으로" onClick={onGoHome} type="button">←</button>
             <div>
-              <button aria-label="공유" type="button"><img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('share')} /></button>
-              <button aria-label="검색" type="button"><img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('search')} /></button>
               <button aria-label="장바구니" onClick={() => onSetStep('cart')} type="button"><img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('cart')} /></button>
             </div>
           </header>
@@ -871,11 +904,7 @@ function ShoppingScreen({
             <em aria-hidden="true">{ingredientIconImage(detailMenu.ingredients[0]?.name ?? detailMenu.name)}</em>
           </div>
           <div className="shopping-detail-copy">
-            <div className="shopping-detail-badges">
-              <span>{detailMenu.season} 제철</span><span>{detailMenu.weather}</span>
-            </div>
             <h1>{detailMenu.name}</h1>
-            <p>{detailMenu.description || `${detailMenu.ingredients.map((ingredient) => ingredient.name).join(', ')}로 만드는 제철 요리예요.`}</p>
             <div className="shopping-detail-ingredients" aria-label="메뉴 재료 선택">
               <span>장바구니에 담을 재료를 선택해주세요</span>
               <div>
@@ -893,7 +922,6 @@ function ShoppingScreen({
                       <em aria-hidden="true">{ingredientIconImage(ingredient.name)}</em>
                       <strong>{ingredient.name}</strong>
                       <small>{formatWon(ingredient.price)}</small>
-                      {selected && <span aria-hidden="true">✓</span>}
                     </button>
                   )
                 })}
@@ -1164,52 +1192,36 @@ function ShoppingScreen({
         <div className="complete-card">
           <h2>주문 체험이 완료됐어요</h2>
           <p>실제 결제와 주문은 발생하지 않습니다.</p>
-          <div className="receipt-mini">
-            <div><span>결제 수단</span><b>{paymentMethod}</b></div>
-            <div><span>배송 방식</span><b>{deliveryTypeInfo.name}</b></div>
-            <div><span>배송 요청</span><b>{deliveryOption}</b></div>
-            {couponDiscount > 0 && <div><span>쿠폰 할인</span><b>-{formatWon(couponDiscount)}</b></div>}
-            <div><span>총액</span><b>{formatWon(orderTotal)}</b></div>
-          </div>
           <div className="receipt-drafts receipt-main" aria-label="주문 완료 영수증">
-            {receiptDrafts.map((draft) => (
-              <article className={`receipt-draft receipt-draft-${draft.id}`} key={draft.id}>
-                {/* 작업: 선택된 라인형 영수증을 주문완료 메인 UI로 적용합니다.
-                    개인 수정 가능: 항목 순서는 바꿔도 되지만 실제 주문값 바인딩은 유지해야 합니다.
-                    적용 위치: 장보기 > 주문완료 화면의 메인 영수증. */}
-                <div className="receipt-draft-head">
-                  <strong>적용 영수증</strong>
-                  <span>{draft.title}</span>
+            <article className="receipt-draft receipt-draft-1">
+              <dl>
+                <div>
+                  <dt>결제 수단</dt>
+                  <dd>{paymentMethod}</dd>
                 </div>
-                <dl>
+                <div>
+                  <dt>배송 방식</dt>
+                  <dd>{deliveryTypeInfo.name}</dd>
+                </div>
+                <div>
+                  <dt>배송 요청</dt>
+                  <dd>{deliveryOption}</dd>
+                </div>
+                {couponDiscount > 0 && (
                   <div>
-                    <dt>결제 수단</dt>
-                    <dd>{paymentMethod}</dd>
+                    <dt>쿠폰 할인</dt>
+                    <dd>-{formatWon(couponDiscount)}</dd>
                   </div>
-                  <div>
-                    <dt>배송 방식</dt>
-                    <dd>{deliveryTypeInfo.name}</dd>
-                  </div>
-                  <div>
-                    <dt>배송 요청</dt>
-                    <dd>{deliveryOption}</dd>
-                  </div>
-                  {couponDiscount > 0 && (
-                    <div>
-                      <dt>쿠폰 할인</dt>
-                      <dd>-{formatWon(couponDiscount)}</dd>
-                    </div>
-                  )}
-                  <div>
-                    <dt>총 결제금액</dt>
-                    <dd>{formatWon(orderTotal)}</dd>
-                  </div>
-                </dl>
-              </article>
-            ))}
+                )}
+                <div>
+                  <dt>총 결제금액</dt>
+                  <dd>{formatWon(orderTotal)}</dd>
+                </div>
+              </dl>
+            </article>
           </div>
           <button className="toss-primary" onClick={onGoPetHome} type="button">밥주러 가기</button>
-          <button className="toss-secondary wide" onClick={onGoHome} type="button">제철홈으로 가기</button>
+          <button className="toss-secondary wide" onClick={onGoHome} type="button">장보러 가기</button>
         </div>
       )}
     </section>
@@ -1478,6 +1490,15 @@ function menuCardVisualImage(menu: Menu) {
 }
 
 function MyPage({
+function shoppingItemIconImage(name: string) {
+  return getPetFeedIconImage(name) || getPetUiIconImage('bag')
+}
+
+function ingredientIconImage(name: string, className = 'sudal-ingredient-icon') {
+  return <img alt="" aria-hidden="true" className={className} src={shoppingItemIconImage(name)} />
+}
+
+function MyPage({
   coupons,
   exp,
   orderHistory,
@@ -1542,6 +1563,8 @@ function MyPage({
 
             {orderHistory.length === 0 && (
               <div className="my-order-empty">
+                <strong>아직 주문 내역이 없어요</strong>
+                <span aria-hidden="true"><img alt="" className="sudal-modal-icon" src={getPetUiIconImage('receipt')} /></span>
                 <strong>아직 주문 내역이 없어요</strong>
                 <p>상품을 구매하면 주문 내역이 여기에 쌓여요.</p>
               </div>
@@ -1670,7 +1693,7 @@ function PetHomeScreen({
   onClearDecor,
   onFeed,
   onSelectDecor,
-  onShare,
+  onShare: onShareFallback,
   onScrollActivity,
 }: {
   level: number
@@ -1689,6 +1712,7 @@ function PetHomeScreen({
 }) {
   const [decorTab, setDecorTab] = useState<PetHomeDecorTab>('all')
   const [petTab, setPetTab] = useState<'feed' | 'decor'>('feed')
+  const petRoomRef = useRef<HTMLDivElement>(null)
   const petHomeDecorItems = decorItems.filter((item) => item.type !== 'outfit' && isPetHomeVisibleDecorItem(item))
   const visibleItems = decorTab === 'all' ? petHomeDecorItems : petHomeDecorItems.filter((item) => item.type === decorTab)
   const canClearDecor = decorTab === 'accessory'
@@ -1708,11 +1732,43 @@ function PetHomeScreen({
     accessory: petTabAccessoryIcon,
   } as const
 
+  async function sharePetHomeImage() {
+    const target = petRoomRef.current
+    if (!target) return
+
+    try {
+      const canvas = await renderPetHomeShareCanvas(target, {
+        background,
+        roomImage,
+      })
+      const blob = await canvasToBlob(canvas)
+      const file = new File([blob], 'mukbo-pet-home.png', { type: 'image/png' })
+
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: 'Mukbo pet home',
+          text: 'Sharing my pet home',
+        })
+        return
+      }
+
+      downloadBlob(blob, file.name)
+    } catch {
+      onShareFallback()
+    }
+  }
+
+  function onShare() {
+    void sharePetHomeImage()
+  }
+
   return (
     <section className="screen pet-home-screen" onScroll={onScrollActivity}>
       <div className="pet-home-shell">
       <div
         className={`pet-room-stage ${roomClass(background)} ${roomImage ? 'has-room-image' : ''}`}
+        ref={petRoomRef}
         style={roomImage ? { backgroundImage: `url(${roomImage})` } : undefined}
       >
         <button className="pet-share-button" aria-label="수달 영역 캡처" onClick={onShare} type="button">
@@ -1883,6 +1939,154 @@ function isDecorUnlocked(item: DecorItem, level: number, shoppingRewardUnlocked:
   if (item.unlockByShopping) return shoppingRewardUnlocked
   if (item.unlockLevel) return level >= item.unlockLevel
   return true
+}
+
+function canvasToBlob(canvas: HTMLCanvasElement) {
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) resolve(blob)
+      else reject(new Error('Canvas export failed'))
+    }, 'image/png')
+  })
+}
+
+async function renderPetHomeShareCanvas(
+  target: HTMLElement,
+  { background, roomImage }: { background: string; roomImage?: string },
+) {
+  const bounds = target.getBoundingClientRect()
+  const scale = Math.max(2, window.devicePixelRatio || 1)
+  const canvas = document.createElement('canvas')
+  canvas.width = Math.round(bounds.width * scale)
+  canvas.height = Math.round(bounds.height * scale)
+
+  const context = canvas.getContext('2d')
+  if (!context) throw new Error('Canvas context unavailable')
+
+  context.scale(scale, scale)
+
+  if (roomImage) {
+    const backgroundImage = await loadCanvasImage(roomImage)
+    drawImageCover(context, backgroundImage, 0, 0, bounds.width, bounds.height)
+  } else {
+    drawPetRoomFallbackBackground(context, roomClass(background), bounds.width, bounds.height)
+  }
+
+  const petElement = target.querySelector('.dress-pet')
+  const petBounds = petElement?.getBoundingClientRect()
+  if (!petBounds) return canvas
+
+  const petRect = {
+    height: petBounds.height,
+    width: petBounds.width,
+    x: petBounds.left - bounds.left,
+    y: petBounds.top - bounds.top,
+  }
+
+  await drawSvgImageLayers(context, target, petRect)
+
+  return canvas
+}
+
+function loadCanvasImage(src: string) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image()
+    image.onload = () => resolve(image)
+    image.onerror = reject
+    image.src = src
+  })
+}
+
+function drawImageCover(
+  context: CanvasRenderingContext2D,
+  image: HTMLImageElement,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+) {
+  const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight)
+  const drawWidth = image.naturalWidth * scale
+  const drawHeight = image.naturalHeight * scale
+  context.drawImage(image, x + (width - drawWidth) / 2, y + (height - drawHeight) / 2, drawWidth, drawHeight)
+}
+
+async function drawSvgImageLayers(
+  context: CanvasRenderingContext2D,
+  target: HTMLElement,
+  petRect: { height: number; width: number; x: number; y: number },
+) {
+  const layers = Array.from(target.querySelectorAll<SVGImageElement>('.sudal-pet image'))
+
+  for (const layer of layers) {
+    const href = layer.href.baseVal || layer.getAttribute('href')
+    if (!href) continue
+
+    const image = await loadCanvasImage(href)
+    const frame = {
+      height: Number(layer.getAttribute('height') ?? 0),
+      width: Number(layer.getAttribute('width') ?? 0),
+      x: Number(layer.getAttribute('x') ?? 0),
+      y: Number(layer.getAttribute('y') ?? 0),
+    }
+
+    drawImageMeet(
+      context,
+      image,
+      petRect.x + (frame.x / 260) * petRect.width,
+      petRect.y + (frame.y / 340) * petRect.height,
+      (frame.width / 260) * petRect.width,
+      (frame.height / 340) * petRect.height,
+    )
+  }
+}
+
+function drawImageMeet(
+  context: CanvasRenderingContext2D,
+  image: HTMLImageElement,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+) {
+  const scale = Math.min(width / image.naturalWidth, height / image.naturalHeight)
+  const drawWidth = image.naturalWidth * scale
+  const drawHeight = image.naturalHeight * scale
+  context.drawImage(image, x + (width - drawWidth) / 2, y + (height - drawHeight) / 2, drawWidth, drawHeight)
+}
+
+function drawPetRoomFallbackBackground(context: CanvasRenderingContext2D, className: string, width: number, height: number) {
+  const gradient = context.createLinearGradient(0, 0, 0, height)
+  if (className === 'winter') {
+    gradient.addColorStop(0, '#bfe7ff')
+    gradient.addColorStop(0.54, '#edf6ff')
+    gradient.addColorStop(1, '#dfefff')
+  } else if (className === 'summer') {
+    gradient.addColorStop(0, '#9edcf9')
+    gradient.addColorStop(0.54, '#9edcf9')
+    gradient.addColorStop(0.55, '#f7d886')
+    gradient.addColorStop(1, '#f7d886')
+  } else if (className === 'autumn') {
+    gradient.addColorStop(0, '#e4b06c')
+    gradient.addColorStop(1, '#d98955')
+  } else if (className === 'night') {
+    gradient.addColorStop(0, '#3f5578')
+    gradient.addColorStop(1, '#927754')
+  } else {
+    gradient.addColorStop(0, '#f7cf79')
+    gradient.addColorStop(1, '#f6c86d')
+  }
+  context.fillStyle = gradient
+  context.fillRect(0, 0, width, height)
+}
+
+function downloadBlob(blob: Blob, fileName: string) {
+  const url = URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = url
+  anchor.download = fileName
+  anchor.click()
+  URL.revokeObjectURL(url)
 }
 
 export default App
