@@ -1909,7 +1909,7 @@ function PetHomeScreen({
         className={`pet-room-stage ${roomClass(background)} ${roomImage ? 'has-room-image' : ''}`}
         style={roomImage ? { backgroundImage: `url(${roomImage})` } : undefined}
       >
-        <button className="pet-share-button" aria-label="먹보 링크 복사" onClick={onShare} type="button">
+        <button className="pet-share-button" aria-label="수달 영역 캡처" onClick={onShare} type="button">
           <img alt="" aria-hidden="true" src={getPetShareIconImage()} />
         </button>
         <PetAvatar outfit={outfit} background={background} accessory={accessory} body="sudal" />
@@ -1982,7 +1982,7 @@ function PetHomeScreen({
                 <span className="decor-card-visual decor-card-empty" aria-hidden="true">
                   <img alt="" src={getPetClearDecorIconImage()} />
                 </span>
-                <strong>해제</strong>
+                <strong>미착용</strong>
               </button>
             )}
             {visibleItems

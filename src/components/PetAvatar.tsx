@@ -41,6 +41,14 @@ function PetAvatar({
     return (
       <div className={`pet-stage pet-dress-stage ${stageClass}`}>
         <svg className="pet-svg dress-pet sudal-pet" viewBox="0 0 260 340" role="img" aria-label="먹보 수달 펫">
+          <defs>
+            <clipPath id="sudal-outfit-foreground">
+              <rect x="28" y="0" width="204" height="122" rx="58" />
+              <ellipse cx="58" cy="190" rx="33" ry="67" />
+              <ellipse cx="202" cy="190" rx="33" ry="67" />
+              <rect x="42" y="268" width="176" height="72" rx="32" />
+            </clipPath>
+          </defs>
           <image href={sudalMain} x="18" y="5" width="224" height="324" preserveAspectRatio="xMidYMid meet" />
           {outfitImage && (
             <image
@@ -49,6 +57,17 @@ function PetAvatar({
               y={outfitFrame.y}
               width={outfitFrame.width}
               height={outfitFrame.height}
+              preserveAspectRatio="xMidYMid meet"
+            />
+          )}
+          {outfitImage && (
+            <image
+              href={sudalMain}
+              x="18"
+              y="5"
+              width="224"
+              height="324"
+              clipPath="url(#sudal-outfit-foreground)"
               preserveAspectRatio="xMidYMid meet"
             />
           )}
@@ -134,7 +153,10 @@ export default PetAvatar
 
 function getOutfitFrame(name: string) {
   if (name.includes('딸기 잠옷')) {
-    return { x: 0, y: 0, width: 260, height: 340 }
+    return { x: 0, y: 8, width: 260, height: 332 }
+  }
+  if (name.includes('밀짚 멜빵바지')) {
+    return { x: 32, y: 98, width: 196, height: 184 }
   }
   return { x: 34, y: 92, width: 192, height: 170 }
 }
@@ -142,6 +164,12 @@ function getOutfitFrame(name: string) {
 function getAccessoryFrame(name: string) {
   if (name.includes('수박 주스')) {
     return { x: 0, y: 0, width: 260, height: 340 }
+  }
+  if (name.includes('딸기 우유팩')) {
+    return { x: 3, y: 52, width: 195, height: 255 }
+  }
+  if (name.includes('밀짚모자')) {
+    return { x: 0, y: -28, width: 260, height: 340 }
   }
   if (name.includes('안경') || name.includes('선글라스')) {
     return { x: 44, y: 46, width: 176, height: 86 }

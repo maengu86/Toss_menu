@@ -18,8 +18,8 @@ export function SudalOutfitLayer({ name }: DecorLayerProps) {
       return <Poncho color="#c9693f" accent="#f2b34f" />
     case '눈꽃 니트':
       return <Sweater color="#b65f58" accent="#fff6df" />
-    case '밀짚모자+멜빵':
-      return <><StrawHat /><Overalls color="#6f9a62" accent="#f5df9a" motif="button" /></>
+    case '밀짚 멜빵바지':
+      return <Overalls color="#6f9a62" accent="#f5df9a" motif="button" />
     case '비옷+장화':
       return <RainSet />
     case '벚꽃 가디건':
@@ -50,6 +50,7 @@ export function SudalOutfitLayer({ name }: DecorLayerProps) {
 export function SudalAccessoryLayer({ name }: DecorLayerProps) {
   switch (name) {
     case '체리 머리핀': return <CherryHairpin />
+    case '밀짚모자': return <StrawHat />
     case '밤톨 베레모': return <AcornBeret />
     case '여름용 튜브': return <SwimTube />
     case '단풍잎 부채': return <MapleFan />
