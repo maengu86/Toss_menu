@@ -5,6 +5,7 @@ import PetAvatar from './components/PetAvatar'
 import { getRoomBackgroundImage } from './data/decorAssets'
 import { fallbackAppData, loadAppData } from './services/appDataService'
 import type { DecorItem, Ingredient, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
+import discountCouponImage from '../discount-coupon-20.jpg'
 
 const tossShoppingOptions = [
   { name: '토스쇼핑 배송', eta: '내일 도착 예정', fee: 0, perk: '무료 배송' },
@@ -13,14 +14,10 @@ const tossShoppingOptions = [
 ]
 const paymentOptions = ['토스페이', '카드 간편결제', '계좌 결제']
 const deliveryOptions = ['문 앞에 놓기', '직접 받을게요']
-// 작업: 펫 레벨업 기준을 누적 XP로 관리합니다.
-// 개인 수정 가능: 2레벨/3레벨 기준을 바꾸고 싶으면 아래 숫자만 조정하면 됩니다.
-// 적용 위치: 펫홈 레벨 표시, 경험치 바, 꾸미기 아이템 잠금 해제 조건.
-const petLevelThresholds = [
-  { level: 1, minExp: 0 },
-  { level: 2, minExp: 10000 },
-  { level: 3, minExp: 30000 },
-] as const
+// 작업: 5단계 레벨업에 총 20만 XP가 필요하며 같은 구조를 반복합니다.
+// 적용 위치: 펫홈 레벨 표시, 경험치 바, 20만 XP 단위 할인 쿠폰 발급.
+const petLevelExpRequirements = [10000, 25000, 40000, 55000, 70000] as const
+const couponRewardExp = petLevelExpRequirements.reduce((total, requirement) => total + requirement, 0)
 
 // 작업: 메뉴와 식재료 가격을 동일한 수치의 XP로 사용합니다.
 // 적용 위치: 메뉴 카드 XP 표시, 밥먹이기 버튼, 실제 펫 경험치 증가량.
@@ -38,15 +35,23 @@ type FeedIngredient = Ingredient & {
 
 type OrderSnapshot = {
   checkedPrice: number
+  couponDiscount: number
   orderTotal: number
 }
 
 type OrderHistoryItem = {
   id: number
   orderedAt: string
-  items: { name: string; quantity: string }[]
+  items: { name: string; quantity: string; count: number; price: number }[]
+  discount: number
   total: number
   status: '주문 완료'
+}
+
+type RewardCoupon = {
+  id: string
+  level: number
+  milestoneExp: number
 }
 
 function formatWon(value: number) {
@@ -66,30 +71,48 @@ function getMenuExp(menu: Menu) {
 }
 
 function getPetLevel(totalExp: number) {
-  return petLevelThresholds.reduce((currentLevel, threshold) => (
-    totalExp >= threshold.minExp ? threshold.level : currentLevel
-  ), 1)
-}
+  const completedCycles = Math.floor(totalExp / couponRewardExp)
+  const cycleExp = totalExp % couponRewardExp
+  let completedLevelsInCycle = 0
+  let threshold = 0
 
-function getNextLevelThreshold(level: number) {
-  return petLevelThresholds.find((threshold) => threshold.level > level)
-}
-
-function getCurrentLevelThreshold(level: number) {
-  let currentThreshold = 0
-  for (const threshold of petLevelThresholds) {
-    if (threshold.level <= level) currentThreshold = threshold.minExp
+  for (const requirement of petLevelExpRequirements) {
+    threshold += requirement
+    if (cycleExp < threshold) break
+    completedLevelsInCycle += 1
   }
-  return currentThreshold
+
+  return completedCycles * petLevelExpRequirements.length + completedLevelsInCycle + 1
+}
+
+function getLevelExpStatus(totalExp: number, level: number) {
+  const levelIndex = (level - 1) % petLevelExpRequirements.length
+  const cycleExp = totalExp % couponRewardExp
+  const currentLevelStartExp = petLevelExpRequirements
+    .slice(0, levelIndex)
+    .reduce((total, requirement) => total + requirement, 0)
+
+  return {
+    currentExp: cycleExp - currentLevelStartExp,
+    requiredExp: petLevelExpRequirements[levelIndex],
+  }
+}
+
+function getCouponCount(totalExp: number) {
+  return Math.floor(totalExp / couponRewardExp)
+}
+
+function getEarnedCoupons(totalExp: number): RewardCoupon[] {
+  return Array.from({ length: getCouponCount(totalExp) }, (_, index) => ({
+    id: `level-coupon-${index + 1}`,
+    level: 6 + index * petLevelExpRequirements.length,
+    milestoneExp: (index + 1) * couponRewardExp,
+  }))
 }
 
 function getLevelProgress(totalExp: number, level: number) {
-  const nextThreshold = getNextLevelThreshold(level)
-  if (!nextThreshold) return 100
-
-  const currentThreshold = getCurrentLevelThreshold(level)
-  const levelRange = nextThreshold.minExp - currentThreshold
-  return Math.min(100, Math.max(0, ((totalExp - currentThreshold) / levelRange) * 100))
+  const { currentExp, requiredExp } = getLevelExpStatus(totalExp, level)
+  return Math.min(100, Math.max(0, (currentExp / requiredExp) * 100))
 }
 
 function App() {
@@ -107,9 +130,12 @@ function App() {
   // 적용 위치: 주문 완료 후 펫홈 > 밥먹이기 목록.
   const [feedIngredients, setFeedIngredients] = useState<FeedIngredient[]>([])
   const [checkedIngredients, setCheckedIngredients] = useState<string[]>([])
+  const [cartQuantities, setCartQuantities] = useState<Record<string, number>>({})
   const [removedCartIngredientKeys, setRemovedCartIngredientKeys] = useState<string[]>([])
   const [lastOrder, setLastOrder] = useState<OrderSnapshot | null>(null)
   const [orderHistory, setOrderHistory] = useState<OrderHistoryItem[]>([])
+  const [usedCouponIds, setUsedCouponIds] = useState<string[]>([])
+  const [appliedCouponId, setAppliedCouponId] = useState('')
   const [profileOpen, setProfileOpen] = useState(false)
   // 작업: 펫 경험치는 레벨별 잔여치가 아니라 누적 XP로 저장합니다.
   // 개인 수정 가능: 기본 시작 XP를 바꾸고 싶으면 0을 원하는 값으로 변경해도 됩니다.
@@ -169,13 +195,23 @@ function App() {
 
   const shoppingItems = cartMenus.flatMap((menu) => menu.ingredients.map((ingredient) => ({ menuId: menu.id, ingredient })))
   const checkedPrice = shoppingItems.reduce((sum, item) => (
-    checkedIngredients.includes(ingredientKey(item.menuId, item.ingredient.name)) ? sum + item.ingredient.price : sum
+    checkedIngredients.includes(ingredientKey(item.menuId, item.ingredient.name))
+      ? sum + item.ingredient.price * (cartQuantities[ingredientKey(item.menuId, item.ingredient.name)] ?? 1)
+      : sum
   ), 0)
+  const earnedCoupons = getEarnedCoupons(exp)
+  const availableCoupons = earnedCoupons.filter((coupon) => !usedCouponIds.includes(coupon.id))
+  const activeCouponId = availableCoupons.some((coupon) => coupon.id === appliedCouponId) ? appliedCouponId : ''
+  const couponDiscount = activeCouponId ? Math.min(20000, Math.floor(checkedPrice * 0.2)) : 0
   const selectedDeliveryInfo = tossShoppingOptions[0]
-  const orderTotal = checkedPrice + selectedDeliveryInfo.fee
+  const orderTotal = checkedPrice - couponDiscount + selectedDeliveryInfo.fee
   const displayCheckedPrice = shopStep === 'complete' ? lastOrder?.checkedPrice ?? checkedPrice : checkedPrice
+  const displayCouponDiscount = shopStep === 'complete' ? lastOrder?.couponDiscount ?? couponDiscount : couponDiscount
   const displayOrderTotal = shopStep === 'complete' ? lastOrder?.orderTotal ?? orderTotal : orderTotal
-  const checkedTotal = shoppingItems.filter((item) => checkedIngredients.includes(ingredientKey(item.menuId, item.ingredient.name))).length
+  const checkedTotal = shoppingItems.reduce((total, item) => {
+    const key = ingredientKey(item.menuId, item.ingredient.name)
+    return checkedIngredients.includes(key) ? total + (cartQuantities[key] ?? 1) : total
+  }, 0)
   const level = getPetLevel(exp)
   function showToast(message: string) {
     setToast(message)
@@ -199,6 +235,9 @@ function App() {
       if (current.includes(menuId)) {
         setCheckedIngredients((keys) => keys.filter((key) => !key.startsWith(`${menuId}:`)))
         setRemovedCartIngredientKeys((keys) => keys.filter((key) => !key.startsWith(`${menuId}:`)))
+        setCartQuantities((quantities) => Object.fromEntries(
+          Object.entries(quantities).filter(([key]) => !key.startsWith(`${menuId}:`)),
+        ))
         return current.filter((id) => id !== menuId)
       }
       setRemovedCartIngredientKeys((keys) => keys.filter((key) => !key.startsWith(`${menuId}:`)))
@@ -212,19 +251,27 @@ function App() {
     setSelectedMenuIds((current) => current.filter((id) => id !== menuId))
     setCheckedIngredients((current) => current.filter((key) => !key.startsWith(`${menuId}:`)))
     setRemovedCartIngredientKeys((current) => current.filter((key) => !key.startsWith(`${menuId}:`)))
+    setCartQuantities((quantities) => Object.fromEntries(
+      Object.entries(quantities).filter(([key]) => !key.startsWith(`${menuId}:`)),
+    ))
   }
 
   function clearMenuSelection() {
     setSelectedMenuIds([])
     setCheckedIngredients([])
     setRemovedCartIngredientKeys([])
+    setCartQuantities({})
     setShoppingCatalogMenuIds([])
+    setAppliedCouponId('')
     setSelectedMenuOpen(false)
   }
 
   function feedPet(ingredient: FeedIngredient) {
-    setExp((current) => current + getIngredientExp(ingredient))
+    const nextExp = exp + getIngredientExp(ingredient)
+    const couponIssued = getCouponCount(nextExp) > getCouponCount(exp)
+    setExp(nextExp)
     setFeedIngredients((current) => current.filter((item) => item.id !== ingredient.id))
+    if (couponIssued) showToast('20% 할인 쿠폰이 발급됐어요. 마이페이지에서 확인해 보세요.')
   }
 
   function toggleIngredient(key: string) {
@@ -233,11 +280,17 @@ function App() {
     ))
   }
 
+  function changeCartQuantity(key: string, quantity: number) {
+    const normalizedQuantity = Number.isFinite(quantity) ? Math.min(99, Math.max(1, Math.floor(quantity))) : 1
+    setCartQuantities((current) => ({ ...current, [key]: normalizedQuantity }))
+  }
+
   function addShoppingProduct(menuId: string, ingredientName: string) {
     const key = ingredientKey(menuId, ingredientName)
     setSelectedMenuIds((current) => current.includes(menuId) ? current : [...current, menuId])
     setRemovedCartIngredientKeys((current) => current.filter((item) => item !== key))
     setCheckedIngredients((current) => current.includes(key) ? current : [...current, key])
+    setCartQuantities((current) => current[key] ? current : { ...current, [key]: 1 })
     showToast(`${ingredientName}을 장바구니에 담았어요.`)
   }
 
@@ -261,7 +314,7 @@ function App() {
     orderSequenceRef.current += 1
     const orderId = orderSequenceRef.current
 
-    setLastOrder({ checkedPrice, orderTotal })
+    setLastOrder({ checkedPrice, couponDiscount, orderTotal })
     setOrderHistory((current) => [{
       id: orderId,
       orderedAt: new Intl.DateTimeFormat('ko-KR', {
@@ -273,22 +326,31 @@ function App() {
       items: checkedItems.map((item) => ({
         name: item.ingredient.name,
         quantity: item.ingredient.quantity,
+        count: cartQuantities[ingredientKey(item.menuId, item.ingredient.name)] ?? 1,
+        price: item.ingredient.price,
       })),
+      discount: couponDiscount,
       total: orderTotal,
       status: '주문 완료',
     }, ...current])
     setRemovedCartIngredientKeys((current) => Array.from(new Set([...current, ...orderedKeys])))
     setFeedIngredients((current) => [
       ...current,
-      ...checkedItems.map((item, index) => {
+      ...checkedItems.flatMap((item, index) => {
         const menu = selectedMenus.find((selectedMenu) => selectedMenu.id === item.menuId)
-        return {
+        const quantity = cartQuantities[ingredientKey(item.menuId, item.ingredient.name)] ?? 1
+        return Array.from({ length: quantity }, (_, unitIndex) => ({
           ...item.ingredient,
-          id: `${orderId}:${index}:${item.menuId}:${item.ingredient.name}`,
+          id: `${orderId}:${index}:${unitIndex}:${item.menuId}:${item.ingredient.name}`,
           menuName: menu?.name ?? '주문 메뉴',
-        }
+        }))
       }),
     ])
+    setCartQuantities((current) => Object.fromEntries(
+      Object.entries(current).filter(([key]) => !orderedKeys.includes(key)),
+    ))
+    if (activeCouponId) setUsedCouponIds((current) => [...current, activeCouponId])
+    setAppliedCouponId('')
     setCheckedIngredients((current) => current.filter((key) => !orderedKeys.includes(key)))
     setSelectedMenuIds([])
     setSelectedMenuOpen(false)
@@ -299,6 +361,7 @@ function App() {
   function restartShoppingAfterOrder() {
     setLastOrder(null)
     setShoppingCatalogMenuIds([])
+    setAppliedCouponId('')
     setShopStep('store')
     setScreen('shopping')
   }
@@ -373,11 +436,15 @@ function App() {
           <ShoppingScreen
             background={selectedBackground}
             accessory={selectedAccessory}
+            appliedCouponId={activeCouponId}
+            availableCoupons={availableCoupons}
+            cartQuantities={cartQuantities}
             checkedIngredients={checkedIngredients}
             checkedTotal={checkedTotal}
             deliveryOption={deliveryOption}
             deliveryOptions={deliveryOptions}
             catalogMenus={shoppingCatalogMenus}
+            couponDiscount={displayCouponDiscount}
             selectedMenus={cartMenus}
             checkedPrice={displayCheckedPrice}
             deliveryTypeInfo={selectedDeliveryInfo}
@@ -388,6 +455,8 @@ function App() {
             step={shopStep}
             onCompleteOrder={completeOrderFlow}
             onAddProduct={addShoppingProduct}
+            onApplyCoupon={setAppliedCouponId}
+            onChangeQuantity={changeCartQuantity}
             onToggleProduct={toggleShoppingProduct}
             onGoHome={() => {
               setLastOrder(null)
@@ -422,7 +491,13 @@ function App() {
         )}
 
         {profileOpen && (
-          <MyPage orderHistory={orderHistory} onClose={() => setProfileOpen(false)} />
+          <MyPage
+            coupons={earnedCoupons}
+            exp={exp}
+            orderHistory={orderHistory}
+            usedCouponIds={usedCouponIds}
+            onClose={() => setProfileOpen(false)}
+          />
         )}
 
         <TabBar
@@ -794,11 +869,15 @@ function HomeScreen({
 function ShoppingScreen({
   background,
   accessory,
+  appliedCouponId,
+  availableCoupons,
+  cartQuantities,
   catalogMenus,
   selectedMenus,
   checkedIngredients,
   checkedTotal,
   checkedPrice,
+  couponDiscount,
   orderTotal,
   deliveryTypeInfo,
   step,
@@ -809,6 +888,8 @@ function ShoppingScreen({
   deliveryOptions,
   onToggleIngredient,
   onAddProduct,
+  onApplyCoupon,
+  onChangeQuantity,
   onToggleProduct,
   onSelectPayment,
   onSelectDelivery,
@@ -821,11 +902,15 @@ function ShoppingScreen({
 }: {
   background: string
   accessory: string
+  appliedCouponId: string
+  availableCoupons: RewardCoupon[]
+  cartQuantities: Record<string, number>
   catalogMenus: Menu[]
   selectedMenus: Menu[]
   checkedIngredients: string[]
   checkedTotal: number
   checkedPrice: number
+  couponDiscount: number
   orderTotal: number
   deliveryTypeInfo: (typeof tossShoppingOptions)[number]
   step: ShopStep
@@ -836,6 +921,8 @@ function ShoppingScreen({
   deliveryOptions: string[]
   onToggleIngredient: (name: string) => void
   onAddProduct: (menuId: string, ingredientName: string) => void
+  onApplyCoupon: (couponId: string) => void
+  onChangeQuantity: (key: string, quantity: number) => void
   onToggleProduct: (menuId: string, ingredientName: string) => void
   onSelectPayment: (method: string) => void
   onSelectDelivery: (option: string) => void
@@ -848,6 +935,7 @@ function ShoppingScreen({
 }) {
   const canContinue = checkedTotal > 0
   const allIngredientKeys = selectedMenus.flatMap((menu) => menu.ingredients.map((item) => ingredientKey(menu.id, item.name)))
+  const checkedProductCount = checkedIngredients.filter((key) => allIngredientKeys.includes(key)).length
   const allChecked = allIngredientKeys.length > 0 && allIngredientKeys.every((key) => checkedIngredients.includes(key))
   const catalogProducts = catalogMenus
     .flatMap((menu) => menu.ingredients.map((ingredient) => ({
@@ -861,7 +949,11 @@ function ShoppingScreen({
   const selectedProduct = catalogProducts.find((product) => product.key === selectedProductKey) ?? catalogProducts[0]
   const selectedCartProducts = selectedMenus.flatMap((menu) => menu.ingredients
     .filter((ingredient) => checkedIngredients.includes(ingredientKey(menu.id, ingredient.name)))
-    .map((ingredient) => ({ menu, ingredient })))
+    .map((ingredient) => {
+      const key = ingredientKey(menu.id, ingredient.name)
+      return { key, menu, ingredient, quantity: cartQuantities[key] ?? 1 }
+    }))
+  const selectedCartQuantity = selectedCartProducts.reduce((total, product) => total + product.quantity, 0)
 
   function openProduct(productKey: string) {
     setSelectedProductKey(productKey)
@@ -1001,7 +1093,7 @@ function ShoppingScreen({
                   type="checkbox"
                 />
                 <span>전체 선택</span>
-                <b>{checkedTotal}/{allIngredientKeys.length}</b>
+                <b>{checkedProductCount}/{allIngredientKeys.length}</b>
               </label>
             )}
             {selectedMenus.map((menu) => {
@@ -1029,16 +1121,54 @@ function ShoppingScreen({
                     <div className="ingredient-list toss-list toss-product-list">
                       {menu.ingredients.map((item) => {
                         const key = ingredientKey(menu.id, item.name)
+                        const quantity = cartQuantities[key] ?? 1
                         return (
-                          <label className="ingredient-row toss-row" key={key}>
-                            <input checked={checkedIngredients.includes(key)} onChange={() => onToggleIngredient(key)} type="checkbox" />
+                          <div className="ingredient-row toss-row" key={key}>
+                            <input
+                              aria-label={`${item.name} 선택`}
+                              checked={checkedIngredients.includes(key)}
+                              onChange={() => onToggleIngredient(key)}
+                              type="checkbox"
+                            />
                             <em aria-hidden="true">{shoppingItemEmoji(item.name)}</em>
                             <span>
                               <strong>내일 도착 예정</strong>
                               <small>{item.name}, {item.quantity}</small>
                             </span>
-                            <b><del>{formatWon(Math.round(item.price * 1.7 / 100) * 100)}</del>{formatWon(item.price)}</b>
-                          </label>
+                            <div className="cart-product-side">
+                              <b>
+                                <del>{formatWon(Math.round(item.price * 1.7 / 100) * 100 * quantity)}</del>
+                                {formatWon(item.price * quantity)}
+                              </b>
+                              <div className="cart-quantity-control" aria-label={`${item.name} 수량`}>
+                                <button
+                                  aria-label={`${item.name} 수량 줄이기`}
+                                  disabled={quantity <= 1}
+                                  onClick={() => onChangeQuantity(key, quantity - 1)}
+                                  type="button"
+                                >
+                                  −
+                                </button>
+                                <input
+                                  aria-label={`${item.name} 수량 직접 입력`}
+                                  inputMode="numeric"
+                                  max="99"
+                                  min="1"
+                                  onChange={(event) => onChangeQuantity(key, event.currentTarget.valueAsNumber)}
+                                  type="number"
+                                  value={quantity}
+                                />
+                                <button
+                                  aria-label={`${item.name} 수량 늘리기`}
+                                  disabled={quantity >= 99}
+                                  onClick={() => onChangeQuantity(key, quantity + 1)}
+                                  type="button"
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                         )
                       })}
                     </div>
@@ -1074,16 +1204,39 @@ function ShoppingScreen({
             </select>
           </section>
           <section className="shopping-order-products">
-            <h2>주문상품 {selectedCartProducts.length}건</h2>
-            {selectedCartProducts.map(({ menu, ingredient }) => (
-              <article key={ingredientKey(menu.id, ingredient.name)}>
+            <h2>주문상품 {selectedCartQuantity}개</h2>
+            {selectedCartProducts.map(({ key, ingredient, quantity }) => (
+              <article key={key}>
                 <em aria-hidden="true">{shoppingItemEmoji(ingredient.name)}</em>
-                <div><strong>내일 도착 예정</strong><span>{ingredient.name}, {ingredient.quantity}</span><b>{formatWon(ingredient.price)} · 1개</b><small>무료 배송</small></div>
+                <div>
+                  <strong>내일 도착 예정</strong>
+                  <span>{ingredient.name}, {ingredient.quantity}</span>
+                  <b>{formatWon(ingredient.price * quantity)} · {quantity}개</b>
+                  <small>무료 배송</small>
+                </div>
               </article>
             ))}
           </section>
           <section className="shopping-payment-section">
-            <div className="shopping-coupon"><strong>쿠폰</strong><span>최대 할인 적용 중</span></div>
+            <div className="shopping-coupon">
+              <div>
+                <strong>쿠폰</strong>
+                <span>20% 할인 · 최대 2만원</span>
+              </div>
+              <select
+                aria-label="할인 쿠폰 선택"
+                disabled={availableCoupons.length === 0}
+                onChange={(event) => onApplyCoupon(event.target.value)}
+                value={appliedCouponId}
+              >
+                <option value="">{availableCoupons.length === 0 ? '사용 가능한 쿠폰 없음' : '쿠폰 적용 안 함'}</option>
+                {availableCoupons.map((coupon) => (
+                  <option key={coupon.id} value={coupon.id}>
+                    20% 할인(최대 2만원) · 레벨 {coupon.level} 달성
+                  </option>
+                ))}
+              </select>
+            </div>
             <h2>결제수단</h2>
             <div className="shopping-payment-options">
               {paymentOptions.map((option) => (
@@ -1094,7 +1247,15 @@ function ShoppingScreen({
             </div>
             <h2>토스포인트 사용</h2>
             <div className="shopping-points"><span>0</span><b>원</b></div>
-            <div className="shopping-total"><strong>총 결제 금액</strong><b>{formatWon(orderTotal)}</b><span>총 주문 금액</span><span>{formatWon(checkedPrice)}</span></div>
+            <div className="shopping-total">
+              <strong>총 결제 금액</strong><b>{formatWon(orderTotal)}</b>
+              <span>총 주문 금액</span><span>{formatWon(checkedPrice)}</span>
+              {couponDiscount > 0 && (
+                <>
+                  <span>쿠폰 할인</span><span className="shopping-discount-value">-{formatWon(couponDiscount)}</span>
+                </>
+              )}
+            </div>
           </section>
           <div className="shopping-paybar">
             <button onClick={onCompleteOrder} type="button">{formatWon(orderTotal)} 결제하기</button>
@@ -1111,6 +1272,7 @@ function ShoppingScreen({
             <div><span>결제 수단</span><b>{paymentMethod}</b></div>
             <div><span>배송 방식</span><b>{deliveryTypeInfo.name}</b></div>
             <div><span>배송 요청</span><b>{deliveryOption}</b></div>
+            {couponDiscount > 0 && <div><span>쿠폰 할인</span><b>-{formatWon(couponDiscount)}</b></div>}
             <div><span>총액</span><b>{formatWon(orderTotal)}</b></div>
           </div>
           <div className="receipt-drafts receipt-main" aria-label="주문 완료 영수증">
@@ -1136,6 +1298,12 @@ function ShoppingScreen({
                     <dt>배송 요청</dt>
                     <dd>{deliveryOption}</dd>
                   </div>
+                  {couponDiscount > 0 && (
+                    <div>
+                      <dt>쿠폰 할인</dt>
+                      <dd>-{formatWon(couponDiscount)}</dd>
+                    </div>
+                  )}
                   <div>
                     <dt>총 결제금액</dt>
                     <dd>{formatWon(orderTotal)}</dd>
@@ -1204,66 +1372,183 @@ function shoppingItemEmoji(name: string) {
 }
 
 function MyPage({
+  coupons,
+  exp,
   orderHistory,
+  usedCouponIds,
   onClose,
 }: {
+  coupons: RewardCoupon[]
+  exp: number
   orderHistory: OrderHistoryItem[]
+  usedCouponIds: string[]
   onClose: () => void
 }) {
+  const [page, setPage] = useState<'overview' | 'coupons' | 'orderDetail'>('overview')
+  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null)
   const totalSpent = orderHistory.reduce((sum, order) => sum + order.total, 0)
+  const availableCouponCount = coupons.filter((coupon) => !usedCouponIds.includes(coupon.id)).length
+  const nextCouponRemainingExp = couponRewardExp - (exp % couponRewardExp)
+  const selectedOrder = orderHistory.find((order) => order.id === selectedOrderId)
+  const pageTitle = page === 'coupons' ? '내 쿠폰함' : page === 'orderDetail' ? '주문 상세' : '마이페이지'
+
+  function goBack() {
+    if (page === 'overview') {
+      onClose()
+      return
+    }
+    setPage('overview')
+    setSelectedOrderId(null)
+  }
 
   return (
     <section className="my-page">
       <header className="my-page-header">
-        <button aria-label="마이페이지 닫기" onClick={onClose} type="button">←</button>
-        <h1>마이페이지</h1>
+        <button aria-label={page === 'overview' ? '마이페이지 닫기' : '마이페이지로 돌아가기'} onClick={goBack} type="button">←</button>
+        <h1>{pageTitle}</h1>
         <span />
       </header>
 
-      <div className="my-page-profile">
-        <span aria-hidden="true">👤</span>
-        <div>
-          <strong>제철 미식가</strong>
-          <p>오늘도 맛있는 제철 음식을 골라보세요.</p>
-        </div>
-      </div>
-
-      <div className="my-page-summary">
-        <div><span>주문</span><strong>{orderHistory.length}건</strong></div>
-        <div><span>총 주문금액</span><strong>{formatWon(totalSpent)}</strong></div>
-      </div>
-
-      <section className="my-order-history">
-        <div className="my-order-title">
-          <h2>내 주문 내역</h2>
-          <span>최근 주문순</span>
-        </div>
-
-        {orderHistory.length === 0 && (
-          <div className="my-order-empty">
-            <span aria-hidden="true">🧾</span>
-            <strong>아직 주문 내역이 없어요</strong>
-            <p>상품을 구매하면 주문 내역이 여기에 쌓여요.</p>
+      {page === 'overview' && (
+        <>
+          <div className="my-page-profile">
+            <span aria-hidden="true">👤</span>
+            <div>
+              <strong>제철 미식가</strong>
+              <p>오늘도 맛있는 제철 음식을 골라보세요.</p>
+            </div>
           </div>
-        )}
 
-        {orderHistory.map((order) => (
-          <article className="my-order-card" key={order.id}>
-            <div className="my-order-card-head">
-              <span>{order.orderedAt}</span>
-              <strong>{order.status}</strong>
+          <div className="my-page-summary">
+            <div><span>주문</span><strong>{orderHistory.length}건</strong></div>
+            <div><span>총 주문금액</span><strong>{formatWon(totalSpent)}</strong></div>
+            <button className="my-coupon-summary-button" onClick={() => setPage('coupons')} type="button">
+              <span>보유 쿠폰</span>
+              <strong>{availableCouponCount}장 ›</strong>
+            </button>
+          </div>
+
+          <section className="my-order-history">
+            <div className="my-order-title">
+              <h2>내 주문 내역</h2>
+              <span>최근 주문순</span>
             </div>
-            <div className="my-order-items">
-              <em aria-hidden="true">{shoppingItemEmoji(order.items[0]?.name ?? '')}</em>
-              <div>
-                <strong>{order.items[0]?.name ?? '제철 상품'}{order.items.length > 1 ? ` 외 ${order.items.length - 1}개` : ''}</strong>
-                <p>{order.items.map((item) => `${item.name} ${item.quantity}`).join(' · ')}</p>
+
+            {orderHistory.length === 0 && (
+              <div className="my-order-empty">
+                <span aria-hidden="true">🧾</span>
+                <strong>아직 주문 내역이 없어요</strong>
+                <p>상품을 구매하면 주문 내역이 여기에 쌓여요.</p>
               </div>
+            )}
+
+            {orderHistory.map((order) => (
+              <button
+                className="my-order-card"
+                key={order.id}
+                onClick={() => {
+                  setSelectedOrderId(order.id)
+                  setPage('orderDetail')
+                }}
+                type="button"
+              >
+                <div className="my-order-card-head">
+                  <span>{order.orderedAt}</span>
+                  <strong>{order.status}</strong>
+                </div>
+                <div className="my-order-items">
+                  <em aria-hidden="true">{shoppingItemEmoji(order.items[0]?.name ?? '')}</em>
+                  <div>
+                    <strong>{order.items[0]?.name ?? '제철 상품'}{order.items.length > 1 ? ` 외 ${order.items.length - 1}개` : ''}</strong>
+                    <p>{order.items.map((item) => `${item.name} ${item.quantity} × ${item.count}`).join(' · ')}</p>
+                  </div>
+                </div>
+                {order.discount > 0 && <div className="my-order-discount"><span>쿠폰 할인</span><b>-{formatWon(order.discount)}</b></div>}
+                <div className="my-order-total"><span>결제 금액</span><b>{formatWon(order.total)} ›</b></div>
+              </button>
+            ))}
+          </section>
+        </>
+      )}
+
+      {page === 'coupons' && (
+        <section className="my-coupon-wallet my-coupon-page">
+          <div className="my-order-title">
+            <h2>내 쿠폰함</h2>
+            <span>20% 할인 · 최대 2만원</span>
+          </div>
+
+          {coupons.length === 0 && (
+            <div className="my-coupon-empty">
+              <span aria-hidden="true">🎟️</span>
+              <strong>아직 보유한 쿠폰이 없어요</strong>
+              <p>{nextCouponRemainingExp.toLocaleString('ko-KR')} XP를 더 모으면 20% 할인 쿠폰을 받아요.</p>
             </div>
-            <div className="my-order-total"><span>결제 금액</span><b>{formatWon(order.total)}</b></div>
-          </article>
-        ))}
-      </section>
+          )}
+
+          <div className="my-coupon-list">
+            {coupons.map((coupon) => {
+              const used = usedCouponIds.includes(coupon.id)
+              return (
+                <article className={`my-coupon-card ${used ? 'used' : ''}`} key={coupon.id}>
+                  <img alt="20% 할인, 최대 2만원 적용 가능한 프로 할인 쿠폰" src={discountCouponImage} />
+                  <div>
+                    <span>{used ? '사용 완료' : '사용 가능'}</span>
+                    <strong>레벨 {coupon.level} 달성 쿠폰</strong>
+                    <p>누적 {coupon.milestoneExp.toLocaleString('ko-KR')} XP 달성 보상 · 최대 2만원 할인</p>
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        </section>
+      )}
+
+      {page === 'orderDetail' && selectedOrder && (
+        <section className="my-order-detail">
+          <div className="my-order-detail-status">
+            <span>{selectedOrder.orderedAt}</span>
+            <strong>{selectedOrder.status}</strong>
+            <p>주문번호 #{String(selectedOrder.id).padStart(6, '0')}</p>
+          </div>
+
+          <div className="my-order-detail-products">
+            <h2>주문 상품</h2>
+            {selectedOrder.items.map((item, index) => (
+              <article key={`${item.name}-${index}`}>
+                <em aria-hidden="true">{shoppingItemEmoji(item.name)}</em>
+                <div>
+                  <strong>{item.name}</strong>
+                  <span>{item.quantity} · {item.count}개</span>
+                  <b>{formatWon(item.price * item.count)}</b>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div className="my-order-detail-payment">
+            <h2>결제 정보</h2>
+            <div>
+              <span>상품 금액</span>
+              <b>{formatWon(selectedOrder.items.reduce((total, item) => total + item.price * item.count, 0))}</b>
+            </div>
+            <div>
+              <span>배송비</span>
+              <b>무료</b>
+            </div>
+            {selectedOrder.discount > 0 && (
+              <div>
+                <span>쿠폰 할인</span>
+                <b className="discount">-{formatWon(selectedOrder.discount)}</b>
+              </div>
+            )}
+            <div className="total">
+              <strong>총 결제 금액</strong>
+              <b>{formatWon(selectedOrder.total)}</b>
+            </div>
+          </div>
+        </section>
+      )}
     </section>
   )
 }
@@ -1298,9 +1583,9 @@ function PetHomeScreen({
   const [decorTab, setDecorTab] = useState<'all' | DecorItem['type']>('all')
   const [petTab, setPetTab] = useState<'feed' | 'decor'>('feed')
   const visibleItems = decorTab === 'all' ? decorItems : decorItems.filter((item) => item.type === decorTab)
-  const nextLevelThreshold = getNextLevelThreshold(level)
+  const levelExpStatus = getLevelExpStatus(exp, level)
   const levelProgress = getLevelProgress(exp, level)
-  const expLabel = nextLevelThreshold ? `${exp}/${nextLevelThreshold.minExp} xp` : `${exp} xp`
+  const expLabel = `${levelExpStatus.currentExp.toLocaleString('ko-KR')}/${levelExpStatus.requiredExp.toLocaleString('ko-KR')} xp`
   const roomImage = getRoomBackgroundImage(background)
   const decorTabs: { id: 'all' | DecorItem['type']; label: string }[] = [
     { id: 'all', label: '전체' },
