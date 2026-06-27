@@ -435,6 +435,15 @@ insert into public.menu_ingredients (menu_id, name, quantity, price, sort_order)
   ('yellowtail-sashimi-bowl', '밥', '1공기', 1200, 2),
   ('yellowtail-sashimi-bowl', '무순', '1팩', 1800, 3);
 
+update public.menus as menu
+set exp = menu_price.total
+from (
+  select menu_id, sum(price)::integer as total
+  from public.menu_ingredients
+  group by menu_id
+) as menu_price
+where menu.id = menu_price.menu_id;
+
 insert into public.decor_items (id, name, type, unlock_level, unlock_by_shopping) values
   ('sunny-kitchen', '햇살 주방', 'background', null, false),
   ('spring-flower-room', '봄꽃 창가', 'background', null, false),
