@@ -22,10 +22,8 @@ const petLevelThresholds = [
   { level: 3, minExp: 30000 },
 ] as const
 
-// 작업: 메뉴 가격을 XP로 변환합니다. 10원당 1xp 규칙을 한 곳에서 관리합니다.
-// 개인 수정 가능: 환산 비율을 바꾸려면 10을 원하는 금액 기준으로 변경하면 됩니다.
+// 작업: 메뉴와 식재료 가격을 동일한 수치의 XP로 사용합니다.
 // 적용 위치: 메뉴 카드 XP 표시, 밥먹이기 버튼, 실제 펫 경험치 증가량.
-const wonPerPetExp = 10
 
 const receiptDrafts = [
   { id: 1, title: '라인형 영수증' },
@@ -60,7 +58,7 @@ function ingredientKey(menuId: string, ingredientName: string) {
 }
 
 function getIngredientExp(ingredient: Ingredient) {
-  return Math.floor(ingredient.price / wonPerPetExp)
+  return ingredient.price
 }
 
 function getMenuExp(menu: Menu) {
@@ -660,7 +658,7 @@ function HomeScreen({
                   <div>
                     <strong>{menu.name}</strong>
                   </div>
-                  <b>{getMenuExp(menu)}xp</b>
+                  <b>{getMenuExp(menu).toLocaleString('ko-KR')}xp</b>
                 </button>
               )
             })}
