@@ -11,6 +11,9 @@ import petTabAccessoryIcon from './assets/sudal-tabs/accessory.png'
 import petTabAllIcon from './assets/sudal-tabs/all.png'
 import petTabFeedIcon from './assets/sudal-tabs/feed.png'
 import petTabRoomIcon from './assets/sudal-tabs/room.png'
+import watermelonFetaSaladImage from './assets/sudal-icons/menus/watermelon-feta-salad.png'
+import watermelonKongguksuImage from './assets/sudal-icons/menus/watermelon-kongguksu.png'
+import watermelonSherbetImage from './assets/sudal-icons/menus/watermelon-sherbet.png'
 import discountCouponImage from '../discount-coupon-20.jpg'
 
 type KakaoLatLng = object
@@ -600,9 +603,14 @@ function HomeScreen({
             aria-label="제철 음식과 메뉴 검색"
             onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="제철 음식과 메뉴 검색"
-            type="search"
+            type="text"
             value={searchQuery}
           />
+          {searchQuery && (
+            <button aria-label="검색어 지우기" className="shopping-search-clear" onClick={() => setSearchQuery('')} type="button">
+              ×
+            </button>
+          )}
         </label>
         <button aria-label="마이페이지 열기" onClick={onOpenProfile} type="button">
           <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('profile')} />
@@ -612,7 +620,7 @@ function HomeScreen({
       {hasSearch ? (
         <section className="home-search-results">
           <div>
-            <h2>제철 식재료 <span>{ingredientSearchResults.length}</span></h2>
+            <h2>제철 식재료</h2>
             <div className="home-search-result-list">
               {ingredientSearchResults.map((ingredient) => (
                 <button
@@ -624,8 +632,7 @@ function HomeScreen({
                   type="button"
                 >
                   <em aria-hidden="true">{ingredientIconImage(ingredient.name)}</em>
-                  <span><strong>{ingredient.name}</strong><small>{ingredient.season} 제철</small></span>
-                  <b>선택</b>
+                  <span><strong>{ingredient.name}</strong></span>
                 </button>
               ))}
               {ingredientSearchResults.length === 0 && <p>일치하는 제철 식재료가 없어요.</p>}
@@ -633,15 +640,14 @@ function HomeScreen({
           </div>
 
           <div>
-            <h2>메뉴 <span>{menuSearchResults.length}</span></h2>
+            <h2>메뉴</h2>
             <div className="home-search-result-list">
               {menuSearchResults.map((menu) => {
                 const selected = selectedMenuIds.includes(menu.id)
                 return (
                   <button className={selected ? 'selected' : ''} key={menu.id} onClick={() => onOpenMenuDetail(menu.id)} type="button">
                     <em aria-hidden="true">{ingredientIconImage(menu.ingredients[0]?.name ?? '')}</em>
-                    <span><strong>{menu.name}</strong><small>{menu.ingredients.map((ingredient) => ingredient.name).join(' · ')}</small></span>
-                    <b>{selected ? '열기' : '보기'}</b>
+                    <span><strong>{menu.name}</strong></span>
                   </button>
                 )
               })}
@@ -707,7 +713,7 @@ function HomeScreen({
                   type="button"
                 >
                   <span className="menu-card-visual" aria-hidden="true">
-                    {ingredientIconImage(menu.ingredients[0]?.name ?? menu.name)}
+                    {menuCardVisualImage(menu)}
                   </span>
                   <strong>{menu.name}</strong>
                   <b>{getMenuExp(menu).toLocaleString('ko-KR')}xp</b>
@@ -1452,7 +1458,23 @@ function shoppingItemIconImage(name: string) {
 }
 
 function ingredientIconImage(name: string, className = 'sudal-ingredient-icon') {
-  return <img alt="" aria-hidden="true" className={className} src={shoppingItemIconImage(name)} />
+  const iconClassName = name.includes('장어') ? `${className} eel-icon-image` : className
+  return <img alt="" aria-hidden="true" className={iconClassName} src={shoppingItemIconImage(name)} />
+}
+
+function menuCardVisualImage(menu: Menu) {
+  const watermelonMenuImages: Record<string, string> = {
+    'watermelon-kongguksu': watermelonKongguksuImage,
+    'watermelon-feta-salad': watermelonFetaSaladImage,
+    'watermelon-sherbet': watermelonSherbetImage,
+  }
+  const menuImage = watermelonMenuImages[menu.id]
+
+  if (menuImage) {
+    return <img alt="" aria-hidden="true" className="sudal-menu-dish-icon" src={menuImage} />
+  }
+
+  return ingredientIconImage(menu.ingredients[0]?.name ?? menu.name)
 }
 
 function MyPage({
@@ -1520,7 +1542,6 @@ function MyPage({
 
             {orderHistory.length === 0 && (
               <div className="my-order-empty">
-                <span aria-hidden="true"><img alt="" className="sudal-modal-icon" src={getPetUiIconImage('receipt')} /></span>
                 <strong>아직 주문 내역이 없어요</strong>
                 <p>상품을 구매하면 주문 내역이 여기에 쌓여요.</p>
               </div>

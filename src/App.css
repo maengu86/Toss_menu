@@ -383,7 +383,7 @@
   justify-content: stretch;
   align-content: start;
   gap: 7px;
-  padding: 7px;
+  padding: 9px 7px 7px;
   background: #ffffff;
   overflow-x: hidden;
   overflow-y: auto;
@@ -405,15 +405,15 @@
   aspect-ratio: auto;
   align-content: center;
   gap: 4px;
-  padding: 5px 3px;
+  padding: 7px 3px 3px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.66);
+  background: transparent;
   box-shadow: none;
 }
 
 .season-panel-index .seasonal-tile.active {
   border-color: var(--orange);
-  background: #ffffff;
+  background: transparent;
   box-shadow: none;
   transform: none;
 }
@@ -484,14 +484,14 @@
   border: 1px solid rgba(226, 216, 195, 0.82);
   border-radius: 14px;
   color: #3e3327;
-  background: #ffffff;
+  background: transparent;
   scroll-snap-align: center;
   transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease, background 160ms ease;
 }
 
 .seasonal-tile.active {
   border-color: var(--orange);
-  background: #ffffff;
+  background: transparent;
   box-shadow: 0 10px 22px rgba(242, 127, 91, 0.14);
   transform: translateY(-1px);
 }
@@ -536,6 +536,12 @@
   width: 34px;
   height: 34px;
   margin: 0 auto;
+}
+
+.seasonal-tile .food-icon-image.eel-icon-image {
+  width: 40px;
+  height: 40px;
+  margin: -3px auto -3px;
 }
 
 .feed-card-icon-image {
@@ -2527,6 +2533,7 @@
 
 .shopping-search input {
   width: 100%;
+  min-width: 0;
   border: 0;
   outline: 0;
   color: #333d4b;
@@ -2537,6 +2544,22 @@
 
 .shopping-search input::placeholder {
   color: #8b95a1;
+}
+
+.shopping-search-clear {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #6b7684;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+  background: #f2f4f6;
 }
 
 .shopping-category-tabs {
@@ -2774,7 +2797,7 @@
 
 .home-purchase-section {
   margin-top: 20px;
-  padding: 6px 10px 4px;
+  padding: 6px 10px 10px;
   border: 1px solid #e5e8eb;
   border-radius: 22px;
   background: #ffffff;
@@ -2786,7 +2809,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 0;
   margin-top: 0;
-  padding: 4px 8px 6px;
+  padding: 4px 8px 12px;
   border: 0;
   background: transparent;
 }
@@ -2983,6 +3006,13 @@
   border-radius: 18px;
   font-size: 30px;
   background: color-mix(in srgb, var(--menu-color) 18%, #ffffff);
+}
+
+.sudal-menu-dish-icon {
+  width: 52px;
+  height: 52px;
+  display: block;
+  object-fit: contain;
 }
 
 .nested-menu-list .menu-card strong {
