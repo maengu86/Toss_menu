@@ -3756,6 +3756,68 @@
   font-weight: 500;
 }
 
+.cart-product-side {
+  min-width: 108px;
+  display: grid;
+  gap: 10px;
+  justify-items: end;
+}
+
+.cart-product-side > b {
+  display: grid;
+  gap: 4px;
+  justify-items: end;
+  color: #191f28;
+}
+
+.cart-product-side > b del {
+  color: #b0b8c1;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.cart-quantity-control {
+  height: 34px;
+  display: grid;
+  grid-template-columns: 32px 42px 32px;
+  overflow: hidden;
+  border: 1px solid #dfe3e7;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.cart-quantity-control button,
+.cart-quantity-control input {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: #333d4b;
+  font-size: 15px;
+  font-weight: 800;
+  text-align: center;
+  background: #ffffff;
+  appearance: textfield;
+}
+
+.cart-quantity-control input {
+  border-right: 1px solid #edf0f3;
+  border-left: 1px solid #edf0f3;
+}
+
+.cart-quantity-control input::-webkit-inner-spin-button,
+.cart-quantity-control input::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.cart-quantity-control button:disabled {
+  color: #d1d6db;
+}
+
 .toss-cart-orderbar {
   grid-template-columns: 1fr;
   bottom: 82px;
@@ -3894,12 +3956,39 @@
 }
 
 .shopping-coupon {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
   margin-bottom: 24px;
   border-bottom: 10px solid #f2f4f6;
 }
 
+.shopping-coupon > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .shopping-coupon span {
   color: #8b95a1;
+  font-size: 12px;
+}
+
+.shopping-coupon select {
+  width: 100%;
+  height: 52px;
+  padding: 0 14px;
+  border: 1px solid #dbe8f6;
+  border-radius: 14px;
+  color: #1b64da;
+  font-weight: 800;
+  background: #f5f9ff;
+}
+
+.shopping-coupon select:disabled {
+  color: #8b95a1;
+  border-color: #e5e8eb;
+  background: #f7f8fa;
 }
 
 .shopping-payment-options {
@@ -3956,6 +4045,12 @@
 .shopping-total span {
   color: #6b7684;
   font-size: 14px;
+}
+
+.shopping-total .shopping-discount-value,
+.my-order-discount b {
+  color: #e84b4b;
+  text-align: right;
 }
 
 .shopping-paybar {
@@ -4063,17 +4158,25 @@
 
 .my-page-summary {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 1px;
   margin-top: 10px;
   background: #edf0f3;
 }
 
-.my-page-summary > div {
+.my-page-summary > div,
+.my-page-summary > button {
   display: grid;
   gap: 6px;
   padding: 20px;
+  border: 0;
+  color: #191f28;
+  text-align: left;
   background: #ffffff;
+}
+
+.my-page-summary > button {
+  cursor: pointer;
 }
 
 .my-page-summary span {
@@ -4082,7 +4185,92 @@
 }
 
 .my-page-summary strong {
-  font-size: 18px;
+  font-size: 16px;
+  word-break: keep-all;
+}
+
+.my-coupon-wallet {
+  margin-top: 10px;
+  padding: 22px 16px;
+  background: #ffffff;
+}
+
+.my-coupon-page {
+  min-height: calc(100% - 68px);
+  margin-top: 0;
+}
+
+.my-coupon-list {
+  display: grid;
+  gap: 14px;
+}
+
+.my-coupon-card {
+  overflow: hidden;
+  border: 1px solid #dbe8f6;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(15, 80, 130, 0.1);
+}
+
+.my-coupon-card img {
+  width: 100%;
+  display: block;
+  aspect-ratio: 1.64 / 1;
+  object-fit: cover;
+}
+
+.my-coupon-card > div {
+  display: grid;
+  gap: 5px;
+  padding: 14px 16px 16px;
+}
+
+.my-coupon-card span {
+  width: fit-content;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: #1967a3;
+  font-size: 11px;
+  font-weight: 800;
+  background: #e8f4ff;
+}
+
+.my-coupon-card strong {
+  font-size: 17px;
+}
+
+.my-coupon-card p,
+.my-coupon-empty p {
+  margin: 0;
+  color: #8b95a1;
+  font-size: 12px;
+}
+
+.my-coupon-card.used {
+  filter: grayscale(0.8);
+  opacity: 0.58;
+}
+
+.my-coupon-card.used span {
+  color: #6b7684;
+  background: #edf0f3;
+}
+
+.my-coupon-empty {
+  min-height: 170px;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 8px;
+  padding: 20px;
+  border-radius: 18px;
+  text-align: center;
+  background: #f7f8fa;
+}
+
+.my-coupon-empty > span {
+  font-size: 38px;
 }
 
 .my-order-history {
@@ -4108,6 +4296,15 @@
   font-size: 12px;
 }
 
+.my-order-title button {
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 9px;
+  color: #4e5968;
+  font-weight: 800;
+  background: #f2f4f6;
+}
+
 .my-order-empty {
   min-height: 220px;
   display: grid;
@@ -4130,9 +4327,16 @@
 }
 
 .my-order-card {
+  width: 100%;
   overflow: hidden;
+  padding: 0;
   border: 1px solid #e5e8eb;
   border-radius: 18px;
+  color: #191f28;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  background: #ffffff;
 }
 
 .my-order-card + .my-order-card {
@@ -4200,6 +4404,103 @@
 .my-order-total {
   border-top: 1px solid #edf0f3;
   background: #ffffff;
+}
+
+.my-order-discount {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 15px 10px;
+  color: #8b95a1;
+  font-size: 12px;
+}
+
+.my-order-detail {
+  display: grid;
+  gap: 10px;
+}
+
+.my-order-detail > div {
+  padding: 22px 18px;
+  background: #ffffff;
+}
+
+.my-order-detail-status {
+  display: grid;
+  gap: 7px;
+}
+
+.my-order-detail-status span,
+.my-order-detail-status p {
+  margin: 0;
+  color: #8b95a1;
+  font-size: 12px;
+}
+
+.my-order-detail-status strong {
+  color: #3182f6;
+  font-size: 22px;
+}
+
+.my-order-detail-products h2,
+.my-order-detail-payment h2 {
+  margin: 0 0 18px;
+  font-size: 19px;
+}
+
+.my-order-detail-products article {
+  display: grid;
+  grid-template-columns: 62px 1fr;
+  gap: 13px;
+  align-items: center;
+  padding: 14px 0;
+  border-top: 1px solid #edf0f3;
+}
+
+.my-order-detail-products em {
+  width: 60px;
+  height: 60px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  font-size: 36px;
+  font-style: normal;
+  background: #f7f8fa;
+}
+
+.my-order-detail-products article div {
+  display: grid;
+  gap: 4px;
+}
+
+.my-order-detail-products article span {
+  color: #8b95a1;
+  font-size: 12px;
+}
+
+.my-order-detail-products article b {
+  margin-top: 2px;
+  font-size: 14px;
+}
+
+.my-order-detail-payment > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  color: #6b7684;
+  font-size: 13px;
+}
+
+.my-order-detail-payment .discount {
+  color: #e84b4b;
+}
+
+.my-order-detail-payment .total {
+  margin-top: 12px;
+  padding-top: 18px;
+  border-top: 1px solid #e5e8eb;
+  color: #191f28;
+  font-size: 18px;
 }
 
 @media (max-width: 520px) {
