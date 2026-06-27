@@ -97,6 +97,11 @@
   white-space: nowrap;
 }
 
+.home-menu-header {
+  margin-top: 52px;
+  text-align: center;
+}
+
 .compact-header {
   margin-bottom: 18px;
 }
@@ -351,6 +356,7 @@
   display: grid;
   grid-template-columns: 90px minmax(0, 1fr);
   align-items: stretch;
+  margin-top: 4px;
   box-shadow: none;
 }
 
@@ -503,9 +509,55 @@
 
 .food-emoji {
   display: block;
-  font-size: 20px;
+  line-height: 1;
   line-height: 1;
   background: transparent;
+}
+
+.sudal-ui-icon,
+.sudal-ingredient-icon,
+.food-icon-image,
+.feed-card-icon-image,
+.sudal-modal-icon,
+.sudal-map-pin-icon,
+.sudal-decor-fallback-icon {
+  display: block;
+  object-fit: contain;
+  background: transparent;
+}
+
+.sudal-ui-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.sudal-ingredient-icon,
+.food-icon-image {
+  width: 34px;
+  height: 34px;
+  margin: 0 auto;
+}
+
+.feed-card-icon-image {
+  width: 42px;
+  height: 42px;
+}
+
+.sudal-modal-icon {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto;
+}
+
+.sudal-map-pin-icon {
+  width: 30px;
+  height: 30px;
+}
+
+.sudal-decor-fallback-icon {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto;
 }
 
 .sub-directory-title {
@@ -1038,7 +1090,7 @@
 }
 
 .decor-card.locked::after {
-  content: "🔒";
+  content: "";
   position: absolute;
   right: 10px;
   top: 10px;
@@ -1089,6 +1141,13 @@
   color: #6f665f;
   font-size: 17px;
   line-height: 1;
+}
+
+.tab-bar .tab-icon img {
+  width: 25px;
+  height: 25px;
+  display: block;
+  object-fit: contain;
 }
 
 .tab-bar .tab-icon b {
@@ -2386,7 +2445,7 @@
   position: sticky;
   top: -26px;
   z-index: 90;
-  margin: -26px -20px 18px;
+  margin: -26px -20px 10px;
   padding: 14px 16px 12px;
   border-bottom: 1px solid rgba(229, 232, 235, 0.8);
   background: rgba(255, 255, 255, 0.97);
@@ -2455,9 +2514,10 @@
   align-items: center;
   gap: 8px;
   padding: 0 13px;
+  border: 1px solid #e5e8eb;
   border-radius: 15px;
   color: #6b7684;
-  background: #f2f4f6;
+  background: #ffffff;
 }
 
 .shopping-search span {
@@ -2713,7 +2773,7 @@
 }
 
 .home-purchase-section {
-  margin-top: 16px;
+  margin-top: 20px;
   padding: 6px 10px 4px;
   border: 1px solid #e5e8eb;
   border-radius: 22px;
@@ -2866,7 +2926,7 @@
 
 .home-purchase-tabs button.active b {
   color: #5a301c;
-  background: rgba(232, 135, 74, 0.6);
+  background: transparent;
 }
 
 .home-purchase-tabs button:focus {
@@ -2881,7 +2941,7 @@
 .nested-menu-list {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  gap: 10px 8px;
   margin-top: 6px;
   padding: 0;
   border: 0;
@@ -2891,15 +2951,15 @@
 
 .nested-menu-list .menu-card {
   min-width: 0;
-  min-height: 146px;
+  height: 134px;
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: auto auto auto auto;
+  grid-template-rows: 50px 20px 16px;
   justify-items: center;
   align-content: center;
-  gap: 6px;
+  gap: 9px;
   position: relative;
-  padding: 10px 7px;
+  padding: 13px 8px 12px;
   border: 1px solid #e5e8eb;
   border-radius: 16px;
   color: #333d4b;
@@ -2926,30 +2986,23 @@
 }
 
 .nested-menu-list .menu-card strong {
-  min-height: 32px;
-  display: -webkit-box;
+  width: 100%;
+  min-width: 0;
+  display: block;
   overflow: hidden;
   margin: 0;
   color: #333d4b;
   font-size: 13px;
-  line-height: 1.25;
-  word-break: keep-all;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
-
-.nested-menu-list .menu-card small {
-  width: 100%;
-  overflow: hidden;
-  color: #8b95a1;
-  font-size: 9px;
+  line-height: 20px;
   text-overflow: ellipsis;
   white-space: nowrap;
+  word-break: keep-all;
 }
 
 .nested-menu-list .menu-card b {
   color: #5f9f68;
   font-size: 11px;
+  line-height: 16px;
 }
 
 .menu-card-selected {

@@ -10,7 +10,22 @@ const decorIcons = import.meta.glob('../assets/sudal-icons/decor/*.png', {
   import: 'default',
 }) as Record<string, string>
 
+const uiIcons = import.meta.glob('../assets/sudal-icons/ui/*.png', {
+  eager: true,
+  import: 'default',
+}) as Record<string, string>
+
 function pickIngredientIconKey(name: string) {
+  if (name.includes('달래')) return 'dallae'
+  if (name.includes('냉이')) return 'naengi'
+  if (name.includes('딸기')) return 'strawberry'
+  if (name.includes('주꾸미')) return 'jukkumi'
+  if (name.includes('봄동')) return 'springCabbage'
+  if (name.includes('두릅')) return 'dureup'
+  if (name.includes('미나리')) return 'minari'
+  if (name.includes('쑥')) return 'mugwort'
+  if (name.includes('죽순')) return 'bambooShoot'
+  if (name.includes('바지락')) return 'clam'
   if (name.includes('수박')) return 'watermelon'
   if (name.includes('콩국수') || name.includes('소면') || name.includes('파스타')) return 'noodle'
   if (name.includes('콩국물') || name.includes('우유') || name.includes('요거트')) return 'milk'
@@ -20,7 +35,7 @@ function pickIngredientIconKey(name: string) {
   if (name.includes('오이') || name.includes('애호박') || name.includes('주키니')) return 'cucumber'
   if (name.includes('가지')) return 'eggplant'
   if (name.includes('귤') || name.includes('한라봉')) return 'citrus'
-  if (name.includes('배추') || name.includes('봄동') || name.includes('열무') || name.includes('시금치') || name.includes('아스파라거스')) return 'greens'
+  if (name.includes('배추') || name.includes('봄동') || name.includes('열무') || name.includes('시금치')) return 'greens'
   if (name.includes('굴') || name.includes('바지락') || name.includes('꼬막')) return 'shell'
   if (name.includes('무')) return 'radish'
   if (name.includes('고구마')) return 'sweetPotato'
@@ -67,8 +82,12 @@ export function getPetDecorIconImage(item: DecorItem) {
   return resolveAsset(decorIcons, `decor/${key}.png`)
 }
 
+export function getPetUiIconImage(key: string) {
+  return resolveAsset(uiIcons, `ui/${key}.png`)
+}
+
 export function getPetShareIconImage() {
-  return resolveAsset(ingredientIcons, 'ingredients/camera.png')
+  return getPetUiIconImage('camera') || resolveAsset(ingredientIcons, 'ingredients/camera.png')
 }
 
 export function getPetClearDecorIconImage() {

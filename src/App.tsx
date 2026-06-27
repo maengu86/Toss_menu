@@ -4,7 +4,7 @@ import './App.css'
 import PetAvatar from './components/PetAvatar'
 import { getRoomBackgroundImage } from './data/decorAssets'
 import { getSudalAccessoryPreviewImage } from './data/sudalDecorImages'
-import { getPetClearDecorIconImage, getPetShareIconImage } from './data/sudalPetIcons'
+import { getPetClearDecorIconImage, getPetDecorIconImage, getPetFeedIconImage, getPetShareIconImage, getPetUiIconImage } from './data/sudalPetIcons'
 import { fallbackAppData, loadAppData } from './services/appDataService'
 import type { DecorItem, Ingredient, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
 import petTabAccessoryIcon from './assets/sudal-tabs/accessory.png'
@@ -107,7 +107,7 @@ type NearbyRestaurant = {
   id: string
   name: string
   menuName: string
-  emoji: string
+  iconImage: string
   distance: string
   eta: string
   rating: string
@@ -585,7 +585,7 @@ function HomeScreen({
     id: `${menu.id}-restaurant`,
     name: index === 0 ? `오늘의 ${menu.name}` : `${menu.name} 맛집`,
     menuName: menu.name,
-    emoji: shoppingItemEmoji(menu.ingredients[0]?.name ?? ''),
+    iconImage: shoppingItemIconImage(menu.ingredients[0]?.name ?? ''),
     distance: `${320 + index * 280}m`,
     eta: `${18 + index * 7}분`,
     rating: (4.8 - index * 0.1).toFixed(1),
@@ -595,7 +595,7 @@ function HomeScreen({
     <section className="screen" onScroll={onScrollActivity}>
       <header className="home-global-bar">
         <label className="shopping-search">
-          <span aria-hidden="true">🔍</span>
+          <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('search')} />
           <input
             aria-label="제철 음식과 메뉴 검색"
             onChange={(event) => setSearchQuery(event.target.value)}
@@ -604,7 +604,9 @@ function HomeScreen({
             value={searchQuery}
           />
         </label>
-        <button aria-label="마이페이지 열기" onClick={onOpenProfile} type="button">👤</button>
+        <button aria-label="마이페이지 열기" onClick={onOpenProfile} type="button">
+          <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('profile')} />
+        </button>
       </header>
 
       {hasSearch ? (
@@ -621,7 +623,7 @@ function HomeScreen({
                   }}
                   type="button"
                 >
-                  <em aria-hidden="true">{ingredient.emoji}</em>
+                  <em aria-hidden="true">{ingredientIconImage(ingredient.name)}</em>
                   <span><strong>{ingredient.name}</strong><small>{ingredient.season} 제철</small></span>
                   <b>선택</b>
                 </button>
@@ -637,7 +639,7 @@ function HomeScreen({
                 const selected = selectedMenuIds.includes(menu.id)
                 return (
                   <button className={selected ? 'selected' : ''} key={menu.id} onClick={() => onOpenMenuDetail(menu.id)} type="button">
-                    <em aria-hidden="true">{shoppingItemEmoji(menu.ingredients[0]?.name ?? '')}</em>
+                    <em aria-hidden="true">{ingredientIconImage(menu.ingredients[0]?.name ?? '')}</em>
                     <span><strong>{menu.name}</strong><small>{menu.ingredients.map((ingredient) => ingredient.name).join(' · ')}</small></span>
                     <b>{selected ? '열기' : '보기'}</b>
                   </button>
@@ -649,10 +651,6 @@ function HomeScreen({
         </section>
       ) : (
         <>
-          <header className="top-header">
-            <h1>제철음식 뭐가있을까?</h1>
-          </header>
-
           <div className={`season-panel season-panel-index season-${selectedSeason}`}>
             <div className="season-tabs" aria-label="계절 선택">
               {seasons.map((season) => (
@@ -676,7 +674,7 @@ function HomeScreen({
                   onClick={() => onSelectSeasonalIngredient(ingredient.id)}
                   type="button"
                 >
-                  <span className="food-emoji" aria-hidden="true">{ingredient.emoji}</span>
+                  <span className="food-emoji" aria-hidden="true">{ingredientIconImage(ingredient.name, 'food-icon-image')}</span>
                   <strong>{ingredient.name}</strong>
                 </button>
               ))}
@@ -709,10 +707,9 @@ function HomeScreen({
                   type="button"
                 >
                   <span className="menu-card-visual" aria-hidden="true">
-                    {shoppingItemEmoji(menu.ingredients[0]?.name ?? menu.name)}
+                    {ingredientIconImage(menu.ingredients[0]?.name ?? menu.name)}
                   </span>
                   <strong>{menu.name}</strong>
-                  <small>{menu.ingredients.slice(0, 2).map((ingredient) => ingredient.name).join(' · ')}</small>
                   <b>{getMenuExp(menu).toLocaleString('ko-KR')}xp</b>
                   {selected && <span className="menu-card-selected" aria-hidden="true">✓</span>}
                 </button>
@@ -728,7 +725,10 @@ function HomeScreen({
               <span>총 {seasonalMenus.length}개 요리 · 내 주변 제철 맛집</span>
               <h2>{selectedSeasonalIngredient?.name ?? '제철 식재료'}로 만든 모든 요리</h2>
             </div>
-            <button onClick={() => setLocationPreview(true)} type="button">📍 내 위치</button>
+            <button onClick={() => setLocationPreview(true)} type="button">
+              <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('location')} />
+              내 위치
+            </button>
           </div>
 
           <KakaoRestaurantMap
@@ -856,11 +856,11 @@ function ShoppingScreen({
           <header className="shopping-sub-header">
             <button aria-label="제철홈으로" onClick={onGoHome} type="button">←</button>
             <div>
-              <button aria-label="장바구니" onClick={() => onSetStep('cart')} type="button">🛒</button>
+              <button aria-label="장바구니" onClick={() => onSetStep('cart')} type="button"><img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('cart')} /></button>
             </div>
           </header>
           <div className="shopping-detail-visual">
-            <em aria-hidden="true">{shoppingItemEmoji(detailMenu.ingredients[0]?.name ?? detailMenu.name)}</em>
+            <em aria-hidden="true">{ingredientIconImage(detailMenu.ingredients[0]?.name ?? detailMenu.name)}</em>
           </div>
           <div className="shopping-detail-copy">
             <h1>{detailMenu.name}</h1>
@@ -878,7 +878,7 @@ function ShoppingScreen({
                       onClick={() => toggleDetailIngredient(key)}
                       type="button"
                     >
-                      <em aria-hidden="true">{shoppingItemEmoji(ingredient.name)}</em>
+                      <em aria-hidden="true">{ingredientIconImage(ingredient.name)}</em>
                       <strong>{ingredient.name}</strong>
                       <small>{formatWon(ingredient.price)}</small>
                     </button>
@@ -919,7 +919,7 @@ function ShoppingScreen({
             onClick={(event) => event.stopPropagation()}
             role="dialog"
           >
-            <span aria-hidden="true">🛒</span>
+            <span aria-hidden="true"><img alt="" className="sudal-modal-icon" src={getPetUiIconImage('cart')} /></span>
             <h2 id="cart-move-modal-title">장바구니로 이동하시겠습니까?</h2>
             <p>선택한 재료를 장바구니에 담았어요.</p>
             <div>
@@ -1014,7 +1014,7 @@ function ShoppingScreen({
                               onChange={() => onToggleIngredient(key)}
                               type="checkbox"
                             />
-                            <em aria-hidden="true">{shoppingItemEmoji(item.name)}</em>
+                            <em aria-hidden="true">{ingredientIconImage(item.name)}</em>
                             <span>
                               <strong>내일 도착 예정</strong>
                               <small>{item.name}, {item.quantity}</small>
@@ -1090,7 +1090,7 @@ function ShoppingScreen({
             <h2>주문상품 {selectedCartQuantity}개</h2>
             {selectedCartProducts.map(({ key, ingredient, quantity }) => (
               <article key={key}>
-                <em aria-hidden="true">{shoppingItemEmoji(ingredient.name)}</em>
+                <em aria-hidden="true">{ingredientIconImage(ingredient.name)}</em>
                 <div>
                   <strong>내일 도착 예정</strong>
                   <span>{ingredient.name}, {ingredient.quantity}</span>
@@ -1334,7 +1334,7 @@ function KakaoRestaurantMap({
       </div>
       {selectedPlace && (
         <article className="kakao-place-card">
-          <span className="kakao-place-selected-label">📍 선택한 맛집</span>
+          <span className="kakao-place-selected-label"><img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('location')} /> 선택한 맛집</span>
           <strong>{selectedPlace.place_name}</strong>
           <span>{selectedPlace.road_address_name || selectedPlace.address_name || '주소 정보 없음'}</span>
           <div>
@@ -1377,7 +1377,7 @@ function FallbackRestaurantMap({ fallbackRestaurants }: { fallbackRestaurants: N
     <div className="home-map-preview" aria-label="주변 음식점 지도 미리보기">
       <div className="map-road road-one" />
       <div className="map-road road-two" />
-      <span className="map-current-location">🔵</span>
+      <span className="map-current-location"><img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('current')} /></span>
       {fallbackRestaurants.slice(0, 3).map((restaurant, index) => (
         <button
           className={`map-restaurant-pin pin-${index + 1}`}
@@ -1385,7 +1385,7 @@ function FallbackRestaurantMap({ fallbackRestaurants }: { fallbackRestaurants: N
           key={restaurant.id}
           type="button"
         >
-          {restaurant.emoji}
+          <img alt="" aria-hidden="true" className="sudal-map-pin-icon" src={restaurant.iconImage} />
         </button>
       ))}
       {fallbackRestaurants.length === 0 && <p>이 제철 식재료로 만든 요리를 준비하고 있어요.</p>}
@@ -1440,55 +1440,12 @@ function getSearchCenter(useCurrentLocation: boolean) {
   })
 }
 
-function shoppingItemEmoji(name: string) {
-  if (name.includes('수박')) return '🍉'
-  if (name.includes('콩국수') || name.includes('소면') || name.includes('파스타')) return '🍜'
-  if (name.includes('콩국물') || name.includes('우유') || name.includes('요거트')) return '🥛'
-  if (name.includes('복숭아')) return '🍑'
-  if (name.includes('옥수수')) return '🌽'
-  if (name.includes('토마토')) return '🍅'
-  if (name.includes('오이') || name.includes('애호박')) return '🥒'
-  if (name.includes('가지')) return '🍆'
-  if (name.includes('귤') || name.includes('한라봉')) return '🍊'
-  if (name.includes('배추') || name.includes('샐러드') || name.includes('깻잎') || name.includes('루꼴라') || name.includes('시금치') || name.includes('무순')) return '🥬'
-  if (name.includes('굴') || name.includes('꼬막') || name.includes('바지락')) return '🦪'
-  if (name === '무' || name.startsWith('무 ')) return '🌱'
-  if (name.includes('고구마')) return '🍠'
-  if (name.includes('버섯')) return '🍄'
-  if (name.includes('딸기')) return '🍓'
-  if (name.includes('치즈') || name.includes('리코타') || name.includes('모차렐라')) return '🧀'
-  if (name.includes('쌀') || name.includes('밥')) return '🍚'
-  if (name.includes('참외')) return '🍈'
-  if (name.includes('고추')) return '🌶️'
-  if (name.includes('감자')) return '🥔'
-  if (name.includes('달걀')) return '🥚'
-  if (name.includes('양파') || name.includes('대파') || name.includes('쪽파') || name.includes('부추')) return '🧅'
-  if (name.includes('버터')) return '🧈'
-  if (name.includes('두부')) return '⬜'
-  if (name.includes('미역') || name.includes('김')) return '🌿'
-  if (name.includes('밀가루') || name.includes('가루') || name.includes('그래놀라')) return '🌾'
-  if (name.includes('꿀') || name.includes('올리고당')) return '🍯'
-  if (name.includes('자두')) return '🟣'
-  if (name.includes('포도')) return '🍇'
-  if (name.includes('탄산수')) return '🥤'
-  if (name.includes('사과')) return '🍎'
-  if (name.includes('배')) return '🍐'
-  if (name.includes('레몬')) return '🍋'
-  if (name.includes('감')) return '🟠'
-  if (name.includes('무화과')) return '🫐'
-  if (name.includes('밤')) return '🌰'
-  if (name.includes('단호박')) return '🎃'
-  if (name.includes('견과')) return '🥜'
-  if (name.includes('대하') || name.includes('새우')) return '🦐'
-  if (name.includes('오징어')) return '🦑'
-  if (name.includes('장어') || name.includes('전어') || name.includes('고등어') || name.includes('대구') || name.includes('방어')) return '🐟'
-  if (name.includes('고기') || name.includes('돼지') || name.includes('소고기')) return '🥩'
-  if (name.includes('두릅') || name.includes('미나리') || name.includes('쑥') || name.includes('죽순') || name.includes('쑥갓') || name.includes('연근') || name.includes('우엉')) return '🌿'
-  if (name.includes('간장') || name.includes('고추장') || name.includes('된장') || name.includes('쌈장') || name.includes('소스')) return '🫙'
-  if (name.includes('오일') || name.includes('식초') || name.includes('참기름') || name.includes('마요네즈')) return '🧴'
-  if (name.includes('젤라틴')) return '🍮'
-  if (name.includes('소금') || name.includes('깨')) return '🧂'
-  return '🛍️'
+function shoppingItemIconImage(name: string) {
+  return getPetFeedIconImage(name) || getPetUiIconImage('bag')
+}
+
+function ingredientIconImage(name: string, className = 'sudal-ingredient-icon') {
+  return <img alt="" aria-hidden="true" className={className} src={shoppingItemIconImage(name)} />
 }
 
 function MyPage({
@@ -1532,7 +1489,7 @@ function MyPage({
       {page === 'overview' && (
         <>
           <div className="my-page-profile">
-            <span aria-hidden="true">👤</span>
+                <span aria-hidden="true"><img alt="" className="sudal-modal-icon" src={getPetUiIconImage('profile')} /></span>
             <div>
               <strong>제철 미식가</strong>
               <p>오늘도 맛있는 제철 음식을 골라보세요.</p>
@@ -1556,7 +1513,7 @@ function MyPage({
 
             {orderHistory.length === 0 && (
               <div className="my-order-empty">
-                <span aria-hidden="true">🧾</span>
+                <span aria-hidden="true"><img alt="" className="sudal-modal-icon" src={getPetUiIconImage('receipt')} /></span>
                 <strong>아직 주문 내역이 없어요</strong>
                 <p>상품을 구매하면 주문 내역이 여기에 쌓여요.</p>
               </div>
@@ -1577,7 +1534,7 @@ function MyPage({
                   <strong>{order.status}</strong>
                 </div>
                 <div className="my-order-items">
-                  <em aria-hidden="true">{shoppingItemEmoji(order.items[0]?.name ?? '')}</em>
+                  <em aria-hidden="true">{ingredientIconImage(order.items[0]?.name ?? '')}</em>
                   <div>
                     <strong>{order.items[0]?.name ?? '제철 상품'}{order.items.length > 1 ? ` 외 ${order.items.length - 1}개` : ''}</strong>
                     <p>{order.items.map((item) => `${item.name} ${item.quantity} × ${item.count}`).join(' · ')}</p>
@@ -1600,7 +1557,7 @@ function MyPage({
 
           {coupons.length === 0 && (
             <div className="my-coupon-empty">
-              <span aria-hidden="true">🎟️</span>
+              <span aria-hidden="true"><img alt="" className="sudal-modal-icon" src={getPetUiIconImage('coupon')} /></span>
               <strong>아직 보유한 쿠폰이 없어요</strong>
               <p>{nextCouponRemainingExp.toLocaleString('ko-KR')} XP를 더 모으면 20% 할인 쿠폰을 받아요.</p>
             </div>
@@ -1636,7 +1593,7 @@ function MyPage({
             <h2>주문 상품</h2>
             {selectedOrder.items.map((item, index) => (
               <article key={`${item.name}-${index}`}>
-                <em aria-hidden="true">{shoppingItemEmoji(item.name)}</em>
+                <em aria-hidden="true">{ingredientIconImage(item.name)}</em>
                 <div>
                   <strong>{item.name}</strong>
                   <span>{item.quantity} · {item.count}개</span>
@@ -1783,7 +1740,7 @@ function PetHomeScreen({
               )}
               {feedIngredients.map((ingredient) => (
                 <button className="feed-card" key={ingredient.id} onClick={() => onFeed(ingredient)} type="button">
-                  <span className="feed-card-icon" aria-hidden="true">{shoppingItemEmoji(ingredient.name)}</span>
+                  <span className="feed-card-icon" aria-hidden="true">{ingredientIconImage(ingredient.name, 'feed-card-icon-image')}</span>
                   <span>
                     <strong>{ingredient.name}</strong>
                     <small>{ingredient.menuName}</small>
@@ -1842,32 +1799,8 @@ function PetHomeScreen({
 }
 
 function decorIcon(item: DecorItem) {
-  if (item.type === 'background') {
-    if (item.name.includes('봄꽃')) return '🌷'
-    if (item.name.includes('바닷가')) return '🌊'
-    if (item.name.includes('낙엽')) return '🍁'
-    if (item.name.includes('눈꽃')) return '❄️'
-    if (item.name.includes('피크닉')) return '🌼'
-    if (item.name.includes('초록')) return '🪟'
-    if (item.name.includes('야시장')) return '🌙'
-    if (item.name.includes('구름')) return '☁️'
-    return '☀️'
-  }
-  if (item.type === 'outfit') {
-    if (item.name.includes('수박')) return '🍉'
-    if (item.name.includes('목도리')) return '🧣'
-    if (item.name.includes('셰프')) return '🧑‍🍳'
-    if (item.name.includes('판초')) return '☔'
-    return '👕'
-  }
-  if (item.name.includes('머그')) return '☕'
-  if (item.name.includes('딸기')) return '🍓'
-  if (item.name.includes('숟가락')) return '🥄'
-  if (item.name.includes('선풍기')) return '🪭'
-  if (item.name.includes('주스')) return '🧃'
-  if (item.name.includes('군고구마')) return '🍠'
-  if (item.name.includes('귤')) return '🍊'
-  return '🛍️'
+  const iconImage = getPetDecorIconImage(item)
+  return iconImage ? <img alt="" aria-hidden="true" className="sudal-decor-fallback-icon" src={iconImage} /> : null
 }
 
 const petHomeAccessoryIds = new Set([
@@ -1898,9 +1831,9 @@ function roomClass(background: string) {
 
 function TabBar({ current, cartCount, onChange }: { current: Screen; cartCount: number; onChange: (screen: Screen) => void }) {
   const tabs: { id: Screen; label: string; icon: string }[] = [
-    { id: 'home', label: '제철홈', icon: '🌿' },
-    { id: 'shopping', label: '장바구니', icon: '🛒' },
-    { id: 'petHome', label: '펫홈', icon: '💛' },
+    { id: 'home', label: '제철홈', icon: getPetUiIconImage('home') },
+    { id: 'shopping', label: '장바구니', icon: getPetUiIconImage('cart') },
+    { id: 'petHome', label: '펫홈', icon: getPetUiIconImage('pet') },
   ]
 
   return (
@@ -1908,7 +1841,7 @@ function TabBar({ current, cartCount, onChange }: { current: Screen; cartCount: 
       {tabs.map((tab) => (
         <button className={current === tab.id ? 'active' : ''} key={tab.id} onClick={() => onChange(tab.id)} type="button">
           <span className="tab-icon" aria-hidden="true">
-            {tab.icon}
+            <img alt="" src={tab.icon} />
             {tab.id === 'shopping' && cartCount > 0 && <b>{cartCount}</b>}
           </span>
           <span className="tab-label">{tab.label}</span>
