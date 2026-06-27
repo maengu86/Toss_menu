@@ -1943,7 +1943,6 @@ function PetHomeScreen({
                 <strong>{level}</strong>
               </div>
               <div className="pet-level-copy">
-                <strong>성장 현황</strong>
                 <span>{expLabel}</span>
               </div>
             </div>

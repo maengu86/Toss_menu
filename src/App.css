@@ -2176,7 +2176,7 @@
   border: 1px solid rgba(138, 138, 138, 0.38);
   border-radius: 24px;
   overflow: hidden;
-  background: rgba(251, 248, 243, 0.94);
+  background: #ffffff;
   box-shadow: 0 10px 26px rgba(94, 59, 28, 0.07);
 }
 
@@ -2189,6 +2189,8 @@
   align-items: end;
   justify-items: center;
   margin: 0;
+  border: 1px solid rgba(138, 138, 138, 0.38);
+  border-bottom: 0;
   border-radius: 0;
 }
 
@@ -2252,7 +2254,7 @@
   padding: 10px 10px 8px;
   border: 0;
   border-radius: 0;
-  background: rgba(255, 255, 255, 0.9);
+  background: #ffffff;
   box-shadow: none;
 }
 
@@ -2313,10 +2315,10 @@
   display: grid;
   gap: 10px;
   margin: 0;
-  padding: 12px 12px 14px;
+  padding: 12px 12px 18px;
   border: 0;
   border-radius: 0;
-  background: transparent;
+  background: #ffffff;
   box-shadow: none;
   backdrop-filter: none;
 }
@@ -2327,18 +2329,18 @@
 
 .pet-feed-panel .level-card {
   margin: 0;
-  padding: 14px 15px 15px;
-  border: 1px solid #f3d4bd;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.6);
+  padding: 14px 15px 16px;
+  border: 1px solid #e5e8eb;
+  border-radius: 8px;
+  background: #ffffff;
   box-shadow: none;
 }
 
 .pet-level-card-main {
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
 }
 
 .pet-level-mark {
@@ -2367,19 +2369,15 @@
 
 .pet-level-copy {
   min-width: 0;
+  flex: 1;
   display: grid;
-  gap: 3px;
-}
-
-.pet-level-copy strong {
-  color: #191f28;
-  font-size: 15px;
-  line-height: 1.2;
+  justify-items: end;
+  gap: 2px;
 }
 
 .pet-level-copy span {
   color: #8b95a1;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -2387,7 +2385,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 12px;
+  margin-top: 14px;
 }
 
 .pet-level-progress-row .progress-track {
@@ -2396,7 +2394,7 @@
   margin: 0;
   overflow: hidden;
   border-radius: 999px;
-  background: var(--pet-apricot-soft);
+  background: #eef1f4;
 }
 
 .pet-level-progress-row .progress-fill {
@@ -2425,10 +2423,10 @@
   justify-content: initial;
   gap: 12px;
   padding: 14px;
-  border: 1px solid #f3d4bd;
+  border: 1px solid #e5e8eb;
   border-radius: 8px;
   color: #191f28;
-  background: rgba(255, 255, 255, 0.6);
+  background: #ffffff;
   box-shadow: none;
 }
 
@@ -2508,7 +2506,7 @@
   border-radius: 8px;
   color: #8b95a1;
   font-size: 14px;
-  background: rgba(247, 248, 250, 0.6);
+  background: #ffffff;
 }
 
 .pet-inventory {
@@ -2519,7 +2517,7 @@
   padding: 0 0 16px;
   border: 0;
   border-radius: 0;
-  background: transparent;
+  background: #ffffff;
   box-shadow: none;
 }
 

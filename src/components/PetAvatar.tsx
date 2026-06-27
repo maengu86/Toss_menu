@@ -35,7 +35,7 @@ function PetAvatar({
   if (body === 'sudal') {
     const outfitImage = getSudalOutfitWornImage(outfit)
     const accessoryImage = getSudalAccessoryWornImage(accessory)
-    const outfitFrame = { x: 34, y: 92, width: 192, height: 170 }
+    const outfitFrame = getOutfitFrame(outfit)
     const accessoryFrame = getAccessoryFrame(accessory)
 
     return (
@@ -132,7 +132,17 @@ function PetAvatar({
 
 export default PetAvatar
 
+function getOutfitFrame(name: string) {
+  if (name.includes('딸기 잠옷')) {
+    return { x: 0, y: 0, width: 260, height: 340 }
+  }
+  return { x: 34, y: 92, width: 192, height: 170 }
+}
+
 function getAccessoryFrame(name: string) {
+  if (name.includes('수박 주스')) {
+    return { x: 0, y: 0, width: 260, height: 340 }
+  }
   if (name.includes('안경') || name.includes('선글라스')) {
     return { x: 44, y: 46, width: 176, height: 86 }
   }
