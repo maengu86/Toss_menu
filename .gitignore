@@ -29,3 +29,4 @@ dist-ssr
 # Temporary publishing scripts
 work-*.mjs
 .env*
+*캡쳐본
