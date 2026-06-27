@@ -70,3 +70,7 @@ export function getPetDecorIconImage(item: DecorItem) {
 export function getPetShareIconImage() {
   return resolveAsset(ingredientIcons, 'ingredients/camera.png')
 }
+
+export function getPetClearDecorIconImage() {
+  return resolveAsset(decorIcons, 'decor/clear.png')
+}

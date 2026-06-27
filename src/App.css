@@ -2173,11 +2173,11 @@
   display: flex;
   flex-direction: column;
   margin: 12px 16px 0;
-  border: 1px solid rgba(138, 138, 138, 0.38);
-  border-radius: 24px;
-  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
   background: #ffffff;
-  box-shadow: 0 10px 26px rgba(94, 59, 28, 0.07);
+  box-shadow: none;
 }
 
 .pet-room-stage {
@@ -2189,8 +2189,7 @@
   align-items: end;
   justify-items: center;
   margin: 0;
-  border: 1px solid rgba(138, 138, 138, 0.38);
-  border-bottom: 0;
+  border: 0;
   border-radius: 0;
 }
 
@@ -2240,8 +2239,8 @@
 }
 
 .pet-share-button img {
-  width: 31px;
-  height: 31px;
+  width: 40px;
+  height: 40px;
   display: block;
   object-fit: contain;
 }
@@ -2296,7 +2295,7 @@
 
 .pet-action-tabs button.active b {
   color: #463d37;
-  background: rgba(123, 123, 123, 0.16);
+  background: rgba(232, 135, 74, 0.6);
 }
 
 .pet-action-tabs button:focus {
@@ -2436,7 +2435,7 @@
   color: #8b95a1;
   font-size: 24px;
   font-weight: 800;
-  background: rgba(247, 248, 250, 0.82);
+  background: transparent;
 }
 
 .decor-card.clear-card strong {
@@ -2449,7 +2448,7 @@
 
 .decor-card.clear-card.selected .decor-card-visual {
   color: #5a301c;
-  background: rgba(232, 135, 74, 0.16);
+  background: transparent;
 }
 
 .decor-card > span img {
@@ -2460,8 +2459,8 @@
 }
 
 .decor-card.clear-card .decor-card-visual img {
-  width: 22px;
-  height: 22px;
+  width: 42px;
+  height: 42px;
 }
 
 .pet-feed-panel .feed-card-icon {
@@ -2538,7 +2537,7 @@
 }
 
 .decor-card > span {
-  background: #f7f8fa;
+  background: transparent;
 }
 
 .decor-card > .room-thumbnail {
@@ -2563,7 +2562,7 @@
 }
 
 .decor-card.selected::before {
-  background: var(--pet-apricot);
+  display: none;
 }
 
 .decor-card.locked {

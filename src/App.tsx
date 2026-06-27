@@ -4,7 +4,7 @@ import './App.css'
 import PetAvatar from './components/PetAvatar'
 import { getRoomBackgroundImage } from './data/decorAssets'
 import { getSudalAccessoryPreviewImage, getSudalOutfitPreviewImage } from './data/sudalDecorImages'
-import { getPetShareIconImage } from './data/sudalPetIcons'
+import { getPetClearDecorIconImage, getPetShareIconImage } from './data/sudalPetIcons'
 import { fallbackAppData, loadAppData } from './services/appDataService'
 import type { DecorItem, Ingredient, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
 import discountCouponImage from '../discount-coupon-20.jpg'
@@ -1979,7 +1979,9 @@ function PetHomeScreen({
                 onClick={() => onClearDecor(decorTab)}
                 type="button"
               >
-                <span className="decor-card-visual decor-card-empty" aria-hidden="true">-</span>
+                <span className="decor-card-visual decor-card-empty" aria-hidden="true">
+                  <img alt="" src={getPetClearDecorIconImage()} />
+                </span>
                 <strong>해제</strong>
               </button>
             )}
