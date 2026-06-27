@@ -8,11 +8,9 @@ import type { DecorItem, Ingredient, Menu, Screen, SeasonalIngredient, SeasonKey
 import discountCouponImage from '../discount-coupon-20.jpg'
 
 type KakaoLatLng = object
-type KakaoMapBounds = { extend: (position: KakaoLatLng) => void }
 type KakaoMapInstance = {
   addControl: (control: object, position: unknown) => void
   panTo: (position: KakaoLatLng) => void
-  setBounds: (bounds: KakaoMapBounds) => void
 }
 type KakaoMapMarker = { setMap: (map: KakaoMapInstance | null) => void }
 type KakaoInfoWindow = {
@@ -27,7 +25,6 @@ type KakaoMapsSdk = {
     ControlPosition: { RIGHT: unknown }
     Marker: new (options: { map: KakaoMapInstance; position: KakaoLatLng }) => KakaoMapMarker
     InfoWindow: new (options: { content: string }) => KakaoInfoWindow
-    LatLngBounds: new () => KakaoMapBounds
     services: {
       Places: new () => {
         keywordSearch: (
@@ -70,6 +67,7 @@ const receiptDrafts = [
 ]
 
 const kakaoMapAppKey = import.meta.env.VITE_KAKAO_MAP_APP_KEY as string | undefined
+const kakaoMapDefaultLevel = 3
 
 type ShopStep = 'store' | 'detail' | 'cart' | 'checkout' | 'complete'
 
@@ -1268,7 +1266,7 @@ function KakaoRestaurantMap({
         const centerLatLng = new kakao.maps.LatLng(center.lat, center.lng)
         const map = new kakao.maps.Map(mapRef.current, {
           center: centerLatLng,
-          level: 13,
+          level: kakaoMapDefaultLevel,
         })
         mapInstanceRef.current = map
         map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT)
