@@ -1904,6 +1904,7 @@ function PetHomeScreen({
 
   return (
     <section className="screen pet-home-screen" onScroll={onScrollActivity}>
+      <div className="pet-home-shell">
       <div
         className={`pet-room-stage ${roomClass(background)} ${roomImage ? 'has-room-image' : ''}`}
         style={roomImage ? { backgroundImage: `url(${roomImage})` } : undefined}
@@ -2014,6 +2015,7 @@ function PetHomeScreen({
           </div>
         </div>
       )}
+      </div>
     </section>
   )
 }
