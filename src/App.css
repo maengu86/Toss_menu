@@ -4896,3 +4896,42 @@
   border-radius: inherit;
   background: rgba(248, 249, 251, 0.22);
 }
+
+.empty-cart-pet .empty-cart-pet-room {
+  width: 100%;
+  max-width: 300px;
+  height: 260px;
+  min-height: 260px;
+  position: relative;
+  display: grid;
+  align-items: end;
+  justify-items: center;
+  overflow: hidden;
+  margin: 0;
+  border: 0;
+  border-radius: 18px;
+  background: transparent;
+}
+
+.empty-cart-pet .empty-cart-pet-room .pet-stage {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  align-items: end;
+  justify-items: center;
+  margin: 0;
+  overflow: visible;
+  background: transparent;
+}
+
+.empty-cart-pet .empty-cart-pet-room .dress-pet {
+  width: min(74%, 210px);
+  max-width: 210px;
+  max-height: 238px;
+  margin-bottom: 10px;
+  animation: none;
+  transform: none;
+  filter: none;
+}
