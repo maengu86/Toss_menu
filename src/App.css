@@ -4581,6 +4581,7 @@
   margin-bottom: 18px;
   animation: none;
   transform: none;
+  filter: none;
 }
 
 .pet-home-screen .pet-share-button {

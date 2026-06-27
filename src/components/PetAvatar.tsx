@@ -150,10 +150,10 @@ function getAccessoryFrame(name: string) {
     return { x: 15, y: 30, width: 195, height: 255 }
   }
   if (name.includes('목걸이')) {
-    return { x: 6, y: 88, width: 248, height: 104 }
+    return { x: 24, y: 86, width: 212, height: 86 }
   }
   if (name.includes('밀짚모자')) {
-    return { x: 46, y: 0, width: 168, height: 220 }
+    return { x: 58, y: -8, width: 144, height: 188 }
   }
   if (name.includes('안경') || name.includes('선글라스')) {
     return { x: 44, y: 46, width: 176, height: 86 }
