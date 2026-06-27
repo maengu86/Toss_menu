@@ -445,18 +445,14 @@ function App() {
             allMenus={menus}
             seasonIngredients={seasonIngredients}
             seasonalMenus={seasonalMenus}
-            checkedIngredients={checkedIngredients}
-            checkedPrice={checkedPrice}
             checkedTotal={checkedTotal}
             selectedSeason={selectedSeason}
             selectedSeasonalIngredientId={activeSeasonalIngredientId}
-            selectedMenus={selectedMenus}
             selectedMenuIds={selectedMenuIds}
             onScrollActivity={handleScrollActivity}
             onSelectSeason={changeSeason}
             onSelectSeasonalIngredient={setSelectedSeasonalIngredientId}
             onToggleMenu={toggleMenu}
-            onToggleProduct={toggleShoppingProduct}
             onOpenCart={() => {
               setShoppingCatalogMenuIds(selectedMenuIds)
               setShopStep('cart')
@@ -557,18 +553,14 @@ function HomeScreen({
   allMenus,
   seasonIngredients,
   seasonalMenus,
-  checkedIngredients,
-  checkedPrice,
   checkedTotal,
   selectedSeason,
   selectedSeasonalIngredientId,
-  selectedMenus,
   selectedMenuIds,
   onScrollActivity,
   onSelectSeason,
   onSelectSeasonalIngredient,
   onToggleMenu,
-  onToggleProduct,
   onOpenCart,
   onOpenProfile,
 }: {
@@ -577,18 +569,14 @@ function HomeScreen({
   allMenus: Menu[]
   seasonIngredients: SeasonalIngredient[]
   seasonalMenus: Menu[]
-  checkedIngredients: string[]
-  checkedPrice: number
   checkedTotal: number
   selectedSeason: SeasonKey
   selectedSeasonalIngredientId: string
-  selectedMenus: Menu[]
   selectedMenuIds: string[]
   onScrollActivity: () => void
   onSelectSeason: (season: SeasonKey) => void
   onSelectSeasonalIngredient: (id: string) => void
   onToggleMenu: (id: string) => void
-  onToggleProduct: (menuId: string, ingredientName: string) => void
   onOpenCart: () => void
   onOpenProfile: () => void
 }) {
@@ -606,13 +594,6 @@ function HomeScreen({
       || menu.ingredients.some((ingredient) => ingredient.name.toLowerCase().includes(normalizedQuery))
     ))
     : []
-  const relatedProducts = selectedMenus
-    .flatMap((menu) => menu.ingredients.map((ingredient) => ({
-      key: ingredientKey(menu.id, ingredient.name),
-      menuId: menu.id,
-      ingredient,
-    })))
-    .filter((product, index, products) => products.findIndex((item) => item.ingredient.name === product.ingredient.name) === index)
   const selectedSeasonalIngredient = seasonIngredients.find((ingredient) => ingredient.id === selectedSeasonalIngredientId)
   const nearbyRestaurants = seasonalMenus.map((menu, index) => ({
     id: `${menu.id}-restaurant`,
@@ -758,56 +739,6 @@ function HomeScreen({
           </div>
         )}
 
-      {purchaseTab === 'cook' && relatedProducts.length > 0 && (
-        <section className="home-shopping-products">
-          <div className="shopping-section-title">
-            <div>
-              <span>선택한 메뉴의 재료</span>
-              <h2>같이 구매하면 좋은 상품</h2>
-            </div>
-            <small>{checkedTotal}개 선택</small>
-          </div>
-          <div className="shopping-product-grid">
-            {relatedProducts.map((product, index) => {
-              const selected = checkedIngredients.includes(product.key)
-              const discount = 38 + ((index * 7) % 48)
-              return (
-                <article className={`shopping-product-card tone-${index % 6} ${selected ? 'selected' : ''}`} key={product.key}>
-                  <button className="shopping-product-main" onClick={() => onToggleProduct(product.menuId, product.ingredient.name)} type="button">
-                    <span className="shopping-discount">{discount}% 특가</span>
-                    <em aria-hidden="true">{shoppingItemEmoji(product.ingredient.name)}</em>
-                    <strong>{product.ingredient.name}, {product.ingredient.quantity}</strong>
-                    <small>★ {(4.5 + (index % 4) * 0.1).toFixed(1)} · 무료배송</small>
-                    <p>{formatWon(product.ingredient.price)}</p>
-                  </button>
-                  <button
-                    className={`shopping-card-cart ${selected ? 'added' : ''}`}
-                    aria-label={`${product.ingredient.name} ${selected ? '선택 해제' : '선택'}`}
-                    onClick={() => onToggleProduct(product.menuId, product.ingredient.name)}
-                    type="button"
-                  >
-                    {selected ? '✅' : '🛒'}
-                  </button>
-                </article>
-              )
-            })}
-          </div>
-          {checkedTotal > 0 && (
-            <button className="home-shopping-cart-button" onClick={onOpenCart} type="button">
-              {checkedTotal}개 상품 장바구니 보기 · {formatWon(checkedPrice)}
-            </button>
-          )}
-        </section>
-      )}
-
-      {purchaseTab === 'cook' && relatedProducts.length === 0 && (
-        <div className="home-purchase-empty">
-          <span aria-hidden="true">🥕</span>
-          <strong>메뉴를 고르면 필요한 재료를 보여드려요</strong>
-          <p>제철 식재료와 간편하게 요리할 수 있는 밀키트를 함께 추천해요.</p>
-        </div>
-      )}
-
         {purchaseTab === 'delivery' && (
           <section className="home-delivery-panel">
           <div className="home-delivery-heading">
@@ -827,20 +758,6 @@ function HomeScreen({
           <p className="home-location-status">
             {locationPreview ? '현재 위치를 허용하면 반경 5km 안의 결과를 우선 보여줘요.' : '카카오맵 키가 있으면 실제 장소 검색 결과가 지도에 표시돼요.'}
           </p>
-
-          <div className="home-restaurant-list">
-            {nearbyRestaurants.map((restaurant) => (
-              <article key={restaurant.id}>
-                <em aria-hidden="true">{restaurant.emoji}</em>
-                <div>
-                  <span>배달 가능 · API 연동 전 예시</span>
-                  <strong>{restaurant.name}</strong>
-                  <p>{restaurant.menuName} · ⭐ {restaurant.rating} · {restaurant.distance}</p>
-                </div>
-                <button type="button">{restaurant.eta}</button>
-              </article>
-            ))}
-          </div>
           </section>
         )}
       </section>
@@ -1049,8 +966,8 @@ function ShoppingScreen({
       {step === 'cart' && (
         <>
           <div className="shopping-cart-head">
-            <button aria-label="쇼핑 홈으로" onClick={() => onSetStep('store')} type="button">←</button>
-            <div><strong>장바구니 {checkedTotal}</strong><span>최근 본 상품</span><span>찜한 상품</span></div>
+            <button aria-label="제철홈으로" onClick={onGoHome} type="button">←</button>
+            <div><strong>장바구니 {checkedTotal}</strong></div>
           </div>
           <div className="toss-menu-list">
             {selectedMenus.length === 0 && (
