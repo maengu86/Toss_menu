@@ -446,7 +446,6 @@ function App() {
 
         {screen === 'shopping' && (
           <ShoppingScreen
-            background={selectedBackground}
             accessory={selectedAccessory}
             appliedCouponId={activeCouponId}
             availableCoupons={availableCoupons}
@@ -743,7 +742,6 @@ function HomeScreen({
 }
 
 function ShoppingScreen({
-  background,
   accessory,
   appliedCouponId,
   availableCoupons,
@@ -774,7 +772,6 @@ function ShoppingScreen({
   onRemoveMenu,
   onScrollActivity,
 }: {
-  background: string
   accessory: string
   appliedCouponId: string
   availableCoupons: RewardCoupon[]
@@ -951,12 +948,14 @@ function ShoppingScreen({
         <>
           <div className="shopping-cart-head">
             <button aria-label="제철홈으로" onClick={onGoHome} type="button">←</button>
-            <div><strong>장바구니 {checkedTotal}</strong></div>
+            <div>{selectedMenus.length > 0 && <strong>장바구니 {checkedTotal}</strong>}</div>
           </div>
           <div className="toss-menu-list">
             {selectedMenus.length === 0 && (
               <div className="empty-cart-pet">
-                <PetAvatar outfit={outfit} background={background} accessory={accessory} />
+                <div className="empty-cart-pet-room">
+                  <PetAvatar outfit={outfit} accessory={accessory} body="sudal" />
+                </div>
                 <h2>배고파요...</h2>
                 <p>오늘은 뭐 먹을래요?</p>
                 <div>
