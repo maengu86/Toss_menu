@@ -7,7 +7,6 @@ export const seasonalIngredients: SeasonalIngredient[] = [
   { id: 'dallae', name: '달래', season: '봄', seasonKey: 'spring', emoji: '🌿' },
   { id: 'naengi', name: '냉이', season: '봄', seasonKey: 'spring', emoji: '🌱' },
   { id: 'strawberry', name: '딸기', season: '봄', seasonKey: 'spring', emoji: '🍓' },
-  { id: 'asparagus', name: '아스파라거스', season: '봄', seasonKey: 'spring', emoji: '🥬' },
   { id: 'jukkumi', name: '주꾸미', season: '봄', seasonKey: 'spring', emoji: '🐙' },
   { id: 'spring-cabbage', name: '봄동', season: '봄', seasonKey: 'spring', emoji: '🥬' },
   { id: 'dureup', name: '두릅', season: '봄', seasonKey: 'spring', emoji: '🌱' },
