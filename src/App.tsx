@@ -6,9 +6,60 @@ import { getRoomBackgroundImage } from './data/decorAssets'
 import { fallbackAppData, loadAppData } from './services/appDataService'
 import type { DecorItem, Ingredient, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
 
+type KakaoLatLng = object
+
+type KakaoZoomControl = object
+
+type KakaoLatLngBounds = {
+  extend: (position: KakaoLatLng) => void
+}
+
+type KakaoMap = {
+  addControl: (control: KakaoZoomControl, position: unknown) => void
+  setBounds: (bounds: KakaoLatLngBounds) => void
+  panTo: (position: KakaoLatLng) => void
+}
+
+type KakaoMarker = {
+  setMap: (map: KakaoMap | null) => void
+}
+
+type KakaoInfoWindow = {
+  open: (map: KakaoMap, marker: KakaoMarker) => void
+  close: () => void
+}
+
+type KakaoPlacesService = {
+  keywordSearch: (
+    keyword: string,
+    callback: (results: KakaoPlace[], status: string) => void,
+    options?: { location: KakaoLatLng; radius: number },
+  ) => void
+}
+
+type KakaoMapsSdk = {
+  maps: {
+    load: (callback: () => void) => void
+    LatLng: new (lat: number, lng: number) => KakaoLatLng
+    Map: new (container: HTMLElement, options: { center: KakaoLatLng; level: number }) => KakaoMap
+    ZoomControl: new () => KakaoZoomControl
+    ControlPosition: { RIGHT: unknown }
+    Marker: new (options: { map?: KakaoMap; position: KakaoLatLng }) => KakaoMarker
+    InfoWindow: new (options: { content: string }) => KakaoInfoWindow
+    LatLngBounds: new () => KakaoLatLngBounds
+    event: {
+      addListener: (target: KakaoMarker, type: string, handler: () => void) => void
+    }
+    services: {
+      Places: new () => KakaoPlacesService
+      Status: { OK: string }
+    }
+  }
+}
+
 declare global {
   interface Window {
-    kakao?: any
+    kakao?: KakaoMapsSdk
     __kakaoMapsSdkPromise?: Promise<void>
   }
 }
@@ -1102,9 +1153,9 @@ function KakaoRestaurantMap({
   useCurrentLocation: boolean
 }) {
   const mapRef = useRef<HTMLDivElement | null>(null)
-  const mapInstanceRef = useRef<any>(null)
-  const markersRef = useRef<any[]>([])
-  const placeMarkerRef = useRef(new Map<string, { infoWindow: any; marker: any; position: any }>())
+  const mapInstanceRef = useRef<KakaoMap | null>(null)
+  const markersRef = useRef<KakaoMarker[]>([])
+  const placeMarkerRef = useRef(new Map<string, { infoWindow: KakaoInfoWindow; marker: KakaoMarker; position: KakaoLatLng }>())
   const [statusMessage, setStatusMessage] = useState(kakaoMapAppKey ? '카카오맵을 불러오는 중이에요.' : '카카오맵 키를 설정하면 실제 지도가 표시돼요.')
   const [places, setPlaces] = useState<KakaoPlace[]>([])
   const [selectedPlace, setSelectedPlace] = useState<KakaoPlace | null>(null)
@@ -1125,6 +1176,7 @@ function KakaoRestaurantMap({
     if (!appKey || !mapRef.current) return
 
     let canceled = false
+    const placeMarkers = placeMarkerRef.current
     setSelectedPlace(null)
     setPlaces([])
 
@@ -1205,7 +1257,7 @@ function KakaoRestaurantMap({
       canceled = true
       markersRef.current.forEach((marker) => marker.setMap(null))
       markersRef.current = []
-      placeMarkerRef.current.clear()
+      placeMarkers.clear()
     }
   }, [keyword, useCurrentLocation])
 
