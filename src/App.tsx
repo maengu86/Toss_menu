@@ -3,8 +3,14 @@ import type { CSSProperties } from 'react'
 import './App.css'
 import PetAvatar from './components/PetAvatar'
 import { getRoomBackgroundImage } from './data/decorAssets'
+import { getSudalAccessoryPreviewImage } from './data/sudalDecorImages'
+import { getPetClearDecorIconImage, getPetShareIconImage } from './data/sudalPetIcons'
 import { fallbackAppData, loadAppData } from './services/appDataService'
 import type { DecorItem, Ingredient, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
+import petTabAccessoryIcon from './assets/sudal-tabs/accessory.png'
+import petTabAllIcon from './assets/sudal-tabs/all.png'
+import petTabFeedIcon from './assets/sudal-tabs/feed.png'
+import petTabRoomIcon from './assets/sudal-tabs/room.png'
 import discountCouponImage from '../discount-coupon-20.jpg'
 
 type KakaoLatLng = object
@@ -119,6 +125,8 @@ type KakaoPlace = {
   distance?: string
 }
 
+type PetHomeDecorTab = 'all' | 'background' | 'accessory'
+
 function formatWon(value: number) {
   return value.toLocaleString('ko-KR') + '원'
 }
@@ -209,9 +217,9 @@ function App() {
   const [paymentMethod, setPaymentMethod] = useState(paymentOptions[0])
   const [deliveryOption, setDeliveryOption] = useState(deliveryOptions[0])
   const [shoppingRewardUnlocked, setShoppingRewardUnlocked] = useState(false)
-  const [selectedBackground, setSelectedBackground] = useState('햇살 주방')
-  const [selectedOutfit, setSelectedOutfit] = useState('기본 앞치마')
-  const [selectedAccessory, setSelectedAccessory] = useState('장바구니')
+  const [selectedBackground, setSelectedBackground] = useState('아늑한 집안')
+  const [selectedOutfit, setSelectedOutfit] = useState('')
+  const [selectedAccessory, setSelectedAccessory] = useState('')
   const [toast, setToast] = useState('')
   const [isScrolling, setIsScrolling] = useState(false)
   const scrollTimerRef = useRef<number | undefined>(undefined)
@@ -395,6 +403,12 @@ function App() {
     if (item.type === 'accessory') setSelectedAccessory(item.name)
   }
 
+  function clearDecor(type: 'outfit' | 'accessory') {
+    if (type === 'outfit') setSelectedOutfit('')
+    if (type === 'accessory') setSelectedAccessory('')
+    showToast('착용을 해제했어요.')
+  }
+
   async function copyShareLink() {
     const url = window.location.href
     try {
@@ -481,6 +495,7 @@ function App() {
             level={level}
             outfit={selectedOutfit}
             shoppingRewardUnlocked={shoppingRewardUnlocked}
+            onClearDecor={clearDecor}
             onFeed={feedPet}
             onSelectDecor={selectDecor}
             onShare={copyShareLink}
@@ -1666,6 +1681,7 @@ function PetHomeScreen({
   feedIngredients,
   decorItems,
   shoppingRewardUnlocked,
+  onClearDecor,
   onFeed,
   onSelectDecor,
   onShare,
@@ -1679,114 +1695,147 @@ function PetHomeScreen({
   feedIngredients: FeedIngredient[]
   decorItems: DecorItem[]
   shoppingRewardUnlocked: boolean
+  onClearDecor: (type: 'outfit' | 'accessory') => void
   onFeed: (ingredient: FeedIngredient) => void
   onSelectDecor: (item: DecorItem) => void
   onShare: () => void
   onScrollActivity: () => void
 }) {
-  const [decorTab, setDecorTab] = useState<'all' | DecorItem['type']>('all')
+  const [decorTab, setDecorTab] = useState<PetHomeDecorTab>('all')
   const [petTab, setPetTab] = useState<'feed' | 'decor'>('feed')
-  const visibleItems = decorTab === 'all' ? decorItems : decorItems.filter((item) => item.type === decorTab)
+  const petHomeDecorItems = decorItems.filter((item) => item.type !== 'outfit' && isPetHomeVisibleDecorItem(item))
+  const visibleItems = decorTab === 'all' ? petHomeDecorItems : petHomeDecorItems.filter((item) => item.type === decorTab)
+  const canClearDecor = decorTab === 'accessory'
+  const isClearSelected = accessory === ''
   const levelExpStatus = getLevelExpStatus(exp, level)
   const levelProgress = getLevelProgress(exp, level)
   const expLabel = `${levelExpStatus.currentExp.toLocaleString('ko-KR')}/${levelExpStatus.requiredExp.toLocaleString('ko-KR')} xp`
   const roomImage = getRoomBackgroundImage(background)
-  const decorTabs: { id: 'all' | DecorItem['type']; label: string }[] = [
+  const decorTabs: { id: PetHomeDecorTab; label: string }[] = [
     { id: 'all', label: '전체' },
     { id: 'background', label: '방' },
-    { id: 'outfit', label: '옷' },
     { id: 'accessory', label: '소품' },
   ]
+  const decorTabIcons = {
+    all: petTabAllIcon,
+    background: petTabRoomIcon,
+    accessory: petTabAccessoryIcon,
+  } as const
 
   return (
     <section className="screen pet-home-screen" onScroll={onScrollActivity}>
+      <div className="pet-home-shell">
       <div
         className={`pet-room-stage ${roomClass(background)} ${roomImage ? 'has-room-image' : ''}`}
         style={roomImage ? { backgroundImage: `url(${roomImage})` } : undefined}
       >
-        <button className="pet-share-button" aria-label="먹보 링크 복사" onClick={onShare} type="button">📤</button>
+        <button className="pet-share-button" aria-label="수달 영역 캡처" onClick={onShare} type="button">
+          <img alt="" aria-hidden="true" src={getPetShareIconImage()} />
+        </button>
         <PetAvatar outfit={outfit} background={background} accessory={accessory} body="sudal" />
       </div>
 
-      <div className="pet-action-tabs" aria-label="펫홈 작업">
-        <button className={petTab === 'feed' ? 'active' : ''} onClick={() => setPetTab('feed')} type="button">
-          <b>밥먹기</b>
-        </button>
-        {decorTabs.map((tab) => (
-          <button
-            className={petTab === 'decor' && decorTab === tab.id ? 'active' : ''}
-            key={tab.id}
-            onClick={() => {
-              setPetTab('decor')
-              setDecorTab(tab.id)
-            }}
-            type="button"
-          >
-            <b>{tab.label}</b>
+      <div className="pet-action-panel">
+        <div className="pet-action-tabs" aria-label="펫홈 작업">
+          <button className={petTab === 'feed' ? 'active' : ''} onClick={() => setPetTab('feed')} type="button">
+            <img className="pet-action-tab-icon" alt="" aria-hidden="true" src={petTabFeedIcon} />
+            <b>밥먹기</b>
           </button>
-        ))}
-      </div>
-
-      {petTab === 'feed' && (
-        <section className="pet-feed-panel">
-          <div className="level-card">
-            <div className="pet-level-card-main">
-              <div className="pet-level-mark">
-                <small>LEVEL</small>
-                <strong>{level}</strong>
-              </div>
-              <div className="pet-level-copy">
-                <strong>먹보가 자라고 있어요</strong>
-                <span>{expLabel}</span>
-              </div>
-            </div>
-            <div className="pet-level-progress-row">
-              <div className="progress-track">
-                <div className="progress-fill" style={{ width: `${levelProgress}%` }} />
-              </div>
-              <b>{Math.round(levelProgress)}%</b>
-            </div>
-          </div>
-          <div className="feed-list compact-feed-list">
-            {feedIngredients.length === 0 && (
-              <p className="empty">메뉴를 주문해 주세요</p>
-            )}
-            {feedIngredients.map((ingredient) => (
-              <button className="feed-card" key={ingredient.id} onClick={() => onFeed(ingredient)} type="button">
-                <span className="feed-card-icon" aria-hidden="true">{shoppingItemEmoji(ingredient.name)}</span>
-                <span>
-                  <strong>{ingredient.name}</strong>
-                  <small>{ingredient.menuName}</small>
-                </span>
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {petTab === 'decor' && (
-        <div className="pet-inventory">
-          <div className="decor-grid">
-            {visibleItems.map((item) => {
-              const unlocked = isDecorUnlocked(item, level, shoppingRewardUnlocked)
-              const selected = item.name === background || item.name === outfit || item.name === accessory
-              const itemRoomImage = item.type === 'background' ? getRoomBackgroundImage(item.name) : undefined
-              return (
-                <button className={`decor-card ${selected ? 'selected' : ''} ${unlocked ? '' : 'locked'}`} key={item.id} onClick={() => onSelectDecor(item)} type="button">
-                  <span
-                    className={itemRoomImage ? 'decor-card-visual room-thumbnail' : 'decor-card-visual'}
-                    style={itemRoomImage ? { backgroundImage: `url(${itemRoomImage})` } : undefined}
-                  >
-                    {!itemRoomImage && decorIcon(item)}
-                  </span>
-                  <strong>{item.name}</strong>
-                  <small>{unlocked ? (selected ? '착용중' : item.badge ?? '') : item.unlockByShopping ? '장보기 보상' : `Lv.${item.unlockLevel}`}</small>
-                </button>
-              )
-            })}
-          </div>
+          {decorTabs.map((tab) => (
+            <button
+              className={petTab === 'decor' && decorTab === tab.id ? 'active' : ''}
+              key={tab.id}
+              onClick={() => {
+                setPetTab('decor')
+                setDecorTab(tab.id)
+              }}
+              type="button"
+            >
+              <img className="pet-action-tab-icon" alt="" aria-hidden="true" src={decorTabIcons[tab.id]} />
+              <b>{tab.label}</b>
+            </button>
+          ))}
         </div>
-      )}
+
+        {petTab === 'feed' && (
+          <section className="pet-feed-panel">
+            <div className="level-card">
+              <div className="pet-level-card-main">
+                <div className="pet-level-mark">
+                  <small>LEVEL</small>
+                  <strong>{level}</strong>
+                </div>
+                <div className="pet-level-copy">
+                  <span>{expLabel}</span>
+                </div>
+              </div>
+              <div className="pet-level-progress-row">
+                <div className="progress-track">
+                  <div className="progress-fill" style={{ width: `${levelProgress}%` }} />
+                </div>
+                <b>{Math.round(levelProgress)}%</b>
+              </div>
+            </div>
+            <div className="feed-list compact-feed-list">
+              {feedIngredients.length === 0 && (
+                <p className="empty">메뉴를 주문해 주세요</p>
+              )}
+              {feedIngredients.map((ingredient) => (
+                <button className="feed-card" key={ingredient.id} onClick={() => onFeed(ingredient)} type="button">
+                  <span className="feed-card-icon" aria-hidden="true">{shoppingItemEmoji(ingredient.name)}</span>
+                  <span>
+                    <strong>{ingredient.name}</strong>
+                    <small>{ingredient.menuName}</small>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {petTab === 'decor' && (
+          <div className="pet-inventory">
+            <div className="decor-grid">
+              {canClearDecor && (
+                <button
+                  className={`decor-card pet-decor-card clear-card ${isClearSelected ? 'selected' : ''}`}
+                  onClick={() => onClearDecor(decorTab)}
+                  type="button"
+                >
+                  <span className="decor-card-visual decor-card-empty" aria-hidden="true">
+                    <img alt="" src={getPetClearDecorIconImage()} />
+                  </span>
+                  <strong>미착용</strong>
+                </button>
+              )}
+              {visibleItems
+                .map((item, index) => ({
+                  item,
+                  unlocked: isDecorUnlocked(item, level, shoppingRewardUnlocked),
+                  selected: item.name === background || item.name === outfit || item.name === accessory,
+                  itemRoomImage: item.type === 'background' ? getRoomBackgroundImage(item.name) : undefined,
+                  itemDecorImage: item.type === 'accessory' ? getSudalAccessoryPreviewImage(item.name) : '',
+                  index,
+                }))
+                .sort((a, b) => Number(b.unlocked) - Number(a.unlocked) || a.index - b.index)
+                .map(({ item, unlocked, selected, itemRoomImage, itemDecorImage }) => (
+                  <button className={`decor-card pet-decor-card ${selected ? 'selected' : ''} ${unlocked ? '' : 'locked'}`} key={item.id} onClick={() => onSelectDecor(item)} type="button">
+                    <span
+                      className={itemRoomImage ? 'decor-card-visual room-thumbnail' : 'decor-card-visual'}
+                      style={itemRoomImage ? { backgroundImage: `url(${itemRoomImage})` } : undefined}
+                    >
+                      {!itemRoomImage && itemDecorImage && <img alt="" src={itemDecorImage} />}
+                      {!itemRoomImage && !itemDecorImage && decorIcon(item)}
+                    </span>
+                    <strong>{item.name}</strong>
+                    <small>{unlocked ? item.badge ?? '' : item.unlockByShopping ? '장보기 보상' : `Lv.${item.unlockLevel}`}</small>
+                  </button>
+                ))}
+            </div>
+          </div>
+        )}
+      </div>
+      </div>
     </section>
   )
 }
@@ -1819,6 +1868,34 @@ function decorIcon(item: DecorItem) {
   if (item.name.includes('군고구마')) return '🍠'
   if (item.name.includes('귤')) return '🍊'
   return '🛍️'
+}
+
+const petHomeAccessoryIds = new Set([
+  'straw-hat',
+  'acorn-beret',
+  'spring-blossom-hat',
+  'summer-shell-hat',
+  'autumn-maple-beret',
+  'winter-snow-knit-hat',
+  'grape-hat-piece',
+  'bell-necklace',
+  'sun-glasses',
+  'cherry-hairpin',
+  'berry-pin',
+  'pearl-blossom-necklace',
+  'shell-necklace',
+  'acorn-maple-necklace',
+  'snow-pearl-necklace',
+  'strawberry-flower-necklace',
+  'citrus-bead-necklace',
+  'moon-shell-necklace',
+  'grape-ribbon-necklace',
+])
+
+function isPetHomeVisibleDecorItem(item: DecorItem) {
+  if (item.type === 'background') return true
+  if (item.type === 'accessory') return petHomeAccessoryIds.has(item.id)
+  return false
 }
 
 function roomClass(background: string) {

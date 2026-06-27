@@ -1,3 +1,4 @@
+import homeInterior from '../components/sudal/rooms/home-interior.png'
 import bakeryKitchen from '../components/sudal/rooms/bakery-kitchen.png'
 import hotSpringVillage from '../components/sudal/rooms/hot-spring-village.png'
 import mapleTeaParty from '../components/sudal/rooms/maple-tea-party.png'
@@ -7,6 +8,7 @@ import starlightCamp from '../components/sudal/rooms/starlight-camp.png'
 import strawberryFarm from '../components/sudal/rooms/strawberry-farm.png'
 
 const roomBackgrounds: Record<string, string> = {
+  '아늑한 집안': homeInterior,
   '딸기 농장': strawberryFarm,
   '단풍 다과회': mapleTeaParty,
   '눈사람 정원': snowmanGarden,
