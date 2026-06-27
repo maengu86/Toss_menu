@@ -475,6 +475,13 @@ function App() {
               setShopStep('cart')
               setScreen('home')
             }}
+            onGoPetHome={() => {
+              setLastOrder(null)
+              setShoppingCatalogMenuIds([])
+              setAppliedCouponId('')
+              setShopStep('cart')
+              setScreen('petHome')
+            }}
             onRemoveMenu={removeMenu}
             onScrollActivity={handleScrollActivity}
             onSelectDelivery={setDeliveryOption}
@@ -769,6 +776,7 @@ function ShoppingScreen({
   onSetStep,
   onCompleteOrder,
   onGoHome,
+  onGoPetHome,
   onRemoveMenu,
   onScrollActivity,
 }: {
@@ -799,6 +807,7 @@ function ShoppingScreen({
   onSetStep: (step: ShopStep) => void
   onCompleteOrder: () => void
   onGoHome: () => void
+  onGoPetHome: () => void
   onRemoveMenu: (menuId: string) => void
   onScrollActivity: () => void
 }) {
@@ -1193,7 +1202,7 @@ function ShoppingScreen({
               </article>
             ))}
           </div>
-          <button className="toss-primary" onClick={onGoHome} type="button">밥주러 가기</button>
+          <button className="toss-primary" onClick={onGoPetHome} type="button">밥주러 가기</button>
           <button className="toss-secondary wide" onClick={onGoHome} type="button">제철홈으로 가기</button>
         </div>
       )}
