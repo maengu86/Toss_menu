@@ -128,9 +128,10 @@ export async function loadAppData(): Promise<AppData> {
     .sort((a, b) => compareByKnownOrder(a.id, b.id, decorItemOrder))
   const decorItems = mergeDecorItems(remoteDecorItems)
 
-  const menus = ((menusResult.data ?? []) as MenuRow[])
+  const remoteMenus = ((menusResult.data ?? []) as MenuRow[])
     .map(mapMenu)
     .sort((a, b) => compareByKnownOrder(a.id, b.id, menuOrder))
+  const menus = mergeMenus(remoteMenus)
 
   const seasonalIngredients = ((seasonalIngredientsResult.data ?? []) as SeasonalIngredientRow[])
     .map(mapSeasonalIngredient)
@@ -176,6 +177,49 @@ function mapMenu(row: MenuRow): Menu {
     seasonalIngredientIds: (row.menu_seasonal_ingredients ?? []).map((ingredient) => ingredient.ingredient_id),
     ingredients,
   }
+}
+
+function mergeMenus(remoteMenus: Menu[]) {
+  const remoteById = new Map(remoteMenus.map((menu) => [menu.id, menu]))
+  const fallbackIds = new Set(fallbackMenus.map((menu) => menu.id))
+  const knownMenus = fallbackMenus.map((fallbackMenu) => {
+    const remoteMenu = remoteById.get(fallbackMenu.id)
+    if (!remoteMenu) return fallbackMenu
+
+    const remoteIngredientsByName = new Map(remoteMenu.ingredients.map((ingredient) => [ingredient.name, ingredient]))
+    const fallbackIngredientNames = new Set(fallbackMenu.ingredients.map((ingredient) => ingredient.name))
+    const ingredients = [
+      ...fallbackMenu.ingredients.map((fallbackIngredient) => {
+        const remoteIngredient = remoteIngredientsByName.get(fallbackIngredient.name)
+        return remoteIngredient
+          ? {
+            ...fallbackIngredient,
+            ...remoteIngredient,
+            price: remoteIngredient.price > 0 ? remoteIngredient.price : fallbackIngredient.price,
+          }
+          : fallbackIngredient
+      }),
+      ...remoteMenu.ingredients.filter((ingredient) => !fallbackIngredientNames.has(ingredient.name)),
+    ]
+
+    return {
+      ...fallbackMenu,
+      ...remoteMenu,
+      ingredients,
+      seasonalIngredientIds: remoteMenu.seasonalIngredientIds?.length
+        ? remoteMenu.seasonalIngredientIds
+        : fallbackMenu.seasonalIngredientIds,
+      exp: ingredients.reduce((total, ingredient) => total + ingredient.price, 0),
+    }
+  })
+  const remoteOnlyMenus = remoteMenus
+    .filter((menu) => !fallbackIds.has(menu.id))
+    .map((menu) => ({
+      ...menu,
+      exp: menu.ingredients.reduce((total, ingredient) => total + ingredient.price, 0),
+    }))
+
+  return [...knownMenus, ...remoteOnlyMenus]
 }
 
 function mapDecorItem(row: DecorItemRow): DecorItem {

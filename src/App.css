@@ -16,8 +16,7 @@
   --soft-text: #725f4b;
   --orange: #f27f5b;
   --green: #75b84f;
-  --tab-bar-height: 88px;
-  --phone-vertical-offset: max(18px, calc((100svh - 920px) / 2));
+  --phone-bottom-offset: max(18px, calc((100svh - 920px) / 2));
 }
 
 .phone {
@@ -33,7 +32,7 @@
 }
 
 .screen {
-  height: calc(100% - var(--tab-bar-height));
+  height: calc(100% - 82px);
   overflow-y: auto;
   position: relative;
   padding: 26px 20px 110px;
@@ -107,7 +106,7 @@
   flex-direction: column;
   gap: 0;
   padding: 18px 0 96px;
-  min-height: calc(100% - var(--tab-bar-height));
+  min-height: calc(100% - 82px);
   background: #ffffff;
 }
 
@@ -1055,7 +1054,7 @@
 }
 
 .tab-bar {
-  height: var(--tab-bar-height);
+  height: 82px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
@@ -1064,7 +1063,7 @@
   right: 0;
   bottom: 0;
   left: 0;
-  padding: 10px 14px 20px;
+  padding: 9px 14px 15px;
   border-top: 1px solid rgba(102, 79, 45, 0.12);
   background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(16px);
@@ -1110,11 +1109,11 @@
 
 .tab-bar .tab-label {
   min-width: 42px;
-  min-height: 24px;
+  min-height: 22px;
   display: grid;
   place-items: center;
   border-radius: 0;
-  line-height: 1.2;
+  line-height: 1;
 }
 
 .tab-bar button.active {
@@ -1707,11 +1706,6 @@
   margin-bottom: 4px;
 }
 
-.toss-cart-spacer {
-  min-height: 148px;
-  flex: 1 1 auto;
-}
-
 .toss-cart-orderbar {
   box-sizing: border-box;
   display: grid;
@@ -1872,7 +1866,7 @@
 .empty-cart-pet > div {
   width: 100%;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 10px;
   margin-top: 10px;
 }
@@ -3142,18 +3136,30 @@
 
 .kakao-place-card {
   display: grid;
-  gap: 5px;
-  padding: 13px 14px;
-  border: 1px solid #edf0f3;
-  border-radius: 16px;
-  background: #fff;
-  box-shadow: 0 8px 22px rgba(25, 31, 40, 0.08);
+  gap: 6px;
+  padding: 15px 16px;
+  border: 1px solid #f2b093;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #fff7f1 0%, #fff1e8 100%);
+  box-shadow: 0 10px 24px rgba(242, 127, 91, 0.16);
+}
+
+.kakao-place-card .kakao-place-selected-label {
+  width: fit-content;
+  margin-bottom: 2px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: #c95531;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  background: #ffe1d3;
 }
 
 .kakao-place-card strong {
   overflow: hidden;
-  color: #191f28;
-  font-size: 15px;
+  color: #4d2d21;
+  font-size: 16px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -3176,10 +3182,14 @@
 
 .kakao-place-card a {
   width: fit-content;
+  margin-top: 3px;
+  padding: 6px 9px;
+  border-radius: 9px;
   color: var(--orange);
   font-size: 12px;
   font-weight: 900;
   text-decoration: none;
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .kakao-place-list {
@@ -3420,7 +3430,7 @@
 }
 
 .shopping-detail {
-  padding-bottom: calc(var(--tab-bar-height) + 120px);
+  padding-bottom: 92px;
 }
 
 .shopping-detail-visual {
@@ -3537,6 +3547,7 @@
   place-items: center;
   align-content: center;
   gap: 5px;
+  position: relative;
   padding: 8px 6px;
   border: 1px solid #e5e8eb;
   border-radius: 12px;
@@ -3561,6 +3572,26 @@
   font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.shopping-detail-ingredients button small {
+  color: #8b95a1;
+  font-size: 10px;
+}
+
+.shopping-detail-ingredients button > span {
+  width: 18px;
+  height: 18px;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 900;
+  background: var(--orange);
 }
 
 .shopping-detail-copy dl {
@@ -3630,35 +3661,108 @@
 
 .shopping-detail-actions {
   display: grid;
-  grid-template-columns: 48px 1fr 1.15fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   position: fixed;
   right: max(0px, calc((100vw - 430px) / 2));
-  bottom: calc(var(--phone-vertical-offset) + var(--tab-bar-height) + 18px);
+  bottom: calc(82px + var(--phone-bottom-offset));
   left: max(0px, calc((100vw - 430px) / 2));
   z-index: 140;
   width: min(100vw, 430px);
-  padding: 10px 14px 12px;
-  border-top: 1px solid #e5e8eb;
+  height: 64px;
+  padding: 6px 8px;
+  border: 0;
   background: #ffffff;
 }
 
 .shopping-detail-actions button {
+  width: 100%;
   height: 52px;
   border: 0;
-  border-radius: 15px;
+  border-radius: 14px;
   color: var(--orange);
+  font-size: 16px;
   font-weight: 900;
   background: #fff7f1;
 }
 
-.shopping-detail-actions button:first-child {
-  color: #8b95a1;
-  font-size: 28px;
-  background: #ffffff;
+.shopping-detail-actions button:last-child {
+  color: #ffffff;
+  background: var(--orange);
 }
 
-.shopping-detail-actions button:last-child {
+.shopping-detail-actions button:disabled {
+  color: #ffffff;
+  background: #d1d6db;
+}
+
+.cart-move-modal {
+  position: fixed;
+  z-index: 400;
+  top: var(--phone-bottom-offset);
+  right: max(0px, calc((100vw - 430px) / 2));
+  bottom: var(--phone-bottom-offset);
+  left: max(0px, calc((100vw - 430px) / 2));
+  width: min(100vw, 430px);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(25, 31, 40, 0.46);
+  backdrop-filter: blur(2px);
+}
+
+.cart-move-modal-card {
+  width: 100%;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 24px 20px 20px;
+  border-radius: 24px;
+  text-align: center;
+  background: #ffffff;
+  box-shadow: 0 20px 48px rgba(25, 31, 40, 0.22);
+}
+
+.cart-move-modal-card > span {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  font-size: 27px;
+  background: #fff7f1;
+}
+
+.cart-move-modal-card h2 {
+  margin: 4px 0 0;
+  color: #191f28;
+  font-size: 20px;
+}
+
+.cart-move-modal-card p {
+  margin: 0;
+  color: #8b95a1;
+  font-size: 13px;
+}
+
+.cart-move-modal-card > div {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.cart-move-modal-card button {
+  min-height: 50px;
+  border: 0;
+  border-radius: 14px;
+  color: #4e5968;
+  font-weight: 900;
+  background: #f2f4f6;
+}
+
+.cart-move-modal-card button:last-child {
   color: #ffffff;
   background: var(--orange);
 }
@@ -3685,7 +3789,7 @@
 }
 
 .shopping-cart-head + .toss-menu-list {
-  padding: 14px 14px 190px;
+  padding: 14px 14px 64px;
   background: #f2f4f6;
 }
 
@@ -3811,8 +3915,12 @@
 
 .toss-cart-orderbar {
   grid-template-columns: 1fr;
-  bottom: calc(var(--phone-vertical-offset) + var(--tab-bar-height) + 18px);
-  padding: 10px 16px 14px;
+  bottom: calc(82px + var(--phone-bottom-offset));
+  height: 64px;
+  padding: 0;
+  border-top: 0;
+  background: var(--orange);
+  box-shadow: none;
 }
 
 .toss-cart-orderbar > div {
@@ -3820,21 +3928,32 @@
 }
 
 .toss-cart-orderbar .toss-primary {
-  min-height: 56px;
-  border-radius: 17px;
+  width: 100%;
+  height: 64px;
+  min-height: 64px;
+  border-radius: 0;
   font-size: 16px;
   background: var(--orange);
 }
 
 .shopping-checkout {
-  padding-bottom: calc(var(--tab-bar-height) + 150px);
+  padding-bottom: 0;
   background: #f2f4f6;
+}
+
+.shopping-step-cart,
+.shopping-step-checkout {
+  padding-bottom: 0;
 }
 
 .shopping-checkout > section {
   margin-bottom: 10px;
   padding: 24px 20px;
   background: #ffffff;
+}
+
+.shopping-checkout > section:last-child {
+  margin-bottom: 0;
 }
 
 .shopping-address {
@@ -4045,34 +4164,30 @@
 }
 
 .shopping-paybar {
-  box-sizing: border-box;
-  position: fixed;
-  right: max(0px, calc((100vw - 430px) / 2));
-  bottom: calc(var(--phone-vertical-offset) + var(--tab-bar-height) + 18px);
-  left: max(0px, calc((100vw - 430px) / 2));
-  z-index: 140;
-  width: min(100vw, 430px);
-  padding: 10px 16px 12px;
-  background: #ffffff;
+  width: 100%;
+  height: auto;
+  margin-top: 20px;
+  padding: 0;
+  background: transparent;
 }
 
 .shopping-paybar button {
   display: block;
   width: 100%;
-  height: 58px;
+  height: 64px;
   border: 0;
-  border-radius: 17px;
+  border-radius: 16px;
   color: #ffffff;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 900;
   background: var(--orange);
 }
 
-.shopping-paybar small {
-  display: block;
-  margin-top: 7px;
+.shopping-payment-notice {
+  margin: 18px 0 0;
   color: #8b95a1;
-  font-size: 10px;
+  font-size: 11px;
+  line-height: 1.5;
   text-align: center;
 }
 
@@ -4498,7 +4613,7 @@
 
 @media (max-width: 520px) {
   :root {
-    --phone-vertical-offset: 0px;
+    --phone-bottom-offset: 0px;
   }
 
   .app-shell {
@@ -4781,4 +4896,3 @@
   border-radius: inherit;
   background: rgba(248, 249, 251, 0.22);
 }
-
