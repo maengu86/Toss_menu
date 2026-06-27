@@ -189,7 +189,6 @@ function App() {
   const [screen, setScreen] = useState<Screen>('home')
   const [selectedMenuIds, setSelectedMenuIds] = useState<string[]>([])
   const [shoppingCatalogMenuIds, setShoppingCatalogMenuIds] = useState<string[]>([])
-  const [selectedMenuOpen, setSelectedMenuOpen] = useState(false)
   const [selectedSeason, setSelectedSeason] = useState<SeasonKey>('summer')
   const [selectedSeasonalIngredientId, setSelectedSeasonalIngredientId] = useState(firstSummerIngredient.id)
   // 작업: 결제 완료된 식재료를 펫에게 먹일 수 있는 재고로 저장합니다.
@@ -235,12 +234,6 @@ function App() {
       isMounted = false
     }
   }, [])
-
-  const today = new Intl.DateTimeFormat('ko-KR', {
-    month: 'long',
-    day: 'numeric',
-    weekday: 'long',
-  }).format(new Date())
 
   const selectedMenus = menus.filter((menu) => selectedMenuIds.includes(menu.id))
   const cartMenus = selectedMenus
@@ -309,7 +302,6 @@ function App() {
       }
       setRemovedCartIngredientKeys((keys) => keys.filter((key) => !key.startsWith(`${menuId}:`)))
       const next = [...current, menuId]
-      setSelectedMenuOpen(false)
       return next
     })
   }
@@ -321,16 +313,6 @@ function App() {
     setCartQuantities((quantities) => Object.fromEntries(
       Object.entries(quantities).filter(([key]) => !key.startsWith(`${menuId}:`)),
     ))
-  }
-
-  function clearMenuSelection() {
-    setSelectedMenuIds([])
-    setCheckedIngredients([])
-    setRemovedCartIngredientKeys([])
-    setCartQuantities({})
-    setShoppingCatalogMenuIds([])
-    setAppliedCouponId('')
-    setSelectedMenuOpen(false)
   }
 
   function feedPet(ingredient: FeedIngredient) {
@@ -420,7 +402,6 @@ function App() {
     setAppliedCouponId('')
     setCheckedIngredients((current) => current.filter((key) => !orderedKeys.includes(key)))
     setSelectedMenuIds([])
-    setSelectedMenuOpen(false)
     setShoppingRewardUnlocked(true)
     setShopStep('complete')
   }
@@ -459,43 +440,25 @@ function App() {
       <main className={`phone ${isScrolling ? 'is-scrolling' : ''}`}>
         {screen === 'home' && (
           <HomeScreen
-            today={today}
             seasons={seasons}
             allSeasonalIngredients={seasonalIngredients}
             allMenus={menus}
             seasonIngredients={seasonIngredients}
             seasonalMenus={seasonalMenus}
-            checkedIngredients={checkedIngredients}
-            checkedPrice={checkedPrice}
             checkedTotal={checkedTotal}
             selectedSeason={selectedSeason}
             selectedSeasonalIngredientId={activeSeasonalIngredientId}
-            selectedMenuOpen={selectedMenuOpen}
-            selectedMenus={selectedMenus}
             selectedMenuIds={selectedMenuIds}
-            onRemoveMenu={removeMenu}
             onScrollActivity={handleScrollActivity}
             onSelectSeason={changeSeason}
             onSelectSeasonalIngredient={setSelectedSeasonalIngredientId}
-            onSetSelectedMenuOpen={setSelectedMenuOpen}
             onToggleMenu={toggleMenu}
-            onToggleProduct={toggleShoppingProduct}
             onOpenCart={() => {
               setShoppingCatalogMenuIds(selectedMenuIds)
               setShopStep('cart')
               setScreen('shopping')
             }}
             onOpenProfile={() => setProfileOpen(true)}
-            onCancelSelection={clearMenuSelection}
-            onStartShopping={() => {
-              if (selectedMenuIds.length === 0) {
-                showToast('먼저 메뉴를 골라주세요.')
-                return
-              }
-              setShoppingCatalogMenuIds(selectedMenuIds)
-              setShopStep('store')
-              setScreen('shopping')
-            }}
           />
         )}
 
@@ -585,57 +548,37 @@ function App() {
 }
 
 function HomeScreen({
-  today,
   seasons,
   allSeasonalIngredients,
   allMenus,
   seasonIngredients,
   seasonalMenus,
-  checkedIngredients,
-  checkedPrice,
   checkedTotal,
   selectedSeason,
   selectedSeasonalIngredientId,
-  selectedMenuOpen,
-  selectedMenus,
   selectedMenuIds,
-  onRemoveMenu,
   onScrollActivity,
   onSelectSeason,
   onSelectSeasonalIngredient,
-  onSetSelectedMenuOpen,
   onToggleMenu,
-  onToggleProduct,
   onOpenCart,
   onOpenProfile,
-  onCancelSelection,
-  onStartShopping,
 }: {
-  today: string
   seasons: { key: SeasonKey; label: string; accent: string }[]
   allSeasonalIngredients: SeasonalIngredient[]
   allMenus: Menu[]
   seasonIngredients: SeasonalIngredient[]
   seasonalMenus: Menu[]
-  checkedIngredients: string[]
-  checkedPrice: number
   checkedTotal: number
   selectedSeason: SeasonKey
   selectedSeasonalIngredientId: string
-  selectedMenuOpen: boolean
-  selectedMenus: Menu[]
   selectedMenuIds: string[]
-  onRemoveMenu: (id: string) => void
   onScrollActivity: () => void
   onSelectSeason: (season: SeasonKey) => void
   onSelectSeasonalIngredient: (id: string) => void
-  onSetSelectedMenuOpen: (open: boolean) => void
   onToggleMenu: (id: string) => void
-  onToggleProduct: (menuId: string, ingredientName: string) => void
   onOpenCart: () => void
   onOpenProfile: () => void
-  onCancelSelection: () => void
-  onStartShopping: () => void
 }) {
   const [purchaseTab, setPurchaseTab] = useState<'cook' | 'delivery'>('cook')
   const [locationPreview, setLocationPreview] = useState(false)
@@ -651,13 +594,6 @@ function HomeScreen({
       || menu.ingredients.some((ingredient) => ingredient.name.toLowerCase().includes(normalizedQuery))
     ))
     : []
-  const relatedProducts = selectedMenus
-    .flatMap((menu) => menu.ingredients.map((ingredient) => ({
-      key: ingredientKey(menu.id, ingredient.name),
-      menuId: menu.id,
-      ingredient,
-    })))
-    .filter((product, index, products) => products.findIndex((item) => item.ingredient.name === product.ingredient.name) === index)
   const selectedSeasonalIngredient = seasonIngredients.find((ingredient) => ingredient.id === selectedSeasonalIngredientId)
   const nearbyRestaurants = seasonalMenus.map((menu, index) => ({
     id: `${menu.id}-restaurant`,
@@ -732,7 +668,6 @@ function HomeScreen({
       ) : (
         <>
           <header className="top-header">
-            <p>{today}</p>
             <h1>제철음식 뭐가있을까?</h1>
           </header>
 
@@ -768,98 +703,44 @@ function HomeScreen({
         </>
       )}
 
-      <nav className="home-purchase-tabs" aria-label="메뉴 이용 방법">
-        <button className={purchaseTab === 'cook' ? 'active' : ''} onClick={() => setPurchaseTab('cook')} type="button">
-          <span aria-hidden="true">🍳</span>
-          요리
-        </button>
-        <button className={purchaseTab === 'delivery' ? 'active' : ''} onClick={() => setPurchaseTab('delivery')} type="button">
-          <span aria-hidden="true">🛵</span>
-          배달
-        </button>
-      </nav>
+      <section className="home-purchase-section">
+        <nav className="home-purchase-tabs" aria-label="메뉴 이용 방법">
+          <button className={purchaseTab === 'cook' ? 'active' : ''} onClick={() => setPurchaseTab('cook')} type="button">
+            <b>요리</b>
+          </button>
+          <button className={purchaseTab === 'delivery' ? 'active' : ''} onClick={() => setPurchaseTab('delivery')} type="button">
+            <b>배달</b>
+          </button>
+        </nav>
 
-      {purchaseTab === 'cook' && (
-        <>
-          <div className="section-title sub-directory-title">
-            <h2>메뉴 추천</h2>
-            <span>{selectedMenuIds.length}개 선택</span>
-          </div>
-
+        {purchaseTab === 'cook' && (
           <div className="menu-list nested-menu-list">
             {seasonalMenus.map((menu) => {
               const selected = selectedMenuIds.includes(menu.id)
               return (
                 <button
+                  aria-pressed={selected}
                   className={`menu-card ${selected ? 'selected' : ''}`}
                   key={menu.id}
                   onClick={() => onToggleMenu(menu.id)}
                   style={{ '--menu-color': menu.color } as CSSProperties}
                   type="button"
                 >
-                  <div>
-                    <strong>{menu.name}</strong>
-                  </div>
+                  <span className="menu-card-visual" aria-hidden="true">
+                    {shoppingItemEmoji(menu.ingredients[0]?.name ?? menu.name)}
+                  </span>
+                  <strong>{menu.name}</strong>
+                  <small>{menu.ingredients.slice(0, 2).map((ingredient) => ingredient.name).join(' · ')}</small>
                   <b>{getMenuExp(menu).toLocaleString('ko-KR')}xp</b>
+                  {selected && <span className="menu-card-selected" aria-hidden="true">✓</span>}
                 </button>
               )
             })}
           </div>
-        </>
-      )}
+        )}
 
-      {purchaseTab === 'cook' && relatedProducts.length > 0 && (
-        <section className="home-shopping-products">
-          <div className="shopping-section-title">
-            <div>
-              <span>선택한 메뉴의 재료</span>
-              <h2>같이 구매하면 좋은 상품</h2>
-            </div>
-            <small>{checkedTotal}개 선택</small>
-          </div>
-          <div className="shopping-product-grid">
-            {relatedProducts.map((product, index) => {
-              const selected = checkedIngredients.includes(product.key)
-              const discount = 38 + ((index * 7) % 48)
-              return (
-                <article className={`shopping-product-card tone-${index % 6} ${selected ? 'selected' : ''}`} key={product.key}>
-                  <button className="shopping-product-main" onClick={() => onToggleProduct(product.menuId, product.ingredient.name)} type="button">
-                    <span className="shopping-discount">{discount}% 특가</span>
-                    <em aria-hidden="true">{shoppingItemEmoji(product.ingredient.name)}</em>
-                    <strong>{product.ingredient.name}, {product.ingredient.quantity}</strong>
-                    <small>★ {(4.5 + (index % 4) * 0.1).toFixed(1)} · 무료배송</small>
-                    <p>{formatWon(product.ingredient.price)}</p>
-                  </button>
-                  <button
-                    className={`shopping-card-cart ${selected ? 'added' : ''}`}
-                    aria-label={`${product.ingredient.name} ${selected ? '선택 해제' : '선택'}`}
-                    onClick={() => onToggleProduct(product.menuId, product.ingredient.name)}
-                    type="button"
-                  >
-                    {selected ? '✅' : '🛒'}
-                  </button>
-                </article>
-              )
-            })}
-          </div>
-          {checkedTotal > 0 && (
-            <button className="home-shopping-cart-button" onClick={onOpenCart} type="button">
-              {checkedTotal}개 상품 장바구니 보기 · {formatWon(checkedPrice)}
-            </button>
-          )}
-        </section>
-      )}
-
-      {purchaseTab === 'cook' && relatedProducts.length === 0 && (
-        <div className="home-purchase-empty">
-          <span aria-hidden="true">🥕</span>
-          <strong>메뉴를 고르면 필요한 재료를 보여드려요</strong>
-          <p>제철 식재료와 간편하게 요리할 수 있는 밀키트를 함께 추천해요.</p>
-        </div>
-      )}
-
-      {purchaseTab === 'delivery' && (
-        <section className="home-delivery-panel">
+        {purchaseTab === 'delivery' && (
+          <section className="home-delivery-panel">
           <div className="home-delivery-heading">
             <div>
               <span>총 {seasonalMenus.length}개 요리 · 내 주변 제철 맛집</span>
@@ -877,47 +758,10 @@ function HomeScreen({
           <p className="home-location-status">
             {locationPreview ? '현재 위치를 허용하면 반경 5km 안의 결과를 우선 보여줘요.' : '카카오맵 키가 있으면 실제 장소 검색 결과가 지도에 표시돼요.'}
           </p>
+          </section>
+        )}
+      </section>
 
-          <div className="home-restaurant-list">
-            {nearbyRestaurants.map((restaurant) => (
-              <article key={restaurant.id}>
-                <em aria-hidden="true">{restaurant.emoji}</em>
-                <div>
-                  <span>배달 가능 · API 연동 전 예시</span>
-                  <strong>{restaurant.name}</strong>
-                  <p>{restaurant.menuName} · ⭐ {restaurant.rating} · {restaurant.distance}</p>
-                </div>
-                <button type="button">{restaurant.eta}</button>
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {purchaseTab === 'cook' && selectedMenus.length > 0 && (
-        <div className={`selected-menu-widget ${selectedMenuOpen ? 'open' : ''}`}>
-          {selectedMenuOpen && (
-            <>
-              <button className="selected-menu-backdrop" aria-label="선택 메뉴 닫기" onClick={() => onSetSelectedMenuOpen(false)} type="button" />
-              <div className="selected-menu-panel variant-2">
-                {selectedMenus.map((menu) => (
-                  <div className="selected-menu-chip" key={menu.id}>
-                    <span>{menu.name}</span>
-                    <button aria-label={`${menu.name} 삭제`} onClick={() => onRemoveMenu(menu.id)} type="button">×</button>
-                  </div>
-                ))}
-                <div className="selected-menu-actions">
-                  <button className="selected-menu-shop" onClick={onStartShopping} type="button">구매하기</button>
-                  <button className="selected-menu-cancel" onClick={onCancelSelection} type="button">취소</button>
-                </div>
-              </div>
-            </>
-          )}
-          <button className="selected-menu-fab" aria-label="선택 메뉴 열기" onClick={() => onSetSelectedMenuOpen(!selectedMenuOpen)} type="button">
-            <span>{selectedMenus.length}</span>
-          </button>
-        </div>
-      )}
     </section>
   )
 }
@@ -1122,8 +966,8 @@ function ShoppingScreen({
       {step === 'cart' && (
         <>
           <div className="shopping-cart-head">
-            <button aria-label="쇼핑 홈으로" onClick={() => onSetStep('store')} type="button">←</button>
-            <div><strong>장바구니 {checkedTotal}</strong><span>최근 본 상품</span><span>찜한 상품</span></div>
+            <button aria-label="제철홈으로" onClick={onGoHome} type="button">←</button>
+            <div><strong>장바구니 {checkedTotal}</strong></div>
           </div>
           <div className="toss-menu-list">
             {selectedMenus.length === 0 && (
