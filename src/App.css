@@ -2165,6 +2165,11 @@
   border-radius: 10px 10px 0 0;
 }
 
+.pet-room-stage.has-room-image {
+  background-position: center;
+  background-size: cover;
+}
+
 /* 작업: 고정된 캐릭터 배경 안에서 펫 SVG가 잘리지 않도록 위치와 크기를 고정합니다.
    개인 수정 가능: 캐릭터 크기는 width/max-height 값으로 조정해도 됩니다.
    적용 위치: 펫홈 상단 캐릭터 배경 영역. */
@@ -2447,6 +2452,14 @@
 
 .decor-card > span {
   background: #f7f8fa;
+}
+
+.decor-card > .room-thumbnail {
+  width: 56px;
+  height: 44px;
+  border-radius: 6px;
+  background-position: center;
+  background-size: cover;
 }
 
 .decor-card strong {

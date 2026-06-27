@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import './App.css'
 import PetAvatar from './components/PetAvatar'
+import { getRoomBackgroundImage } from './data/decorAssets'
 import { fallbackAppData, loadAppData } from './services/appDataService'
 import type { DecorItem, Ingredient, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
 
@@ -770,6 +771,7 @@ function PetHomeScreen({
   const nextLevelThreshold = getNextLevelThreshold(level)
   const levelProgress = getLevelProgress(exp, level)
   const expLabel = nextLevelThreshold ? `${exp}/${nextLevelThreshold.minExp} xp` : `${exp} xp`
+  const roomImage = getRoomBackgroundImage(background)
   const decorTabs: { id: 'all' | DecorItem['type']; label: string }[] = [
     { id: 'all', label: '전체' },
     { id: 'background', label: '방' },
@@ -779,7 +781,10 @@ function PetHomeScreen({
 
   return (
     <section className="screen pet-home-screen" onScroll={onScrollActivity}>
-      <div className={`pet-room-stage ${roomClass(background)}`}>
+      <div
+        className={`pet-room-stage ${roomClass(background)} ${roomImage ? 'has-room-image' : ''}`}
+        style={roomImage ? { backgroundImage: `url(${roomImage})` } : undefined}
+      >
         <button className="pet-share-button" aria-label="먹보 링크 복사" onClick={onShare} type="button">📤</button>
         <PetAvatar outfit={outfit} background={background} accessory={accessory} body="sudal" />
       </div>
@@ -846,11 +851,17 @@ function PetHomeScreen({
             {visibleItems.map((item) => {
               const unlocked = isDecorUnlocked(item, level, shoppingRewardUnlocked)
               const selected = item.name === background || item.name === outfit || item.name === accessory
+              const itemRoomImage = item.type === 'background' ? getRoomBackgroundImage(item.name) : undefined
               return (
                 <button className={`decor-card ${selected ? 'selected' : ''} ${unlocked ? '' : 'locked'}`} key={item.id} onClick={() => onSelectDecor(item)} type="button">
-                  <span>{decorIcon(item)}</span>
+                  <span
+                    className={itemRoomImage ? 'decor-card-visual room-thumbnail' : 'decor-card-visual'}
+                    style={itemRoomImage ? { backgroundImage: `url(${itemRoomImage})` } : undefined}
+                  >
+                    {!itemRoomImage && decorIcon(item)}
+                  </span>
                   <strong>{item.name}</strong>
-                  <small>{unlocked ? (selected ? '착용중' : '') : item.unlockByShopping ? '장보기 보상' : `Lv.${item.unlockLevel}`}</small>
+                  <small>{unlocked ? (selected ? '착용중' : item.badge ?? '') : item.unlockByShopping ? '장보기 보상' : `Lv.${item.unlockLevel}`}</small>
                 </button>
               )
             })}
