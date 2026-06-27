@@ -122,8 +122,16 @@
   align-content: end;
   overflow: hidden;
   background:
-    radial-gradient(circle at 74% 28%, rgba(255, 246, 205, 0.5) 0 6px, transparent 7px),
-    radial-gradient(circle at 22% 18%, rgba(255, 246, 205, 0.45) 0 5px, transparent 6px),
+    radial-gradient(
+      circle at 74% 28%,
+      rgba(255, 246, 205, 0.5) 0 6px,
+      transparent 7px
+    ),
+    radial-gradient(
+      circle at 22% 18%,
+      rgba(255, 246, 205, 0.45) 0 5px,
+      transparent 6px
+    ),
     linear-gradient(180deg, #f7c96f, #f5c464);
 }
 
@@ -133,39 +141,72 @@
 
 .pet-room-stage.picnic {
   background:
-    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.16) 0 14px, transparent 14px 28px),
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.16) 0 14px,
+      transparent 14px 28px
+    ),
     linear-gradient(180deg, #c7eec8, #f6d385);
 }
 
 .pet-room-stage.spring {
   background:
-    radial-gradient(circle at 18% 24%, rgba(255, 255, 255, 0.5) 0 18px, transparent 19px),
-    radial-gradient(circle at 74% 26%, rgba(255, 211, 220, 0.65) 0 22px, transparent 23px),
+    radial-gradient(
+      circle at 18% 24%,
+      rgba(255, 255, 255, 0.5) 0 18px,
+      transparent 19px
+    ),
+    radial-gradient(
+      circle at 74% 26%,
+      rgba(255, 211, 220, 0.65) 0 22px,
+      transparent 23px
+    ),
     linear-gradient(180deg, #ffd7df, #cce9b6);
 }
 
 .pet-room-stage.summer {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0) 0 58%, rgba(255, 255, 255, 0.18) 58% 64%, transparent 64%),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0) 0 58%,
+      rgba(255, 255, 255, 0.18) 58% 64%,
+      transparent 64%
+    ),
     linear-gradient(180deg, #9edcf9 0 54%, #f7d886 54% 100%);
 }
 
 .pet-room-stage.autumn {
   background:
-    radial-gradient(circle at 22% 32%, rgba(255, 230, 162, 0.5) 0 18px, transparent 19px),
+    radial-gradient(
+      circle at 22% 32%,
+      rgba(255, 230, 162, 0.5) 0 18px,
+      transparent 19px
+    ),
     linear-gradient(180deg, #e4b06c, #d98955);
 }
 
 .pet-room-stage.winter {
   background:
-    radial-gradient(circle at 24% 26%, rgba(255, 255, 255, 0.88) 0 18px, transparent 19px),
-    radial-gradient(circle at 70% 18%, rgba(255, 255, 255, 0.76) 0 26px, transparent 27px),
+    radial-gradient(
+      circle at 24% 26%,
+      rgba(255, 255, 255, 0.88) 0 18px,
+      transparent 19px
+    ),
+    radial-gradient(
+      circle at 70% 18%,
+      rgba(255, 255, 255, 0.76) 0 26px,
+      transparent 27px
+    ),
     linear-gradient(180deg, #bfe7ff, #edf6ff 54%, #dfefff);
 }
 
 .pet-room-stage.garden {
   background:
-    radial-gradient(circle at 20% 34%, rgba(255, 255, 255, 0.35), transparent 16%),
+    radial-gradient(
+      circle at 20% 34%,
+      rgba(255, 255, 255, 0.35),
+      transparent 16%
+    ),
     linear-gradient(180deg, #bfe8c8, #dbefb5);
 }
 
@@ -177,8 +218,16 @@
 
 .pet-room-stage.cloud {
   background:
-    radial-gradient(circle at 28% 30%, rgba(255, 255, 255, 0.8) 0 24px, transparent 25px),
-    radial-gradient(circle at 62% 23%, rgba(255, 255, 255, 0.72) 0 30px, transparent 31px),
+    radial-gradient(
+      circle at 28% 30%,
+      rgba(255, 255, 255, 0.8) 0 24px,
+      transparent 25px
+    ),
+    radial-gradient(
+      circle at 62% 23%,
+      rgba(255, 255, 255, 0.72) 0 30px,
+      transparent 31px
+    ),
     linear-gradient(180deg, #bfe4ff, #f3d78a);
 }
 
@@ -486,7 +535,11 @@
   color: #3e3327;
   background: #ffffff;
   scroll-snap-align: center;
-  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease, background 160ms ease;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease,
+    background 160ms ease;
 }
 
 .seasonal-tile.active {
@@ -755,7 +808,10 @@
   color: #3e3327;
   text-align: left;
   background: #ffffff;
-  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .menu-card.selected {
@@ -829,8 +885,7 @@
   margin: 10px 0 16px;
   border: 1px solid rgba(117, 184, 79, 0.24);
   border-radius: 26px;
-  background:
-    linear-gradient(#ffe5a8 0 42%, #dff1cf 42% 100%);
+  background: linear-gradient(#ffe5a8 0 42%, #dff1cf 42% 100%);
 }
 
 .pet-stage.picnic {
@@ -879,7 +934,11 @@
   bottom: 24px;
   border-radius: 30px;
   background:
-    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.75), transparent 18%),
+    radial-gradient(
+      circle at 30% 30%,
+      rgba(255, 255, 255, 0.75),
+      transparent 18%
+    ),
     linear-gradient(145deg, rgba(255, 138, 88, 0.3), rgba(117, 184, 79, 0.28));
   opacity: 0.52;
 }
@@ -951,7 +1010,6 @@
 .reward-card strong {
   color: #3f3a36;
 }
-
 
 .shopping-summary,
 .reward-card {
@@ -1064,7 +1122,9 @@
 .decor-card.selected {
   position: relative;
   background: #fffdf4;
-  box-shadow: inset 0 0 0 2px rgba(255, 178, 95, 0.55), 0 5px 12px rgba(116, 99, 38, 0.1);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 178, 95, 0.55),
+    0 5px 12px rgba(116, 99, 38, 0.1);
 }
 
 .decor-card.selected::before {
@@ -1482,7 +1542,10 @@
   color: #363a40;
   text-align: left;
   background: #ffffff;
-  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
 }
 
 .store-card.selected {
@@ -1670,7 +1733,7 @@
 .receipt-draft span,
 .receipt-draft dt,
 .receipt-draft dd {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 900;
 }
 
@@ -1888,7 +1951,7 @@
   gap: 10px;
   padding: 22px 16px;
   border-radius: 18px;
-  background: #fffdf8;
+  background: transparent;
 }
 
 .empty-cart-pet .pet-stage {
@@ -2191,7 +2254,6 @@
   outline-offset: 2px;
 }
 
-
 .pet-feed-panel {
   position: relative;
   z-index: 4;
@@ -2289,7 +2351,6 @@
   color: #6b7684;
   font-size: 11px;
 }
-
 
 .pet-feed-panel .compact-feed-list {
   margin-top: 12px;
@@ -2583,7 +2644,11 @@
   color: #191f28;
   text-align: left;
   background:
-    radial-gradient(circle at 78% 36%, rgba(255, 255, 255, 0.92), transparent 30%),
+    radial-gradient(
+      circle at 78% 36%,
+      rgba(255, 255, 255, 0.92),
+      transparent 30%
+    ),
     linear-gradient(135deg, #f8fafc, #edf2f5);
 }
 
@@ -2662,11 +2727,21 @@
   background: #f5f1eb;
 }
 
-.shopping-product-card.tone-1 { background: #f0f2eb; }
-.shopping-product-card.tone-2 { background: #eef2f4; }
-.shopping-product-card.tone-3 { background: #f4eee9; }
-.shopping-product-card.tone-4 { background: #eef4ed; }
-.shopping-product-card.tone-5 { background: #f6f0e8; }
+.shopping-product-card.tone-1 {
+  background: #f0f2eb;
+}
+.shopping-product-card.tone-2 {
+  background: #eef2f4;
+}
+.shopping-product-card.tone-3 {
+  background: #f4eee9;
+}
+.shopping-product-card.tone-4 {
+  background: #eef4ed;
+}
+.shopping-product-card.tone-5 {
+  background: #f6f0e8;
+}
 
 .shopping-product-main {
   width: 100%;
@@ -3146,8 +3221,18 @@
   border: 1px solid #dfe6dc;
   border-radius: 22px;
   background:
-    linear-gradient(30deg, transparent 0 44%, rgba(211, 225, 207, 0.7) 45% 48%, transparent 49%),
-    linear-gradient(150deg, transparent 0 60%, rgba(211, 225, 207, 0.62) 61% 65%, transparent 66%),
+    linear-gradient(
+      30deg,
+      transparent 0 44%,
+      rgba(211, 225, 207, 0.7) 45% 48%,
+      transparent 49%
+    ),
+    linear-gradient(
+      150deg,
+      transparent 0 60%,
+      rgba(211, 225, 207, 0.62) 61% 65%,
+      transparent 66%
+    ),
     #edf4ea;
 }
 
@@ -3370,9 +3455,18 @@
   box-shadow: 0 5px 12px rgba(25, 31, 40, 0.2);
 }
 
-.map-restaurant-pin.pin-1 { top: 42px; left: 72px; }
-.map-restaurant-pin.pin-2 { top: 58px; right: 66px; }
-.map-restaurant-pin.pin-3 { right: 118px; bottom: 34px; }
+.map-restaurant-pin.pin-1 {
+  top: 42px;
+  left: 72px;
+}
+.map-restaurant-pin.pin-2 {
+  top: 58px;
+  right: 66px;
+}
+.map-restaurant-pin.pin-3 {
+  right: 118px;
+  bottom: 34px;
+}
 
 .map-restaurant-pin {
   text-indent: 1px;
@@ -3714,7 +3808,7 @@
 
 .shopping-detail-actions button {
   width: 100%;
-  height: 52px;
+  height: 48px;
   border: 0;
   border-radius: 14px;
   color: var(--orange);
@@ -3832,7 +3926,7 @@
 }
 
 .shopping-cart-head + .toss-menu-list {
-  padding: 14px 14px 64px;
+  padding: 14px 14px 0;
   background: #f2f4f6;
 }
 
@@ -3987,6 +4081,12 @@
 .shopping-step-cart,
 .shopping-step-checkout {
   padding-bottom: 0;
+}
+
+.shopping-step-cart:has(.empty-cart-pet),
+.shopping-step-cart:has(.empty-cart-pet) .shopping-cart-head,
+.shopping-step-cart:has(.empty-cart-pet) .toss-menu-list {
+  background: #ffffff;
 }
 
 .shopping-checkout > section {
@@ -4950,7 +5050,7 @@
 }
 
 .pet-home-screen .pet-decor-card.locked::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
