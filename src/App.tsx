@@ -4,35 +4,174 @@ import './App.css'
 import PetAvatar from './components/PetAvatar'
 import { getRoomBackgroundImage } from './data/decorAssets'
 import { getSudalAccessoryPreviewImage } from './data/sudalDecorImages'
-import { getPetClearDecorIconImage, getPetDecorIconImage, getPetFeedIconImage, getPetShareIconImage, getPetUiIconImage } from './data/sudalPetIcons'
+import { getPetClearDecorIconImage, getPetDecorIconImage, getPetFeedIconImage, getPetFeedIconImageById, getPetShareIconImage, getPetUiIconImage } from './data/sudalPetIcons'
 import { fallbackAppData, loadAppData } from './services/appDataService'
 import type { DecorItem, Ingredient, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
 import petTabAccessoryIcon from './assets/sudal-tabs/accessory.png'
 import petTabAllIcon from './assets/sudal-tabs/all.png'
 import petTabFeedIcon from './assets/sudal-tabs/feed.png'
 import petTabRoomIcon from './assets/sudal-tabs/room.png'
+import applePorkSaladImage from './assets/sudal-icons/menus/apple-pork-salad.png'
+import burdockGimbapImage from './assets/sudal-icons/menus/burdock-gimbap.png'
+import cabbageHotpotImage from './assets/sudal-icons/menus/cabbage-hotpot.png'
+import chestnutRiceImage from './assets/sudal-icons/menus/chestnut-rice.png'
+import cockleBibimbapImage from './assets/sudal-icons/menus/cockle-bibimbap.png'
+import codStewImage from './assets/sudal-icons/menus/cod-stew.png'
+import cornBoiledImage from './assets/sudal-icons/menus/corn-boiled.png'
+import cornButterGrillImage from './assets/sudal-icons/menus/corn-butter-grill.png'
+import cornColdSoupImage from './assets/sudal-icons/menus/corn-cold-soup.png'
+import cornCreamSoupImage from './assets/sudal-icons/menus/corn-cream-soup.png'
+import cornGrillImage from './assets/sudal-icons/menus/corn-grill.png'
+import cornJeonImage from './assets/sudal-icons/menus/corn-jeon.png'
+import cornPotRiceImage from './assets/sudal-icons/menus/corn-pot-rice.png'
+import cornRiceImage from './assets/sudal-icons/menus/corn-rice.png'
+import cornSaladImage from './assets/sudal-icons/menus/corn-salad.png'
+import dallaeSoyNoodleImage from './assets/sudal-icons/menus/dallae-soy-noodle.png'
+import cucumberBibimNoodleImage from './assets/sudal-icons/menus/cucumber-bibim-noodle.png'
+import cucumberColdSoupImage from './assets/sudal-icons/menus/cucumber-cold-soup.png'
+import cucumberMuchimImage from './assets/sudal-icons/menus/cucumber-muchim.png'
+import cucumberOijiImage from './assets/sudal-icons/menus/cucumber-oiji.png'
+import cucumberPickleImage from './assets/sudal-icons/menus/cucumber-pickle.png'
+import cucumberSaengchaeImage from './assets/sudal-icons/menus/cucumber-saengchae.png'
+import cucumberSaladImage from './assets/sudal-icons/menus/cucumber-salad.png'
+import cucumberSobagiImage from './assets/sudal-icons/menus/cucumber-sobagi.png'
+import eelBaeksukImage from './assets/sudal-icons/menus/eel-baeksuk.png'
+import eelGrillImage from './assets/sudal-icons/menus/eel-grill.png'
+import eelJorimImage from './assets/sudal-icons/menus/eel-jorim.png'
+import eelRiceBowlImage from './assets/sudal-icons/menus/eel-rice-bowl.png'
+import eelSoupImage from './assets/sudal-icons/menus/eel-soup.png'
+import eggplantDonburiImage from './assets/sudal-icons/menus/eggplant-donburi.png'
+import eggplantFriedImage from './assets/sudal-icons/menus/eggplant-fried.png'
+import eggplantGrillImage from './assets/sudal-icons/menus/eggplant-grill.png'
+import eggplantJeonImage from './assets/sudal-icons/menus/eggplant-jeon.png'
+import eggplantNamulImage from './assets/sudal-icons/menus/eggplant-namul.png'
+import eggplantPastaImage from './assets/sudal-icons/menus/eggplant-pasta.png'
+import eggplantStirFryImage from './assets/sudal-icons/menus/eggplant-stir-fry.png'
+import figToastImage from './assets/sudal-icons/menus/fig-toast.png'
+import gizzardShadFriedImage from './assets/sudal-icons/menus/gizzard-shad-fried.png'
+import gizzardShadGrillImage from './assets/sudal-icons/menus/gizzard-shad-grill.png'
+import gizzardShadJorimImage from './assets/sudal-icons/menus/gizzard-shad-jorim.png'
+import gizzardShadSaladImage from './assets/sudal-icons/menus/gizzard-shad-salad.png'
+import gizzardShadSashimiImage from './assets/sudal-icons/menus/gizzard-shad-sashimi.png'
+import gizzardShadSsamImage from './assets/sudal-icons/menus/gizzard-shad-ssam.png'
+import grapeCheongImage from './assets/sudal-icons/menus/grape-cheong.png'
+import grapeJamImage from './assets/sudal-icons/menus/grape-jam.png'
+import grapeJuiceImage from './assets/sudal-icons/menus/grape-juice.png'
+import grapeSaladImage from './assets/sudal-icons/menus/grape-salad.png'
+import grapeYogurtBowlImage from './assets/sudal-icons/menus/grape-yogurt-bowl.png'
+import hallabongSaladImage from './assets/sudal-icons/menus/hallabong-salad.png'
+import jukkumiGreenOnionMuchimImage from './assets/sudal-icons/menus/jukkumi-green-onion-muchim.png'
+import jukkumiRamenJjamppongImage from './assets/sudal-icons/menus/jukkumi-ramen-jjamppong.png'
+import jukkumiRiceBowlImage from './assets/sudal-icons/menus/jukkumi-rice-bowl.png'
+import jukkumiShabuShabuImage from './assets/sudal-icons/menus/jukkumi-shabu-shabu.png'
+import jukkumiSkewerImage from './assets/sudal-icons/menus/jukkumi-skewer.png'
+import jukkumiStirFryImage from './assets/sudal-icons/menus/jukkumi-stir-fry.png'
+import jukkumiSukhoeImage from './assets/sudal-icons/menus/jukkumi-sukhoe.png'
+import lotusRootJorimImage from './assets/sudal-icons/menus/lotus-root-jorim.png'
+import mackerelGrillImage from './assets/sudal-icons/menus/mackerel-grill.png'
+import mandarinPuddingImage from './assets/sudal-icons/menus/mandarin-pudding.png'
+import melonAdeImage from './assets/sudal-icons/menus/melon-ade.png'
+import melonHwachaeImage from './assets/sudal-icons/menus/melon-hwachae.png'
+import melonJuiceImage from './assets/sudal-icons/menus/melon-juice.png'
+import melonMuchimImage from './assets/sudal-icons/menus/melon-muchim.png'
+import melonSaladImage from './assets/sudal-icons/menus/melon-salad.png'
+import melonSmoothieImage from './assets/sudal-icons/menus/melon-smoothie.png'
+import melonSobagiImage from './assets/sudal-icons/menus/melon-sobagi.png'
+import naengiSoybeanSoupImage from './assets/sudal-icons/menus/naengi-soybean-soup.png'
+import oysterGukbapImage from './assets/sudal-icons/menus/oyster-gukbap.png'
+import peachBingsuImage from './assets/sudal-icons/menus/peach-bingsu.png'
+import peachCakeImage from './assets/sudal-icons/menus/peach-cake.png'
+import peachCapreseImage from './assets/sudal-icons/menus/peach-caprese.png'
+import peachCheongImage from './assets/sudal-icons/menus/peach-cheong.png'
+import peachCompoteImage from './assets/sudal-icons/menus/peach-compote.png'
+import peachJorimImage from './assets/sudal-icons/menus/peach-jorim.png'
+import peachSaladImage from './assets/sudal-icons/menus/peach-salad.png'
+import peachSangriaImage from './assets/sudal-icons/menus/peach-sangria.png'
+import peachSmoothieImage from './assets/sudal-icons/menus/peach-smoothie.png'
+import peachTartImage from './assets/sudal-icons/menus/peach-tart.png'
+import peachYogurtBowlImage from './assets/sudal-icons/menus/peach-yogurt-bowl.png'
+import pearSaladImage from './assets/sudal-icons/menus/pear-salad.png'
+import pepperAnchovyStirFryImage from './assets/sudal-icons/menus/pepper-anchovy-stir-fry.png'
+import pepperBeefStirFryImage from './assets/sudal-icons/menus/pepper-beef-stir-fry.png'
+import pepperJangajjiImage from './assets/sudal-icons/menus/pepper-jangajji.png'
+import pepperJeonImage from './assets/sudal-icons/menus/pepper-jeon.png'
+import pepperMuchimImage from './assets/sudal-icons/menus/pepper-muchim.png'
+import persimmonSaladImage from './assets/sudal-icons/menus/persimmon-salad.png'
+import perillaJangajjiImage from './assets/sudal-icons/menus/perilla-jangajji.png'
+import perillaJeonImage from './assets/sudal-icons/menus/perilla-jeon.png'
+import perillaKimchiImage from './assets/sudal-icons/menus/perilla-kimchi.png'
+import perillaSsambapImage from './assets/sudal-icons/menus/perilla-ssambap.png'
+import plumAdeImage from './assets/sudal-icons/menus/plum-ade.png'
+import plumCheongImage from './assets/sudal-icons/menus/plum-cheong.png'
+import plumJamImage from './assets/sudal-icons/menus/plum-jam.png'
+import plumSaladImage from './assets/sudal-icons/menus/plum-salad.png'
+import plumTartImage from './assets/sudal-icons/menus/plum-tart.png'
+import potatoJeonImage from './assets/sudal-icons/menus/potato-jeon.png'
+import potatoJorimImage from './assets/sudal-icons/menus/potato-jorim.png'
+import potatoSaladImage from './assets/sudal-icons/menus/potato-salad.png'
+import potatoSoupImage from './assets/sudal-icons/menus/potato-soup.png'
+import potatoStirFryImage from './assets/sudal-icons/menus/potato-stir-fry.png'
+import pumpkinSoupImage from './assets/sudal-icons/menus/pumpkin-soup.png'
+import radishBeefSoupImage from './assets/sudal-icons/menus/radish-beef-soup.png'
+import shrimpSaltGrillImage from './assets/sudal-icons/menus/shrimp-salt-grill.png'
+import spinachNamulImage from './assets/sudal-icons/menus/spinach-namul.png'
+import springHerbBibimbapImage from './assets/sudal-icons/menus/spring-herb-bibimbap.png'
+import strawberryCakeTartImage from './assets/sudal-icons/menus/strawberry-cake-tart.png'
+import strawberrySaladImage from './assets/sudal-icons/menus/strawberry-salad.png'
+import strawberryToastImage from './assets/sudal-icons/menus/strawberry-toast.png'
+import mushroomBulgogiImage from './assets/sudal-icons/menus/mushroom-bulgogi.png'
+import mushroomFriedImage from './assets/sudal-icons/menus/mushroom-fried.png'
+import mushroomGangjeongImage from './assets/sudal-icons/menus/mushroom-gangjeong.png'
+import mushroomGrillImage from './assets/sudal-icons/menus/mushroom-grill.png'
+import mushroomHotpotImage from './assets/sudal-icons/menus/mushroom-hotpot.png'
+import mushroomJeonImage from './assets/sudal-icons/menus/mushroom-jeon.png'
+import mushroomJjigaeImage from './assets/sudal-icons/menus/mushroom-jjigae.png'
+import mushroomPastaImage from './assets/sudal-icons/menus/mushroom-pasta.png'
+import mushroomSoupImage from './assets/sudal-icons/menus/mushroom-soup.png'
+import mushroomStirFryImage from './assets/sudal-icons/menus/mushroom-stir-fry.png'
+import tomatoCapreseImage from './assets/sudal-icons/menus/tomato-caprese.png'
+import tomatoColdPastaImage from './assets/sudal-icons/menus/tomato-cold-pasta.png'
+import tomatoEggStirFryImage from './assets/sudal-icons/menus/tomato-egg-stir-fry.png'
+import tomatoMarinadeImage from './assets/sudal-icons/menus/tomato-marinade.png'
+import tomatoPastaImage from './assets/sudal-icons/menus/tomato-pasta.png'
+import tomatoPickleImage from './assets/sudal-icons/menus/tomato-pickle.png'
+import tomatoSaladImage from './assets/sudal-icons/menus/tomato-salad.png'
+import tomatoSoupImage from './assets/sudal-icons/menus/tomato-soup.png'
+import watermelonBingsuImage from './assets/sudal-icons/menus/watermelon-bingsu.png'
 import watermelonFetaSaladImage from './assets/sudal-icons/menus/watermelon-feta-salad.png'
+import watermelonHwachaeImage from './assets/sudal-icons/menus/watermelon-hwachae.png'
+import watermelonJuiceImage from './assets/sudal-icons/menus/watermelon-juice.png'
 import watermelonKongguksuImage from './assets/sudal-icons/menus/watermelon-kongguksu.png'
+import watermelonPunchImage from './assets/sudal-icons/menus/watermelon-punch.png'
+import watermelonSaladImage from './assets/sudal-icons/menus/watermelon-salad.png'
 import watermelonSherbetImage from './assets/sudal-icons/menus/watermelon-sherbet.png'
+import watermelonSmoothieImage from './assets/sudal-icons/menus/watermelon-smoothie.png'
+import sweetPotatoBreadImage from './assets/sudal-icons/menus/sweet-potato-bread.png'
+import sweetPotatoCheeseBakeImage from './assets/sudal-icons/menus/sweet-potato-cheese-bake.png'
+import sweetPotatoFriedImage from './assets/sudal-icons/menus/sweet-potato-fried.png'
+import sweetPotatoGratinImage from './assets/sudal-icons/menus/sweet-potato-gratin.png'
+import sweetPotatoLatteImage from './assets/sudal-icons/menus/sweet-potato-latte.png'
+import sweetPotatoMakgeolliImage from './assets/sudal-icons/menus/sweet-potato-makgeolli.png'
+import sweetPotatoMatangImage from './assets/sudal-icons/menus/sweet-potato-matang.png'
+import sweetPotatoRoastedImage from './assets/sudal-icons/menus/sweet-potato-roasted.png'
+import sweetPotatoSaladImage from './assets/sudal-icons/menus/sweet-potato-salad.png'
+import sweetPotatoSoupImage from './assets/sudal-icons/menus/sweet-potato-soup.png'
+import yellowtailSashimiBowlImage from './assets/sudal-icons/menus/yellowtail-sashimi-bowl.png'
+import youngRadishBibimbapImage from './assets/sudal-icons/menus/young-radish-bibimbap.png'
+import youngRadishDoenjangMuchimImage from './assets/sudal-icons/menus/young-radish-doenjang-muchim.png'
+import youngRadishKimchiImage from './assets/sudal-icons/menus/young-radish-kimchi.png'
+import youngRadishNoodleImage from './assets/sudal-icons/menus/young-radish-noodle.png'
+import zucchiniDoenjangJjigaeImage from './assets/sudal-icons/menus/zucchini-doenjang-jjigae.png'
+import zucchiniJeonImage from './assets/sudal-icons/menus/zucchini-jeon.png'
+import zucchiniJeongolImage from './assets/sudal-icons/menus/zucchini-jeongol.png'
+import zucchiniNamulImage from './assets/sudal-icons/menus/zucchini-namul.png'
+import zucchiniStirFryImage from './assets/sudal-icons/menus/zucchini-stir-fry.png'
 import discountCouponImage from '../discount-coupon-20.jpg'
 
-type KakaoLatLng = object
-type KakaoMapInstance = {
-  addControl: (control: object, position: unknown) => void
-  panTo: (position: KakaoLatLng) => void
-}
-import './App.css'
-import PetAvatar from './components/PetAvatar'
-import { getRoomBackgroundImage } from './data/decorAssets'
-import { getSudalAccessoryPreviewImage } from './data/sudalDecorImages'
-import { getPetClearDecorIconImage, getPetDecorIconImage, getPetFeedIconImage, getPetShareIconImage, getPetUiIconImage } from './data/sudalPetIcons'
-import { fallbackAppData, loadAppData } from './services/appDataService'
-import type { DecorItem, Ingredient, Menu, Screen, SeasonalIngredient, SeasonKey } from './types'
-import petTabAccessoryIcon from './assets/sudal-tabs/accessory.png'
-import petTabAllIcon from './assets/sudal-tabs/all.png'
-import petTabFeedIcon from './assets/sudal-tabs/feed.png'
-import petTabRoomIcon from './assets/sudal-tabs/room.png'
-import discountCouponImage from '../discount-coupon-20.jpg'
+const menuDishImages = import.meta.glob('./assets/sudal-icons/menus/*.png', {
+  eager: true,
+  import: 'default',
+}) as Record<string, string>
 
 type KakaoLatLng = object
 type KakaoMapInstance = {
@@ -630,17 +769,6 @@ function HomeScreen({
           <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('profile')} />
         </button>
       </header>
-            aria-label="제철 음식과 메뉴 검색"
-            onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="제철 음식과 메뉴 검색"
-            type="search"
-            value={searchQuery}
-          />
-        </label>
-        <button aria-label="마이페이지 열기" onClick={onOpenProfile} type="button">
-          <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('profile')} />
-        </button>
-      </header>
 
       {hasSearch ? (
         <section className="home-search-results">
@@ -658,9 +786,6 @@ function HomeScreen({
                 >
                   <em aria-hidden="true">{ingredientIconImage(ingredient.name)}</em>
                   <span><strong>{ingredient.name}</strong></span>
-                  <em aria-hidden="true">{ingredientIconImage(ingredient.name)}</em>
-                  <span><strong>{ingredient.name}</strong><small>{ingredient.season} 제철</small></span>
-                  <b>선택</b>
                 </button>
               ))}
               {ingredientSearchResults.length === 0 && <p>일치하는 제철 식재료가 없어요.</p>}
@@ -674,12 +799,8 @@ function HomeScreen({
                 const selected = selectedMenuIds.includes(menu.id)
                 return (
                   <button className={selected ? 'selected' : ''} key={menu.id} onClick={() => onOpenMenuDetail(menu.id)} type="button">
-                    <em aria-hidden="true">{ingredientIconImage(menu.ingredients[0]?.name ?? '')}</em>
+                    <em aria-hidden="true">{menuCardVisualImage(menu)}</em>
                     <span><strong>{menu.name}</strong></span>
-                  <button className={selected ? 'selected' : ''} key={menu.id} onClick={() => onOpenMenuDetail(menu.id)} type="button">
-                    <em aria-hidden="true">{ingredientIconImage(menu.ingredients[0]?.name ?? '')}</em>
-                    <span><strong>{menu.name}</strong><small>{menu.ingredients.map((ingredient) => ingredient.name).join(' · ')}</small></span>
-                    <b>{selected ? '열기' : '보기'}</b>
                   </button>
                 )
               })}
@@ -747,9 +868,6 @@ function HomeScreen({
                   <span className="menu-card-visual" aria-hidden="true">
                     {menuCardVisualImage(menu)}
                   </span>
-                  <span className="menu-card-visual" aria-hidden="true">
-                    {ingredientIconImage(menu.ingredients[0]?.name ?? menu.name)}
-                  </span>
                   <strong>{menu.name}</strong>
                   <b>{getMenuExp(menu).toLocaleString('ko-KR')}xp</b>
                   {selected && <span className="menu-card-selected" aria-hidden="true">✓</span>}
@@ -766,7 +884,7 @@ function HomeScreen({
               <span>총 {seasonalMenus.length}개 요리 · 내 주변 제철 맛집</span>
               <h2>{selectedSeasonalIngredient?.name ?? '제철 식재료'}로 만든 모든 요리</h2>
             </div>
-            <button onClick={() => setLocationPreview(true)} type="button">
+            <button aria-label="내 위치" onClick={() => setLocationPreview(true)} type="button">
               <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('location')} />
               내 위치
             </button>
@@ -895,13 +1013,17 @@ function ShoppingScreen({
       {step === 'detail' && detailMenu && (
         <div className="shopping-detail">
           <header className="shopping-sub-header">
-            <button aria-label="제철홈으로" onClick={onGoHome} type="button">←</button>
-            <div>
-              <button aria-label="장바구니" onClick={() => onSetStep('cart')} type="button"><img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('cart')} /></button>
-            </div>
+            <button aria-label="뒤로가기" className="shopping-back-button" onClick={onGoHome} type="button">
+              <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('back')} />
+            </button>
+            <button aria-label="장바구니" className="shopping-cart-button" onClick={() => onSetStep('cart')} type="button">
+              <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('cart')} />
+            </button>
           </header>
           <div className="shopping-detail-visual">
-            <em aria-hidden="true">{ingredientIconImage(detailMenu.ingredients[0]?.name ?? detailMenu.name)}</em>
+            <div className="shopping-detail-plate" aria-hidden="true">
+              {menuCardVisualImage(detailMenu)}
+            </div>
           </div>
           <div className="shopping-detail-copy">
             <h1>{detailMenu.name}</h1>
@@ -990,7 +1112,9 @@ function ShoppingScreen({
       {step === 'cart' && (
         <>
           <div className="shopping-cart-head">
-            <button aria-label="제철홈으로" onClick={onGoHome} type="button">←</button>
+            <button aria-label="뒤로가기" onClick={onGoHome} type="button">
+              <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('back')} />
+            </button>
             <div>{selectedMenus.length > 0 && <strong>장바구니 {checkedTotal}</strong>}</div>
           </div>
           <div className="toss-menu-list">
@@ -1116,7 +1240,9 @@ function ShoppingScreen({
       {step === 'checkout' && (
         <div className="shopping-checkout">
           <header className="shopping-sub-header">
-            <button aria-label="장바구니로" onClick={() => onSetStep('cart')} type="button">←</button>
+            <button aria-label="뒤로가기" onClick={() => onSetStep('cart')} type="button">
+              <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('back')} />
+            </button>
           </header>
           <section className="shopping-address">
             <h1><span>집</span>으로 배송</h1>
@@ -1474,13 +1600,185 @@ function ingredientIconImage(name: string, className = 'sudal-ingredient-icon') 
   return <img alt="" aria-hidden="true" className={iconClassName} src={shoppingItemIconImage(name)} />
 }
 
+function renderableMenuImage(image: string) {
+  const value = image.trim()
+  if (!value) return ''
+  return /^(https?:|data:|blob:|\/)/.test(value) ? value : ''
+}
+
+function menuDishImageById(id: string) {
+  return menuDishImages[`./assets/sudal-icons/menus/${id}.png`] ?? ''
+}
+
 function menuCardVisualImage(menu: Menu) {
-  const watermelonMenuImages: Record<string, string> = {
+  const menuImagesById: Record<string, string> = {
+    'spring-herb-bibimbap': springHerbBibimbapImage,
+    'dallae-soy-noodle': dallaeSoyNoodleImage,
+    'naengi-soybean-soup': naengiSoybeanSoupImage,
+    'strawberry-toast': strawberryToastImage,
+    'strawberry-salad': strawberrySaladImage,
+    'strawberry-cake-tart': strawberryCakeTartImage,
+    'strawberry-cake': strawberryCakeTartImage,
+    'strawberry-tart': strawberryCakeTartImage,
+    'jukkumi-green-onion-muchim': jukkumiGreenOnionMuchimImage,
+    'jukkumi-ramen-jjamppong': jukkumiRamenJjamppongImage,
+    'jukkumi-rice-bowl': jukkumiRiceBowlImage,
+    'jukkumi-shabu-shabu': jukkumiShabuShabuImage,
+    'jukkumi-skewer': jukkumiSkewerImage,
+    'jukkumi-stir-fry': jukkumiStirFryImage,
+    'jukkumi-sukhoe': jukkumiSukhoeImage,
+    'pear-salad': pearSaladImage,
+    'chestnut-rice': chestnutRiceImage,
+    'pumpkin-soup': pumpkinSoupImage,
+    'apple-pork-salad': applePorkSaladImage,
+    'shrimp-salt-grill': shrimpSaltGrillImage,
+    'persimmon-salad': persimmonSaladImage,
+    'fig-toast': figToastImage,
+    'mackerel-grill': mackerelGrillImage,
+    'oyster-gukbap': oysterGukbapImage,
+    'radish-beef-soup': radishBeefSoupImage,
+    'cabbage-hotpot': cabbageHotpotImage,
+    'mandarin-pudding': mandarinPuddingImage,
+    'cod-stew': codStewImage,
+    'spinach-namul': spinachNamulImage,
+    'cockle-bibimbap': cockleBibimbapImage,
+    'lotus-root-jorim': lotusRootJorimImage,
+    'burdock-gimbap': burdockGimbapImage,
+    'hallabong-salad': hallabongSaladImage,
+    'yellowtail-sashimi-bowl': yellowtailSashimiBowlImage,
+    'corn-pot-rice': cornPotRiceImage,
+    'corn-cold-soup': cornColdSoupImage,
+    'corn-boiled': cornBoiledImage,
+    'corn-grill': cornGrillImage,
+    'corn-butter-grill': cornButterGrillImage,
+    'corn-cream-soup': cornCreamSoupImage,
+    'corn-jeon': cornJeonImage,
+    'corn-rice': cornRiceImage,
+    'corn-salad': cornSaladImage,
+    'cucumber-cold-soup': cucumberColdSoupImage,
+    'cucumber-bibim-noodle': cucumberBibimNoodleImage,
+    'cucumber-oiji': cucumberOijiImage,
+    'cucumber-muchim': cucumberMuchimImage,
+    'cucumber-pickle': cucumberPickleImage,
+    'cucumber-saengchae': cucumberSaengchaeImage,
+    'cucumber-sobagi': cucumberSobagiImage,
+    'cucumber-salad': cucumberSaladImage,
+    'eel-rice-bowl': eelRiceBowlImage,
+    'eel-baeksuk': eelBaeksukImage,
+    'eel-grill': eelGrillImage,
+    'eel-jorim': eelJorimImage,
+    'eel-soup': eelSoupImage,
+    'eggplant-donburi': eggplantDonburiImage,
+    'eggplant-grill': eggplantGrillImage,
+    'eggplant-namul': eggplantNamulImage,
+    'eggplant-jeon': eggplantJeonImage,
+    'eggplant-pasta': eggplantPastaImage,
+    'eggplant-stir-fry': eggplantStirFryImage,
+    'eggplant-fried': eggplantFriedImage,
+    'gizzard-shad-salad': gizzardShadSaladImage,
+    'gizzard-shad-grill': gizzardShadGrillImage,
+    'gizzard-shad-jorim': gizzardShadJorimImage,
+    'gizzard-shad-sashimi': gizzardShadSashimiImage,
+    'gizzard-shad-ssam': gizzardShadSsamImage,
+    'gizzard-shad-fried': gizzardShadFriedImage,
+    'grape-yogurt': grapeYogurtBowlImage,
+    'grape-cheong': grapeCheongImage,
+    'grape-jam': grapeJamImage,
+    'grape-juice': grapeJuiceImage,
+    'grape-salad': grapeSaladImage,
+    'melon-smoothie': melonSmoothieImage,
+    'melon-juice': melonJuiceImage,
+    'melon-ade': melonAdeImage,
+    'melon-hwachae': melonHwachaeImage,
+    'melon-muchim': melonMuchimImage,
+    'melon-salad': melonSaladImage,
+    'melon-sobagi': melonSobagiImage,
+    'mushroom-hotpot': mushroomHotpotImage,
+    'mushroom-bulgogi': mushroomBulgogiImage,
+    'mushroom-gangjeong': mushroomGangjeongImage,
+    'mushroom-grill': mushroomGrillImage,
+    'mushroom-jeon': mushroomJeonImage,
+    'mushroom-pasta': mushroomPastaImage,
+    'mushroom-soup': mushroomSoupImage,
+    'mushroom-jjigae': mushroomJjigaeImage,
+    'mushroom-stir-fry': mushroomStirFryImage,
+    'mushroom-fried': mushroomFriedImage,
+    'pepper-jeon': pepperJeonImage,
+    'pepper-anchovy-stir-fry': pepperAnchovyStirFryImage,
+    'pepper-beef-stir-fry': pepperBeefStirFryImage,
+    'pepper-muchim': pepperMuchimImage,
+    'pepper-jangajji': pepperJangajjiImage,
+    'perilla-leaf-rice': perillaSsambapImage,
+    'perilla-jeon': perillaJeonImage,
+    'perilla-kimchi': perillaKimchiImage,
+    'perilla-jangajji': perillaJangajjiImage,
+    'plum-ade': plumAdeImage,
+    'plum-cheong': plumCheongImage,
+    'plum-jam': plumJamImage,
+    'plum-salad': plumSaladImage,
+    'plum-tart': plumTartImage,
+    'potato-salad': potatoSaladImage,
+    'potato-jeon': potatoJeonImage,
+    'potato-jorim': potatoJorimImage,
+    'potato-soup': potatoSoupImage,
+    'potato-stir-fry': potatoStirFryImage,
+    'peach-caprese': peachCapreseImage,
+    'peach-yogurt-bowl': peachYogurtBowlImage,
+    'peach-bingsu': peachBingsuImage,
+    'peach-cheong': peachCheongImage,
+    'peach-compote': peachCompoteImage,
+    'peach-jorim': peachJorimImage,
+    'peach-salad': peachSaladImage,
+    'peach-sangria': peachSangriaImage,
+    'peach-smoothie': peachSmoothieImage,
+    'peach-tart': peachTartImage,
+    'peach-cake': peachCakeImage,
+    'tomato-cold-pasta': tomatoColdPastaImage,
+    'tomato-marinade': tomatoMarinadeImage,
+    'tomato-pickle': tomatoPickleImage,
+    'tomato-caprese': tomatoCapreseImage,
+    'tomato-egg-stir-fry': tomatoEggStirFryImage,
+    'tomato-salad': tomatoSaladImage,
+    'tomato-pasta': tomatoPastaImage,
+    'tomato-soup': tomatoSoupImage,
     'watermelon-kongguksu': watermelonKongguksuImage,
     'watermelon-feta-salad': watermelonFetaSaladImage,
+    'watermelon-bingsu': watermelonBingsuImage,
+    'watermelon-salad': watermelonSaladImage,
+    'watermelon-hwachae': watermelonHwachaeImage,
+    'watermelon-punch': watermelonPunchImage,
+    'watermelon-juice': watermelonJuiceImage,
+    'watermelon-smoothie': watermelonSmoothieImage,
     'watermelon-sherbet': watermelonSherbetImage,
+    'sweet-potato-gratin': sweetPotatoGratinImage,
+    'sweet-potato-roasted': sweetPotatoRoastedImage,
+    'sweet-potato-bread': sweetPotatoBreadImage,
+    'sweet-potato-cheese-bake': sweetPotatoCheeseBakeImage,
+    'sweet-potato-makgeolli': sweetPotatoMakgeolliImage,
+    'sweet-potato-matang': sweetPotatoMatangImage,
+    'sweet-potato-salad': sweetPotatoSaladImage,
+    'sweet-potato-soup': sweetPotatoSoupImage,
+    'sweet-potato-latte': sweetPotatoLatteImage,
+    'sweet-potato-fried': sweetPotatoFriedImage,
+    'young-radish-noodle': youngRadishNoodleImage,
+    'young-radish-bibimbap': youngRadishBibimbapImage,
+    'young-radish-doenjang-muchim': youngRadishDoenjangMuchimImage,
+    'young-radish-kimchi': youngRadishKimchiImage,
+    'zucchini-pancake': zucchiniJeonImage,
+    'zucchini-doenjang-jjigae': zucchiniDoenjangJjigaeImage,
+    'zucchini-jeongol': zucchiniJeongolImage,
+    'zucchini-namul': zucchiniNamulImage,
+    'zucchini-stir-fry': zucchiniStirFryImage,
   }
-  const menuImage = watermelonMenuImages[menu.id]
+  const menuImage = menuImagesById[menu.id]
+    || menuDishImageById(menu.id)
+    || renderableMenuImage(menu.image)
+    || tomatoMenuImageByName(menu)
+    || cornMenuImageByName(menu)
+    || peachMenuImageByName(menu)
+    || watermelonMenuImageByName(menu)
+    || yellowtailMenuImageByName(menu)
+    || menu.seasonalIngredientIds?.map((id) => getPetFeedIconImageById(id)).find(Boolean)
 
   if (menuImage) {
     return <img alt="" aria-hidden="true" className="sudal-menu-dish-icon" src={menuImage} />
@@ -1489,13 +1787,87 @@ function menuCardVisualImage(menu: Menu) {
   return ingredientIconImage(menu.ingredients[0]?.name ?? menu.name)
 }
 
-function MyPage({
-function shoppingItemIconImage(name: string) {
-  return getPetFeedIconImage(name) || getPetUiIconImage('bag')
+function cornMenuImageByName(menu: Menu) {
+  const name = menu.name
+  const isCornMenu = menu.seasonalIngredientIds?.includes('corn') || name.includes('옥수수')
+  if (!isCornMenu) return ''
+
+  if (name.includes('솥밥')) return cornPotRiceImage
+  if (name.includes('냉수프') || name.includes('냉스프')) return cornColdSoupImage
+  if (name.includes('삶기')) return cornBoiledImage
+  if (name.includes('버터')) return cornButterGrillImage
+  if (name.includes('크림')) return cornCreamSoupImage
+  if (name.includes('구이')) return cornGrillImage
+  if (name.includes('전')) return cornJeonImage
+  if (name.includes('샐러드')) return cornSaladImage
+  if (name.includes('밥')) return cornRiceImage
+  return ''
 }
 
-function ingredientIconImage(name: string, className = 'sudal-ingredient-icon') {
-  return <img alt="" aria-hidden="true" className={className} src={shoppingItemIconImage(name)} />
+function tomatoMenuImageByName(menu: Menu) {
+  const name = menu.name
+  const isTomatoMenu = menu.seasonalIngredientIds?.includes('tomato') || name.includes('토마토')
+  if (!isTomatoMenu) return ''
+
+  if (name.includes('냉파스타')) return tomatoColdPastaImage
+  if (name.includes('마리네')) return tomatoMarinadeImage
+  if (name.includes('절임')) return tomatoPickleImage
+  if (name.includes('카프레제')) return tomatoCapreseImage
+  if (name.includes('달걀') || name.includes('계란')) return tomatoEggStirFryImage
+  if (name.includes('샐러드')) return tomatoSaladImage
+  if (name.includes('파스타')) return tomatoPastaImage
+  if (name.includes('수프') || name.includes('스프')) return tomatoSoupImage
+  return ''
+}
+
+function peachMenuImageByName(menu: Menu) {
+  const name = menu.name
+  const isPeachMenu = menu.seasonalIngredientIds?.includes('peach') || name.includes('복숭아')
+  if (!isPeachMenu) return ''
+
+  if (name.includes('카프레제')) return peachCapreseImage
+  if (name.includes('요거트')) return peachYogurtBowlImage
+  if (name.includes('빙수')) return peachBingsuImage
+  if (name.includes('청')) return peachCheongImage
+  if (name.includes('콤포트')) return peachCompoteImage
+  if (name.includes('조림')) return peachJorimImage
+  if (name.includes('샐러드')) return peachSaladImage
+  if (name.includes('상그리아')) return peachSangriaImage
+  if (name.includes('스무디')) return peachSmoothieImage
+  if (name.includes('타르트')) return peachTartImage
+  if (name.includes('케이크') || name === '케이크') return peachCakeImage
+  return ''
+}
+
+function watermelonMenuImageByName(menu: Menu) {
+  const name = menu.name
+  const isWatermelonMenu = menu.seasonalIngredientIds?.includes('watermelon') || name.includes('수박')
+  if (!isWatermelonMenu) return ''
+
+  if (name.includes('콩국수')) return watermelonKongguksuImage
+  if (name.includes('페타')) return watermelonFetaSaladImage
+  if (name.includes('빙수')) return watermelonBingsuImage
+  if (name.includes('샐러드')) return watermelonSaladImage
+  if (name.includes('화채')) return watermelonHwachaeImage
+  if (name.includes('펀치')) return watermelonPunchImage
+  if (name.includes('주스')) return watermelonJuiceImage
+  if (name.includes('스무디')) return watermelonSmoothieImage
+  if (name.includes('셔벗') || name.includes('샤베트') || name.includes('소르베')) return watermelonSherbetImage
+  return ''
+}
+
+function yellowtailMenuImageByName(menu: Menu) {
+  const name = menu.name
+  const isYellowtailMenu = menu.seasonalIngredientIds?.includes('yellowtail') || name.includes('방어')
+  if (!isYellowtailMenu) return ''
+
+  if (name.includes('덮밥')) return menuDishImageById('yellowtail-sashimi-bowl')
+  if (name.includes('구이')) return menuDishImageById('yellowtail-grill')
+  if (name.includes('조림')) return menuDishImageById('yellowtail-jorim')
+  if (name.includes('회')) return menuDishImageById('yellowtail-sashimi')
+  if (name.includes('매운탕')) return menuDishImageById('yellowtail-spicy-fish-stew')
+  if (name.includes('초밥')) return menuDishImageById('yellowtail-sushi')
+  return ''
 }
 
 function MyPage({
@@ -1531,7 +1903,9 @@ function MyPage({
   return (
     <section className="my-page">
       <header className="my-page-header">
-        <button aria-label={page === 'overview' ? '마이페이지 닫기' : '마이페이지로 돌아가기'} onClick={goBack} type="button">←</button>
+        <button aria-label={page === 'overview' ? '마이페이지 닫기' : '마이페이지로 돌아가기'} onClick={goBack} type="button">
+          <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('back')} />
+        </button>
         <h1>{pageTitle}</h1>
         <span />
       </header>
@@ -1563,8 +1937,6 @@ function MyPage({
 
             {orderHistory.length === 0 && (
               <div className="my-order-empty">
-                <strong>아직 주문 내역이 없어요</strong>
-                <span aria-hidden="true"><img alt="" className="sudal-modal-icon" src={getPetUiIconImage('receipt')} /></span>
                 <strong>아직 주문 내역이 없어요</strong>
                 <p>상품을 구매하면 주문 내역이 여기에 쌓여요.</p>
               </div>

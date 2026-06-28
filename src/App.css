@@ -1,4 +1,4 @@
-﻿.app-shell {
+.app-shell {
   min-height: 100svh;
   display: grid;
   place-items: center;
@@ -9,12 +9,14 @@
 :root {
   --cream: #ffffff;
   --surface: #ffffff;
-  --surface-strong: #fff7f1;
+  --surface-strong: #fff8f1;
   --line: #efd8b4;
   --ink: #3f3a36;
   --muted: #8d765e;
   --soft-text: #725f4b;
-  --orange: #f27f5b;
+  --orange: #e7b88f;
+  --orange-strong: #ad704b;
+  --orange-soft: #fae7d8;
   --green: #75b84f;
   --phone-bottom-offset: max(18px, calc((100svh - 920px) / 2));
 }
@@ -401,7 +403,7 @@
 }
 
 .season-panel-index {
-  --season-index-height: 184px;
+  --season-index-height: 232px;
   display: grid;
   grid-template-columns: 90px minmax(0, 1fr);
   align-items: stretch;
@@ -2133,10 +2135,10 @@
 }
 
 .pet-home-screen {
-  --pet-apricot: #e8874a;
-  --pet-apricot-strong: #ad5226;
-  --pet-apricot-soft: #ffe7d3;
-  --pet-apricot-surface: #fff8f1;
+  --pet-apricot: #e7b88f;
+  --pet-apricot-strong: #ad704b;
+  --pet-apricot-soft: #fae7d8;
+  --pet-apricot-surface: #fff9f4;
   padding: 0 0 96px;
   background: #ffffff;
 }
@@ -2244,7 +2246,7 @@
 
 .pet-action-tabs button.active b {
   color: #5a301c;
-  background: rgba(232, 135, 74, 0.6);
+  background: color-mix(in srgb, var(--pet-apricot) 55%, #ffffff);
 }
 
 .pet-action-tabs button:focus {
@@ -2869,6 +2871,9 @@
 .home-purchase-section {
   margin-top: 20px;
   padding: 6px 10px 10px;
+  position: relative;
+  z-index: 6;
+  overflow: visible;
   border: 1px solid #e5e8eb;
   border-radius: 22px;
   background: #ffffff;
@@ -2948,7 +2953,18 @@
   border-radius: 13px;
   font-size: 28px;
   font-style: normal;
-  background: #f7f8fa;
+  background: #fff9f4;
+}
+
+.home-search-result-list em img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+
+.home-search-result-list em .sudal-menu-dish-icon {
+  width: 44px;
+  height: 44px;
 }
 
 .home-search-result-list button > span {
@@ -3010,17 +3026,18 @@
 }
 
 .home-purchase-tabs button b {
-  padding: 6px 24px;
+  padding: 5px 12px;
   border-radius: 0;
   color: #49372f;
   font-size: 13px;
+  font-weight: 500;
   line-height: 1.1;
   background: transparent;
 }
 
 .home-purchase-tabs button.active b {
   color: #5a301c;
-  background: transparent;
+  background: rgba(231, 184, 143, 0.3);
 }
 
 .home-purchase-tabs button:focus {
@@ -3037,9 +3054,43 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px 8px;
   margin-top: 6px;
-  padding: 0;
+  max-height: min(430px, calc(100svh - 456px));
+  min-height: 0;
+  padding: 0 4px 2px 0;
+  position: relative;
+  z-index: 7;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-color: transparent transparent;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
   border: 0;
   border-radius: 0;
+  background: transparent;
+}
+
+.nested-menu-list::-webkit-scrollbar,
+.home-delivery-panel::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.nested-menu-list::-webkit-scrollbar-track,
+.nested-menu-list::-webkit-scrollbar-button,
+.nested-menu-list::-webkit-scrollbar-corner,
+.home-delivery-panel::-webkit-scrollbar-track,
+.home-delivery-panel::-webkit-scrollbar-button,
+.home-delivery-panel::-webkit-scrollbar-corner {
+  width: 0;
+  height: 0;
+  display: none;
+  background: transparent;
+}
+
+.nested-menu-list::-webkit-scrollbar-thumb,
+.home-delivery-panel::-webkit-scrollbar-thumb {
   background: transparent;
 }
 
@@ -3063,9 +3114,9 @@
 }
 
 .nested-menu-list .menu-card.selected {
-  border-color: #e8874a;
+  border-color: var(--orange);
   background: #fff8f2;
-  box-shadow: 0 8px 18px rgba(232, 135, 74, 0.14);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--orange) 18%, transparent);
   transform: translateY(-1px);
 }
 
@@ -3076,37 +3127,14 @@
   place-items: center;
   border-radius: 18px;
   font-size: 30px;
-  background: color-mix(in srgb, var(--menu-color) 18%, #ffffff);
+  background: transparent;
 }
 
 .sudal-menu-dish-icon {
-  width: 52px;
-  height: 52px;
+  width: 58px;
+  height: 58px;
   display: block;
   object-fit: contain;
-}
-
-.nested-menu-list .menu-card strong {
-  width: 100%;
-  min-width: 0;
-  display: block;
-  overflow: hidden;
-  margin: 0;
-  color: #333d4b;
-  font-size: 13px;
-  line-height: 20px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  word-break: keep-all;
-}
-
-.nested-menu-list .menu-card b {
-  color: #5f9f68;
-  font-size: 11px;
-  line-height: 16px;
-}
-  font-size: 30px;
-  background: color-mix(in srgb, var(--menu-color) 18%, #ffffff);
 }
 
 .nested-menu-list .menu-card strong {
@@ -3141,7 +3169,7 @@
   color: #ffffff;
   font-size: 12px;
   font-weight: 900;
-  background: #e8874a;
+  background: var(--orange);
 }
 
 .home-purchase-empty {
@@ -3223,7 +3251,17 @@
 
 .home-delivery-panel {
   margin: 12px 0 0;
-  padding: 12px 0 4px;
+  max-height: min(430px, calc(100svh - 456px));
+  min-height: 0;
+  padding: 12px 4px 4px 0;
+  position: relative;
+  z-index: 7;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-color: transparent transparent;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .home-delivery-heading {
@@ -3252,15 +3290,21 @@
 }
 
 .home-delivery-heading button {
-  min-width: max-content;
-  min-height: 38px;
-  padding: 0 11px;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  padding: 0;
   border: 0;
-  border-radius: 11px;
+  border-radius: 999px;
   color: var(--orange);
-  font-size: 12px;
-  font-weight: 900;
-  background: #fff7f1;
+  font-size: 0;
+  background: transparent;
+}
+
+.home-delivery-heading button .sudal-ui-icon {
+  width: 25px;
+  height: 25px;
 }
 
 .home-map-preview {
@@ -3880,6 +3924,162 @@
 .shopping-detail-actions button:disabled {
   color: #ffffff;
   background: #d1d6db;
+}
+
+.shopping-step-detail {
+  padding: 0 0 18px;
+  background: #ffffff;
+}
+
+.shopping-step-detail .shopping-sub-header {
+  position: sticky;
+  z-index: 20;
+  top: 0;
+  height: 58px;
+  padding: 8px 14px;
+  border-bottom: 1px solid rgba(239, 216, 180, 0.35);
+}
+
+.shopping-sub-header .shopping-back-button,
+.shopping-sub-header .shopping-cart-button {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+}
+
+.shopping-sub-header .shopping-back-button .sudal-ui-icon {
+  width: 34px;
+  height: 34px;
+}
+
+.shopping-sub-header .shopping-cart-button .sudal-ui-icon {
+  width: 27px;
+  height: 27px;
+}
+
+.shopping-step-detail .shopping-detail {
+  min-height: 100%;
+  padding-bottom: 94px;
+  background: #ffffff;
+}
+
+.shopping-step-detail .shopping-detail-visual {
+  min-height: 302px;
+  display: grid;
+  place-items: center;
+  padding: 28px 20px 34px;
+  background:
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.98) 0 27%, rgba(255, 255, 255, 0) 62%),
+    linear-gradient(145deg, #f6f1ea, #fbfaf6);
+}
+
+.shopping-detail-plate {
+  width: 214px;
+  height: 214px;
+  display: grid;
+  place-items: center;
+}
+
+.shopping-detail-plate .sudal-menu-dish-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 22px 28px rgba(91, 62, 34, 0.12));
+}
+
+.shopping-step-detail .shopping-detail-copy {
+  padding: 24px 18px 20px;
+  border-radius: 0;
+}
+
+.shopping-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 9px;
+}
+
+.shopping-detail-meta span {
+  padding: 6px 9px;
+  border-radius: 999px;
+  color: #9a5a2d;
+  font-size: 11px;
+  font-weight: 900;
+  background: #fff5ec;
+}
+
+.shopping-step-detail .shopping-detail-copy h1 {
+  margin: 0 0 18px;
+  color: #20304a;
+  font-size: 25px;
+  line-height: 1.28;
+}
+
+.shopping-step-detail .shopping-detail-ingredients {
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.shopping-step-detail .shopping-detail-ingredients > span {
+  display: none;
+  color: #42526a;
+  font-size: 13px;
+}
+
+.shopping-step-detail .shopping-detail-ingredients > div {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.shopping-step-detail .shopping-detail-ingredients button {
+  min-height: 104px;
+  padding: 8px 7px;
+  border-color: #f0d8c4;
+  border-radius: 12px;
+  background: #fffaf6;
+}
+
+.shopping-step-detail .shopping-detail-ingredients button.active {
+  border-color: var(--orange);
+  background: #fff6ef;
+  box-shadow: inset 0 0 0 1px var(--orange);
+}
+
+.shopping-step-detail .shopping-detail-ingredients em {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+}
+
+.shopping-step-detail .shopping-detail-ingredients em .sudal-ingredient-icon {
+  width: 42px;
+  height: 42px;
+}
+
+.shopping-step-detail .shopping-detail-ingredients strong {
+  color: #20304a;
+  font-size: 12px;
+}
+
+.shopping-step-detail .shopping-detail-ingredients button span {
+  max-width: 100%;
+  overflow: hidden;
+  color: #8b95a1;
+  font-size: 10px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shopping-step-detail .shopping-detail-ingredients button small {
+  color: #3f8b47;
+  font-size: 10px;
+  font-weight: 900;
 }
 
 .cart-move-modal {
@@ -4850,10 +5050,10 @@
 
 /* feature/pet-home merge overrides */
 .pet-home-screen {
-  --pet-apricot: #e8874a;
-  --pet-apricot-strong: #ad5226;
-  --pet-apricot-soft: #ffe7d3;
-  --pet-apricot-surface: #fff8f1;
+  --pet-apricot: #e7b88f;
+  --pet-apricot-strong: #ad704b;
+  --pet-apricot-soft: #fae7d8;
+  --pet-apricot-surface: #fff9f4;
   padding: 0 0 96px;
   background: #ffffff;
 }
@@ -4979,7 +5179,7 @@
 
 .pet-action-tabs button.active {
   color: #49372f;
-  background: rgba(232, 135, 74, 0.16);
+  background: color-mix(in srgb, var(--pet-apricot) 18%, #ffffff);
 }
 
 .pet-action-tabs b {
