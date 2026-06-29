@@ -978,6 +978,11 @@ function ShoppingScreen({
   const detailMenu = catalogMenus[0]
   const [excludedDetailIngredientKeys, setExcludedDetailIngredientKeys] = useState<string[]>([])
   const [cartMovePromptOpen, setCartMovePromptOpen] = useState(false)
+  const [deliveryAddress, setDeliveryAddress] = useState('서울특별시 중구 세종대로 110')
+  const [buyerPhone, setBuyerPhone] = useState('010-0000-0000')
+  const [addressEditOpen, setAddressEditOpen] = useState(false)
+  const [draftAddress, setDraftAddress] = useState(deliveryAddress)
+  const [draftBuyerPhone, setDraftBuyerPhone] = useState(buyerPhone)
   const selectedDetailIngredientKeys = detailMenu?.ingredients
     .map((ingredient) => ingredientKey(detailMenu.id, ingredient.name))
     .filter((key) => !excludedDetailIngredientKeys.includes(key)) ?? []
@@ -1007,6 +1012,18 @@ function ShoppingScreen({
       return
     }
     onSetStep('checkout')
+  }
+
+  function openAddressEdit() {
+    setDraftAddress(deliveryAddress)
+    setDraftBuyerPhone(buyerPhone)
+    setAddressEditOpen(true)
+  }
+
+  function saveAddressEdit() {
+    setDeliveryAddress(draftAddress.trim() || deliveryAddress)
+    setBuyerPhone(draftBuyerPhone.trim() || buyerPhone)
+    setAddressEditOpen(false)
   }
 
   return (
@@ -1241,9 +1258,9 @@ function ShoppingScreen({
           </header>
           <section className="shopping-address">
             <h1><span>집</span>으로 배송</h1>
-            <p>서울특별시 중구 세종대로 110</p>
-            <small>구매자 · 010-0000-0000</small>
-            <button type="button">변경</button>
+            <p>{deliveryAddress}</p>
+            <small>구매자 · {buyerPhone}</small>
+            <button onClick={openAddressEdit} type="button">변경</button>
             <select aria-label="배송 시 요청사항" value={deliveryOption} onChange={(event) => onSelectDelivery(event.target.value)}>
               {deliveryOptions.map((option) => <option key={option}>{option}</option>)}
             </select>
@@ -1306,6 +1323,41 @@ function ShoppingScreen({
             </div>
             <p className="shopping-payment-notice">실제 결제와 주문은 발생하지 않는 MVP 체험 화면입니다.</p>
           </section>
+
+          {addressEditOpen && (
+            <div className="address-edit-modal" onClick={() => setAddressEditOpen(false)} role="presentation">
+              <form
+                aria-label="배송지 변경"
+                className="address-edit-card"
+                onClick={(event) => event.stopPropagation()}
+                onSubmit={(event) => {
+                  event.preventDefault()
+                  saveAddressEdit()
+                }}
+              >
+                <h2>배송지 변경</h2>
+                <label>
+                  <span>주소</span>
+                  <input
+                    autoFocus
+                    value={draftAddress}
+                    onChange={(event) => setDraftAddress(event.target.value)}
+                  />
+                </label>
+                <label>
+                  <span>연락처</span>
+                  <input
+                    value={draftBuyerPhone}
+                    onChange={(event) => setDraftBuyerPhone(event.target.value)}
+                  />
+                </label>
+                <div>
+                  <button onClick={() => setAddressEditOpen(false)} type="button">취소</button>
+                  <button type="submit">저장</button>
+                </div>
+              </form>
+            </div>
+          )}
         </div>
       )}
 

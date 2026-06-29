@@ -4107,7 +4107,7 @@
 
 .shopping-cart-head {
   padding: 10px 12px 0;
-  background: #f2f4f6;
+  background: #ffffff;
 }
 
 .shopping-cart-head > button {
@@ -4128,7 +4128,7 @@
 
 .shopping-cart-head + .toss-menu-list {
   padding: 14px 14px 0;
-  background: #f2f4f6;
+  background: #ffffff;
 }
 
 .shopping-cart-head + .toss-menu-list .toss-select-all {
@@ -4276,7 +4276,7 @@
 
 .shopping-checkout {
   padding-bottom: 0;
-  background: #f2f4f6;
+  background: #ffffff;
 }
 
 .shopping-step-cart,
@@ -4291,7 +4291,7 @@
 }
 
 .shopping-checkout > section {
-  margin-bottom: 10px;
+  margin-bottom: 0;
   padding: 24px 20px;
   background: #ffffff;
 }
@@ -4347,6 +4347,84 @@
   color: #6b7684;
   font-weight: 800;
   background: #ffffff;
+}
+
+.shopping-address select:focus {
+  border-color: var(--orange);
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(244, 162, 97, 0.18);
+}
+
+.address-edit-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 260;
+  display: grid;
+  place-items: end center;
+  padding: 20px max(20px, calc((100vw - 430px) / 2 + 20px));
+  background: rgba(25, 31, 40, 0.34);
+}
+
+.address-edit-card {
+  width: min(100%, 390px);
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 18px 40px rgba(25, 31, 40, 0.18);
+}
+
+.address-edit-card h2 {
+  margin: 0;
+  color: #191f28;
+  font-size: 21px;
+}
+
+.address-edit-card label {
+  display: grid;
+  gap: 7px;
+  color: #6b7684;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.address-edit-card input {
+  width: 100%;
+  height: 50px;
+  padding: 0 14px;
+  border: 1px solid #e5e8eb;
+  border-radius: 14px;
+  color: #333d4b;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.address-edit-card input:focus {
+  border-color: var(--orange);
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(244, 162, 97, 0.18);
+}
+
+.address-edit-card > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.address-edit-card button {
+  height: 50px;
+  border: 0;
+  border-radius: 14px;
+  color: #6b7684;
+  font-weight: 900;
+  background: #f2f4f6;
+}
+
+.address-edit-card button[type='submit'] {
+  color: #ffffff;
+  background: var(--orange);
 }
 
 .shopping-order-products h2,
@@ -4414,7 +4492,7 @@
   grid-template-columns: 1fr;
   gap: 12px;
   margin-bottom: 24px;
-  border-bottom: 10px solid #f2f4f6;
+  border-bottom: 1px solid #e5e8eb;
 }
 
 .shopping-coupon > div {
@@ -4550,12 +4628,13 @@
   position: fixed;
   height: var(--fixed-action-height);
   margin: 0;
-  padding: 0 8px;
+  padding: 0;
   background: #ffffff;
   box-shadow: 0 -8px 20px rgba(25, 31, 40, 0.06);
 }
 
 .shopping-paybar button {
+  width: 100%;
   height: var(--fixed-action-height);
   border-radius: 0;
 }
