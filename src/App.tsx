@@ -761,7 +761,7 @@ function HomeScreen({
           />
           {searchQuery && (
             <button aria-label="검색어 지우기" className="shopping-search-clear" onClick={() => setSearchQuery('')} type="button">
-              ×
+              <span className="handdrawn-x-icon" aria-hidden="true" />
             </button>
           )}
         </label>
@@ -869,7 +869,7 @@ function HomeScreen({
                     {menuCardVisualImage(menu)}
                   </span>
                   <strong>{menu.name}</strong>
-                  <b>{getMenuExp(menu).toLocaleString('ko-KR')}xp</b>
+                  <b>{formatWon(getMenuExp(menu))}</b>
                   {selected && <span className="menu-card-selected" aria-hidden="true">✓</span>}
                 </button>
               )
@@ -1112,9 +1112,6 @@ function ShoppingScreen({
       {step === 'cart' && (
         <>
           <div className="shopping-cart-head">
-            <button aria-label="뒤로가기" onClick={onGoHome} type="button">
-              <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('back')} />
-            </button>
             <div>{selectedMenus.length > 0 && <strong>장바구니 {checkedTotal}</strong>}</div>
           </div>
           <div className="toss-menu-list">

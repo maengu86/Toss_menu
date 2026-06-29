@@ -14,10 +14,13 @@
   --ink: #3f3a36;
   --muted: #8d765e;
   --soft-text: #725f4b;
-  --orange: #e7b88f;
-  --orange-strong: #ad704b;
-  --orange-soft: #fae7d8;
+  --orange: #ecad7a;
+  --orange-strong: #b46c43;
+  --orange-soft: #fde4d2;
   --green: #75b84f;
+  --bottom-nav-height: 82px;
+  --fixed-action-height: 64px;
+  --fixed-action-bottom: calc(var(--bottom-nav-height) + var(--phone-bottom-offset));
   --phone-bottom-offset: max(18px, calc((100svh - 920px) / 2));
 }
 
@@ -34,7 +37,7 @@
 }
 
 .screen {
-  height: calc(100% - 82px);
+  height: calc(100% - var(--bottom-nav-height));
   overflow-y: auto;
   position: relative;
   padding: 26px 20px 110px;
@@ -1170,7 +1173,7 @@
 }
 
 .tab-bar {
-  height: 82px;
+  height: var(--bottom-nav-height);
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
@@ -2135,9 +2138,9 @@
 }
 
 .pet-home-screen {
-  --pet-apricot: #e7b88f;
-  --pet-apricot-strong: #ad704b;
-  --pet-apricot-soft: #fae7d8;
+  --pet-apricot: #ecad7a;
+  --pet-apricot-strong: #b46c43;
+  --pet-apricot-soft: #fde4d2;
   --pet-apricot-surface: #fff9f4;
   padding: 0 0 96px;
   background: #ffffff;
@@ -2606,19 +2609,46 @@
 }
 
 .shopping-search-clear {
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   display: grid;
   flex: 0 0 auto;
   place-items: center;
   padding: 0;
   border: 0;
   border-radius: 50%;
-  color: #6b7684;
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1;
-  background: #f2f4f6;
+  color: #7a6a5f;
+  background: transparent;
+}
+
+.handdrawn-x-icon {
+  width: 17px;
+  height: 17px;
+  position: relative;
+  display: block;
+}
+
+.handdrawn-x-icon::before,
+.handdrawn-x-icon::after {
+  content: "";
+  width: 18px;
+  height: 2px;
+  position: absolute;
+  top: 7px;
+  left: 0;
+  border-radius: 999px;
+  background: #7b6a5f;
+  transform-origin: center;
+}
+
+.handdrawn-x-icon::before {
+  transform: rotate(43deg);
+}
+
+.handdrawn-x-icon::after {
+  width: 16px;
+  left: 1px;
+  transform: rotate(-47deg);
 }
 
 .shopping-category-tabs {
@@ -3037,7 +3067,7 @@
 
 .home-purchase-tabs button.active b {
   color: #5a301c;
-  background: rgba(231, 184, 143, 0.3);
+  background: rgba(236, 173, 122, 0.3);
 }
 
 .home-purchase-tabs button:focus {
@@ -3054,14 +3084,16 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px 8px;
   margin-top: 6px;
-  max-height: min(430px, calc(100svh - 456px));
+  box-sizing: border-box;
+  max-height: min(430px, calc(100svh - 520px));
   min-height: 0;
-  padding: 0 4px 2px 0;
+  padding: 0 4px 92px 0;
   position: relative;
   z-index: 7;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior-y: contain;
+  scroll-padding-bottom: 92px;
   scrollbar-color: transparent transparent;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
@@ -3251,14 +3283,16 @@
 
 .home-delivery-panel {
   margin: 12px 0 0;
-  max-height: min(430px, calc(100svh - 456px));
+  box-sizing: border-box;
+  max-height: min(430px, calc(100svh - 520px));
   min-height: 0;
-  padding: 12px 4px 4px 0;
+  padding: 12px 4px 92px 0;
   position: relative;
   z-index: 7;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior-y: contain;
+  scroll-padding-bottom: 92px;
   scrollbar-color: transparent transparent;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
@@ -4575,6 +4609,49 @@
   background: var(--orange);
 }
 
+.shopping-detail-actions,
+.toss-cart-orderbar,
+.shopping-paybar {
+  right: max(0px, calc((100vw - 430px) / 2));
+  bottom: var(--fixed-action-bottom);
+  left: max(0px, calc((100vw - 430px) / 2));
+  z-index: 180;
+  width: min(100vw, 430px);
+}
+
+.shopping-detail-actions {
+  height: var(--fixed-action-height);
+  padding: 8px 8px 0;
+}
+
+.toss-cart-orderbar {
+  height: var(--fixed-action-height);
+}
+
+.shopping-paybar {
+  position: fixed;
+  height: var(--fixed-action-height);
+  margin: 0;
+  padding: 0 8px;
+  background: #ffffff;
+  box-shadow: 0 -8px 20px rgba(25, 31, 40, 0.06);
+}
+
+.shopping-paybar button {
+  height: var(--fixed-action-height);
+  border-radius: 0;
+}
+
+.shopping-step-detail .shopping-detail,
+.shopping-step-cart .toss-menu-list,
+.shopping-checkout {
+  padding-bottom: calc(var(--bottom-nav-height) + var(--fixed-action-height) + 42px);
+}
+
+.shopping-payment-section {
+  padding-bottom: calc(var(--fixed-action-height) + 34px);
+}
+
 .shopping-payment-notice {
   margin: 18px 0 0;
   color: #8b95a1;
@@ -5050,9 +5127,9 @@
 
 /* feature/pet-home merge overrides */
 .pet-home-screen {
-  --pet-apricot: #e7b88f;
-  --pet-apricot-strong: #ad704b;
-  --pet-apricot-soft: #fae7d8;
+  --pet-apricot: #ecad7a;
+  --pet-apricot-strong: #b46c43;
+  --pet-apricot-soft: #fde4d2;
   --pet-apricot-surface: #fff9f4;
   padding: 0 0 96px;
   background: #ffffff;
