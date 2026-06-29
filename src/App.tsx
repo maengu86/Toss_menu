@@ -1775,6 +1775,7 @@ function menuCardVisualImage(menu: Menu) {
     || peachMenuImageByName(menu)
     || watermelonMenuImageByName(menu)
     || yellowtailMenuImageByName(menu)
+    || winterMenuImageByName(menu)
     || menu.seasonalIngredientIds?.map((id) => getPetFeedIconImageById(id)).find(Boolean)
 
   if (menuImage) {
@@ -1864,6 +1865,108 @@ function yellowtailMenuImageByName(menu: Menu) {
   if (name.includes('회')) return menuDishImageById('yellowtail-sashimi')
   if (name.includes('매운탕')) return menuDishImageById('yellowtail-spicy-fish-stew')
   if (name.includes('초밥')) return menuDishImageById('yellowtail-sushi')
+  return ''
+}
+
+function winterMenuImageByName(menu: Menu) {
+  const name = menu.name
+  const seasonalIds = menu.seasonalIngredientIds ?? []
+  const hasSeasonal = (id: string) => seasonalIds.includes(id)
+
+  if (hasSeasonal('oyster') || name.includes('굴')) {
+    if (name.includes('국밥')) return menuDishImageById('oyster-gukbap')
+    if (name.includes('무침')) return menuDishImageById('oyster-muchim')
+    if (name.includes('튀김')) return menuDishImageById('oyster-fried')
+    if (name.includes('떡국')) return menuDishImageById('oyster-tteokguk')
+    if (name.includes('생굴')) return menuDishImageById('raw-oyster')
+    if (name.includes('찜')) return menuDishImageById('oyster-jjim')
+    if (name.includes('전')) return menuDishImageById('oyster-jeon')
+  }
+
+  if (hasSeasonal('radish') || name.includes('무') || name.includes('동치미') || name.includes('깍두기')) {
+    if (name.includes('소고기국')) return menuDishImageById('radish-beef-soup')
+    if (name.includes('동치미')) return menuDishImageById('radish-dongchimi')
+    if (name.includes('말랭이')) return menuDishImageById('dried-radish-muchim')
+    if (name.includes('깍두기')) return menuDishImageById('kkakdugi')
+    if (name.includes('조림')) return menuDishImageById('radish-jorim')
+    if (name.includes('전')) return menuDishImageById('radish-jeon')
+    if (name.includes('생채')) return menuDishImageById('radish-saengchae')
+    if (name.includes('국')) return menuDishImageById('radish-soup')
+  }
+
+  if (hasSeasonal('cabbage') || name.includes('배추')) {
+    if (name.includes('밀푀유') || name.includes('나베')) return menuDishImageById('cabbage-hotpot')
+    if (name.includes('된장무침')) return menuDishImageById('cabbage-doenjang-muchim')
+    if (name.includes('된장국')) return menuDishImageById('cabbage-doenjang-soup')
+    if (name.includes('겉절이')) return menuDishImageById('cabbage-geotjeori')
+    if (name.includes('김치')) return menuDishImageById('cabbage-kimchi')
+    if (name.includes('전')) return menuDishImageById('cabbage-jeon')
+    if (name.includes('쌈')) return menuDishImageById('cabbage-ssam')
+  }
+
+  if (hasSeasonal('mandarin') || name.includes('귤')) {
+    if (name.includes('푸딩')) return menuDishImageById('mandarin-pudding')
+    if (name.includes('케이크')) return menuDishImageById('mandarin-cake')
+    if (name.includes('타르트')) return menuDishImageById('mandarin-tart')
+    if (name.includes('청')) return menuDishImageById('mandarin-cheong')
+    if (name.includes('화채')) return menuDishImageById('mandarin-hwachae')
+    if (name.includes('주스')) return menuDishImageById('mandarin-juice')
+    if (name.includes('마말레이드') || name.includes('마멀레이드')) return menuDishImageById('mandarin-marmalade')
+    if (name === '귤') return menuDishImageById('mandarin')
+  }
+
+  if (hasSeasonal('cod') || name.includes('대구')) {
+    if (name.includes('탕')) return menuDishImageById('cod-stew')
+    if (name.includes('뽈찜')) return menuDishImageById('cod-ppoljjim')
+    if (name.includes('조림')) return menuDishImageById('cod-jorim')
+    if (name.includes('전')) return menuDishImageById('cod-jeon')
+    if (name.includes('튀김')) return menuDishImageById('cod-fried')
+    if (name.includes('찜')) return menuDishImageById('cod-jjim')
+  }
+
+  if (hasSeasonal('spinach') || name.includes('시금치')) {
+    if (name.includes('나물')) return menuDishImageById('spinach-namul')
+    if (name.includes('된장무침')) return menuDishImageById('spinach-doenjang-muchim')
+    if (name.includes('된장국')) return menuDishImageById('spinach-doenjang-soup')
+    if (name.includes('계란') || name.includes('달걀')) return menuDishImageById('spinach-egg-stir-fry')
+    if (name.includes('전')) return menuDishImageById('spinach-jeon')
+    if (name.includes('파스타')) return menuDishImageById('spinach-pasta')
+  }
+
+  if (hasSeasonal('cockle') || name.includes('꼬막')) {
+    if (name.includes('비빔밥')) return menuDishImageById('cockle-bibimbap')
+    if (name.includes('된장찌개')) return menuDishImageById('cockle-doenjang-jjigae')
+    if (name.includes('전')) return menuDishImageById('cockle-jeon')
+    if (name.includes('무침')) return menuDishImageById('cockle-muchim')
+    if (name.includes('찜')) return menuDishImageById('cockle-jjim')
+  }
+
+  if (hasSeasonal('lotus-root') || name.includes('연근')) {
+    if (name.includes('조림')) return menuDishImageById('lotus-root-jorim')
+    if (name.includes('튀김')) return menuDishImageById('lotus-root-fried')
+    if (name.includes('전')) return menuDishImageById('lotus-root-jeon')
+    if (name.includes('밥')) return menuDishImageById('lotus-root-rice')
+    if (name.includes('샐러드')) return menuDishImageById('lotus-root-salad')
+    if (name.includes('차')) return menuDishImageById('lotus-root-tea')
+  }
+
+  if (hasSeasonal('burdock') || name.includes('우엉')) {
+    if (name.includes('김밥')) return menuDishImageById('burdock-gimbap')
+    if (name.includes('튀김')) return menuDishImageById('burdock-fried')
+    if (name.includes('전')) return menuDishImageById('burdock-jeon')
+    if (name.includes('조림')) return menuDishImageById('burdock-jorim')
+    if (name.includes('밥')) return menuDishImageById('burdock-rice')
+    if (name.includes('차')) return menuDishImageById('burdock-tea')
+  }
+
+  if (hasSeasonal('hallabong') || name.includes('한라봉')) {
+    if (name.includes('샐러드')) return menuDishImageById('hallabong-salad')
+    if (name.includes('청')) return menuDishImageById('hallabong-cheong')
+    if (name.includes('주스')) return menuDishImageById('hallabong-juice')
+    if (name.includes('마말레이드') || name.includes('마멀레이드')) return menuDishImageById('hallabong-marmalade')
+    if (name.includes('타르트')) return menuDishImageById('hallabong-tart')
+  }
+
   return ''
 }
 

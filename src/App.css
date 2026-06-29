@@ -3056,10 +3056,10 @@
 }
 
 .home-purchase-tabs button b {
-  padding: 5px 12px;
+  padding: 6px 14px;
   border-radius: 0;
   color: #49372f;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 500;
   line-height: 1.1;
   background: transparent;
@@ -3085,15 +3085,15 @@
   gap: 10px 8px;
   margin-top: 6px;
   box-sizing: border-box;
-  max-height: min(430px, calc(100svh - 520px));
+  max-height: min(390px, calc(100svh - 570px));
   min-height: 0;
-  padding: 0 4px 92px 0;
+  padding: 0 4px calc(var(--bottom-nav-height) + 34px) 0;
   position: relative;
   z-index: 7;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior-y: contain;
-  scroll-padding-bottom: 92px;
+  scroll-padding-bottom: calc(var(--bottom-nav-height) + 34px);
   scrollbar-color: transparent transparent;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
@@ -3176,7 +3176,7 @@
   overflow: hidden;
   margin: 0;
   color: #333d4b;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 20px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -3284,15 +3284,15 @@
 .home-delivery-panel {
   margin: 12px 0 0;
   box-sizing: border-box;
-  max-height: min(430px, calc(100svh - 520px));
+  max-height: min(390px, calc(100svh - 570px));
   min-height: 0;
-  padding: 12px 4px 92px 0;
+  padding: 12px 4px calc(var(--bottom-nav-height) + 34px) 0;
   position: relative;
   z-index: 7;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior-y: contain;
-  scroll-padding-bottom: 92px;
+  scroll-padding-bottom: calc(var(--bottom-nav-height) + 34px);
   scrollbar-color: transparent transparent;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
