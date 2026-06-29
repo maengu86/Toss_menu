@@ -159,13 +159,13 @@ function mapSeasonalIngredient(row: SeasonalIngredientRow): SeasonalIngredient {
 }
 
 function mapMenu(row: MenuRow): Menu {
-  const ingredients = [...(row.menu_ingredients ?? [])]
+  const ingredients = sanitizeMenuIngredients(row.name, [...(row.menu_ingredients ?? [])]
     .sort((a, b) => a.sort_order - b.sort_order)
     .map<Ingredient>((ingredient) => ({
       name: ingredient.name,
       quantity: ingredient.quantity,
       price: ingredient.price,
-    }))
+    })))
 
   return {
     id: row.id,
@@ -180,6 +180,23 @@ function mapMenu(row: MenuRow): Menu {
     seasonalIngredientIds: (row.menu_seasonal_ingredients ?? []).map((ingredient) => ingredient.ingredient_id),
     ingredients,
   }
+}
+
+function sanitizeMenuIngredients(menuName: string, ingredients: Ingredient[]) {
+  const menuKey = normalizeIngredientCompareText(menuName)
+  const seen = new Set<string>()
+
+  return ingredients.filter((ingredient) => {
+    const ingredientKey = normalizeIngredientCompareText(ingredient.name)
+    if (!ingredientKey || ingredientKey === menuKey) return false
+    if (seen.has(ingredientKey)) return false
+    seen.add(ingredientKey)
+    return true
+  })
+}
+
+function normalizeIngredientCompareText(value: string) {
+  return value.replace(/[\s/·・,()[\]-]/g, '').toLowerCase()
 }
 
 function mergeMenus(remoteMenus: Menu[]) {

@@ -97,8 +97,16 @@ ingredients_to_insert as (
   from missing_menus
 )
 insert into public.menu_ingredients (menu_id, name, quantity, price, sort_order)
-select menu_id, name, quantity, price, sort_order
-from ingredients_to_insert;
+select
+  ingredients_to_insert.menu_id,
+  ingredients_to_insert.name,
+  ingredients_to_insert.quantity,
+  ingredients_to_insert.price,
+  ingredients_to_insert.sort_order
+from ingredients_to_insert
+join public.menus as menu on menu.id = ingredients_to_insert.menu_id
+where lower(regexp_replace(ingredients_to_insert.name, '[[:space:]/·・,()[\]-]', '', 'g'))
+  <> lower(regexp_replace(menu.name, '[[:space:]/·・,()[\]-]', '', 'g'));
 
 update public.menus as menu
 set exp = ingredient_totals.total_price
