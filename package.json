@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc -b && vite build",
+    "db:sql": "node scripts/generate-latest-data-sql.mjs",
+    "db:check": "node scripts/generate-latest-data-sql.mjs --check",
     "lint": "eslint .",
     "preview": "vite preview"
   },
