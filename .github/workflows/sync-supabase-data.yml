@@ -39,7 +39,42 @@ jobs:
             echo "SUPABASE_DB_URL secret is missing."
             exit 1
           fi
-          echo "Database secret is configured. If the next step fails with Network is unreachable, use the Supabase Pooler connection string."
+          node <<'NODE'
+          const connectionString = process.env.SUPABASE_DB_URL;
+          let url;
+
+          try {
+            url = new URL(connectionString);
+          } catch {
+            console.error("SUPABASE_DB_URL is not a valid PostgreSQL URL.");
+            process.exit(1);
+          }
+
+          const username = decodeURIComponent(url.username);
+          const host = url.hostname;
+          const port = url.port;
+
+          console.log(`Database host: ${host}`);
+          console.log(`Database port: ${port || "(default)"}`);
+          console.log(`Database user: ${username}`);
+
+          if (!host.includes("pooler.supabase.com")) {
+            console.error("Use the Supabase Pooler connection string, not the direct db.*.supabase.co URL.");
+            process.exit(1);
+          }
+
+          if (username !== "postgres.tjjmjqlbxskejvicghdh") {
+            console.error('Pooler username must be "postgres.tjjmjqlbxskejvicghdh".');
+            process.exit(1);
+          }
+
+          if (!url.searchParams.has("sslmode")) {
+            console.error('Add "?sslmode=require" to SUPABASE_DB_URL.');
+            process.exit(1);
+          }
+
+          console.log("Database secret format looks correct.");
+          NODE
 
       - name: Apply data sync SQL
         env:
