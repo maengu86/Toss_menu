@@ -151,11 +151,17 @@ export async function loadAppData(): Promise<AppData> {
 function mapSeasonalIngredient(row: SeasonalIngredientRow): SeasonalIngredient {
   return {
     id: row.id,
-    name: row.name,
+    name: formatSeasonalIngredientName(row.name),
     season: row.season,
     seasonKey: row.season_key,
     emoji: row.emoji,
   }
+}
+
+function formatSeasonalIngredientName(name: string) {
+  if (name === '초당옥수수') return '초당 옥수수'
+  if (name === '꽈리고추') return '꽈리 고추'
+  return name
 }
 
 function mapMenu(row: MenuRow): Menu {
@@ -238,7 +244,7 @@ function mergeMenus(remoteMenus: Menu[]) {
       const remoteIngredientExp = menu.ingredients.reduce((total, ingredient) => total + ingredient.price, 0)
       const ingredients = remoteIngredientExp > 0
         ? menu.ingredients
-        : createMissingMenuIngredients(menu.name)
+        : createMissingMenuIngredients(menu.name, menu.seasonalIngredientIds)
 
       return {
         ...menu,
@@ -283,16 +289,33 @@ const defaultSupportingIngredients: [Ingredient, Ingredient] = [
   { name: '간장', quantity: '1병', price: 3100 },
 ]
 
-function createMissingMenuIngredients(menuName: string): Ingredient[] {
-  const primary = primaryIngredientDefaults.find((item) => item.keywords.some((keyword) => menuName.includes(keyword)))
+function createMissingMenuIngredients(menuName: string, seasonalIngredientIds: string[] = []): Ingredient[] {
+  const primary = findSeasonalIngredientReference(seasonalIngredientIds)
+    ?? primaryIngredientDefaults.find((item) => item.keywords.some((keyword) => menuName.includes(keyword)))
   const supporting = getSupportingIngredients(menuName)
 
   return [
-    primary
-      ? { name: primary.name, quantity: primary.quantity, price: primary.price }
-      : { name: '제철 식재료', quantity: '1팩', price: 4500 },
+    ...(primary ? [{ name: primary.name, quantity: primary.quantity, price: primary.price }] : []),
     ...supporting,
   ]
+}
+
+function findSeasonalIngredientReference(seasonalIngredientIds: string[]) {
+  for (const seasonalIngredientId of seasonalIngredientIds) {
+    const seasonalIngredient = fallbackSeasonalIngredients.find((item) => item.id === seasonalIngredientId)
+    if (!seasonalIngredient) continue
+
+    const ingredientName = normalizeIngredientCompareText(seasonalIngredient.name)
+    const candidates = fallbackMenus
+      .filter((menu) => menu.seasonalIngredientIds?.includes(seasonalIngredientId))
+      .flatMap((menu) => menu.ingredients)
+    const reference = candidates.find((ingredient) => normalizeIngredientCompareText(ingredient.name) === ingredientName)
+      ?? candidates.find((ingredient) => normalizeIngredientCompareText(ingredient.name).includes(ingredientName))
+
+    if (reference) return reference
+  }
+
+  return undefined
 }
 
 function getSupportingIngredients(menuName: string): [Ingredient, Ingredient] {
