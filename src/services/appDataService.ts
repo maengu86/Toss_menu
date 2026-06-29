@@ -63,33 +63,7 @@ type DecorItemRow = {
 }
 
 const hiddenSeasonalIngredientIds = new Set(['asparagus'])
-const hiddenMenuIds = new Set([
-  'strawberry-cake',
-  'strawberry-tart',
-  'strawberry-cake-tart',
-  'jukkumi-ramen',
-  'jukkumi-ramen-jjamppong',
-  'jukkumi-jjamppong',
-  'jukkumi-jjamppong-tang',
-  'jukkumi-jjamppongtang',
-  'jukkumi-spicy-seafood-soup',
-])
-const hiddenMenuNameWords = [
-  '아스파라거스',
-  '딸기케이크',
-  '딸기타르트',
-  '딸기타르느',
-  '딸기케이스',
-  '주꾸미라면',
-  '쭈꾸미라면',
-  '쭈구미라면',
-  '주꾸미짬뽕',
-  '쭈꾸미짬뽕',
-  '쭈구미짬뽕',
-  '주꾸미짬뽕탕',
-  '쭈꾸미짬뽕탕',
-  '쭈구미짬뽕탕',
-]
+const hiddenMenuNameWords = ['아스파라거스']
 
 export const fallbackAppData: AppData = {
   decorItems: fallbackDecorItems,
@@ -191,8 +165,7 @@ function formatSeasonalIngredientName(name: string) {
 }
 
 function mapMenu(row: MenuRow): Menu {
-  const name = normalizeMenuDisplayName(row.name, row.id)
-  const ingredients = sanitizeMenuIngredients(name, [...(row.menu_ingredients ?? [])]
+  const ingredients = sanitizeMenuIngredients(row.name, [...(row.menu_ingredients ?? [])]
     .sort((a, b) => a.sort_order - b.sort_order)
     .map<Ingredient>((ingredient) => ({
       name: ingredient.name,
@@ -202,7 +175,7 @@ function mapMenu(row: MenuRow): Menu {
 
   return {
     id: row.id,
-    name,
+    name: row.name,
     season: row.season,
     weather: row.weather,
     description: row.description ?? '',
@@ -454,32 +427,10 @@ function filterVisibleSeasonalIngredients(ingredients: SeasonalIngredient[]) {
   return ingredients.filter((ingredient) => !hiddenSeasonalIngredientIds.has(ingredient.id))
 }
 
-function normalizeMenuDisplayName(name: string, id?: string) {
-  if (id === 'spring-herb-bibimbap') return '달래비빔밥'
-
-  return name.replace(/\s+/g, '')
-}
-
 function isHiddenMenu(menu: Menu) {
-  const menuNameKey = getMenuNameKey(menu.name)
-
-  return hiddenMenuIds.has(menu.id)
-    || menu.seasonalIngredientIds?.some((id) => hiddenSeasonalIngredientIds.has(id))
-    || isHiddenSeasonalMenu(menu, menuNameKey)
-    || hiddenMenuNameWords.some((word) => menuNameKey.includes(getMenuNameKey(word)))
-    || menu.ingredients.some((ingredient) => {
-      const ingredientNameKey = getMenuNameKey(ingredient.name)
-      return hiddenMenuNameWords.some((word) => ingredientNameKey.includes(getMenuNameKey(word)))
-    })
-}
-
-function isHiddenSeasonalMenu(menu: Menu, menuNameKey: string) {
-  const seasonalIngredientIds = menu.seasonalIngredientIds ?? []
-  const isStrawberryMenu = seasonalIngredientIds.includes('strawberry')
-  const isJukkumiMenu = seasonalIngredientIds.includes('jukkumi')
-
-  return (isStrawberryMenu && /케이크|케이스|타르트|타르느/.test(menuNameKey))
-    || (isJukkumiMenu && /라면|짬뽕/.test(menuNameKey))
+  return menu.seasonalIngredientIds?.some((id) => hiddenSeasonalIngredientIds.has(id))
+    || hiddenMenuNameWords.some((word) => menu.name.includes(word))
+    || menu.ingredients.some((ingredient) => hiddenMenuNameWords.some((word) => ingredient.name.includes(word)))
 }
 
 function hasCombinedMenuName(name: string) {
