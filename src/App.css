@@ -4584,19 +4584,8 @@
   background: #fff7f1;
 }
 
-.shopping-points {
-  height: 54px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 14px;
-  border: 1px solid #e5e8eb;
-  border-radius: 14px;
-  color: #4e5968;
-}
-
 .shopping-total {
-  margin-top: 30px;
+  margin-top: 18px;
   padding-top: 24px;
   border-top: 1px solid #e5e8eb;
 }
