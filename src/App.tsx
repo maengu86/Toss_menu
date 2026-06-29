@@ -1306,8 +1306,6 @@ function ShoppingScreen({
                 </button>
               ))}
             </div>
-            <h2>토스포인트 사용</h2>
-            <div className="shopping-points"><span>0</span><b>원</b></div>
             <div className="shopping-total">
               <strong>총 결제 금액</strong><b>{formatWon(orderTotal)}</b>
               <span>총 주문 금액</span><span>{formatWon(checkedPrice)}</span>
