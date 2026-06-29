@@ -177,12 +177,9 @@ type KakaoLatLng = object
 type KakaoMapInstance = {
   addControl: (control: object, position: unknown) => void
   panTo: (position: KakaoLatLng) => void
+  setZoomable: (zoomable: boolean) => void
 }
 type KakaoMapMarker = { setMap: (map: KakaoMapInstance | null) => void }
-type KakaoInfoWindow = {
-  close: () => void
-  open: (map: KakaoMapInstance, marker: KakaoMapMarker) => void
-}
 type KakaoMapsSdk = {
   maps: {
     LatLng: new (latitude: number, longitude: number) => KakaoLatLng
@@ -190,7 +187,6 @@ type KakaoMapsSdk = {
     ZoomControl: new () => object
     ControlPosition: { RIGHT: unknown }
     Marker: new (options: { map: KakaoMapInstance; position: KakaoLatLng }) => KakaoMapMarker
-    InfoWindow: new (options: { content: string }) => KakaoInfoWindow
     services: {
       Places: new () => {
         keywordSearch: (
@@ -311,11 +307,11 @@ function getPetLevel(totalExp: number) {
     completedLevelsInCycle += 1
   }
 
-  return completedCycles * petLevelExpRequirements.length + completedLevelsInCycle + 1
+  return completedCycles * petLevelExpRequirements.length + completedLevelsInCycle
 }
 
 function getLevelExpStatus(totalExp: number, level: number) {
-  const levelIndex = (level - 1) % petLevelExpRequirements.length
+  const levelIndex = level % petLevelExpRequirements.length
   const cycleExp = totalExp % couponRewardExp
   const currentLevelStartExp = petLevelExpRequirements
     .slice(0, levelIndex)
@@ -334,7 +330,7 @@ function getCouponCount(totalExp: number) {
 function getEarnedCoupons(totalExp: number): RewardCoupon[] {
   return Array.from({ length: getCouponCount(totalExp) }, (_, index) => ({
     id: `level-coupon-${index + 1}`,
-    level: 6 + index * petLevelExpRequirements.length,
+    level: petLevelExpRequirements.length + index * petLevelExpRequirements.length,
     milestoneExp: (index + 1) * couponRewardExp,
   }))
 }
@@ -761,11 +757,11 @@ function HomeScreen({
           />
           {searchQuery && (
             <button aria-label="검색어 지우기" className="shopping-search-clear" onClick={() => setSearchQuery('')} type="button">
-              <span className="handdrawn-x-icon" aria-hidden="true" />
+              <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('clear')} />
             </button>
           )}
         </label>
-        <button aria-label="마이페이지 열기" onClick={onOpenProfile} type="button">
+        <button aria-label="마이페이지 열기" className="home-profile-button" onClick={onOpenProfile} type="button">
           <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('profile')} />
         </button>
       </header>
@@ -842,24 +838,22 @@ function HomeScreen({
         </>
       )}
 
-      <section className="home-purchase-section">
-        <nav className="home-purchase-tabs" aria-label="메뉴 이용 방법">
-          <button className={purchaseTab === 'cook' ? 'active' : ''} onClick={() => setPurchaseTab('cook')} type="button">
-            <b>요리</b>
-          </button>
-          <button className={purchaseTab === 'delivery' ? 'active' : ''} onClick={() => setPurchaseTab('delivery')} type="button">
-            <b>배달</b>
-          </button>
-        </nav>
+      {!hasSearch && (
+        <section className="home-purchase-section">
+          <nav className="home-purchase-tabs" aria-label="메뉴 이용 방법">
+            <button className={purchaseTab === 'cook' ? 'active' : ''} onClick={() => setPurchaseTab('cook')} type="button">
+              <b>요리</b>
+            </button>
+            <button className={purchaseTab === 'delivery' ? 'active' : ''} onClick={() => setPurchaseTab('delivery')} type="button">
+              <b>배달</b>
+            </button>
+          </nav>
 
-        {purchaseTab === 'cook' && (
-          <div className="menu-list nested-menu-list">
-            {seasonalMenus.map((menu) => {
-              const selected = selectedMenuIds.includes(menu.id)
-              return (
+          {purchaseTab === 'cook' && (
+            <div className="menu-list nested-menu-list">
+              {seasonalMenus.map((menu) => (
                 <button
-                  aria-pressed={selected}
-                  className={`menu-card ${selected ? 'selected' : ''}`}
+                  className="menu-card"
                   key={menu.id}
                   onClick={() => onOpenMenuDetail(menu.id)}
                   style={{ '--menu-color': menu.color } as CSSProperties}
@@ -870,38 +864,27 @@ function HomeScreen({
                   </span>
                   <strong>{menu.name}</strong>
                   <b>{formatWon(getMenuExp(menu))}</b>
-                  {selected && <span className="menu-card-selected" aria-hidden="true">✓</span>}
                 </button>
-              )
-            })}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
 
         {purchaseTab === 'delivery' && (
           <section className="home-delivery-panel">
-          <div className="home-delivery-heading">
-            <div>
-              <span>총 {seasonalMenus.length}개 요리 · 내 주변 제철 맛집</span>
-              <h2>{selectedSeasonalIngredient?.name ?? '제철 식재료'}로 만든 모든 요리</h2>
-            </div>
-            <button aria-label="내 위치" onClick={() => setLocationPreview(true)} type="button">
-              <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('location')} />
-              내 위치
-            </button>
-          </div>
-
           <KakaoRestaurantMap
             fallbackRestaurants={nearbyRestaurants}
             keyword={`${selectedSeasonalIngredient?.name ?? '제철'} 맛집`}
+            onRequestCurrentLocation={() => setLocationPreview(true)}
             useCurrentLocation={locationPreview}
           />
 
-          <p className="home-location-status">
-            {locationPreview ? '현재 위치를 허용하면 반경 5km 안의 결과를 우선 보여줘요.' : '카카오맵 키가 있으면 실제 장소 검색 결과가 지도에 표시돼요.'}
-          </p>
-          </section>
-        )}
-      </section>
+            <p className="home-location-status">
+              {locationPreview ? '현재 위치를 허용하면 반경 5km 안의 결과를 우선 보여줘요.' : '카카오맵 키가 있으면 실제 장소 검색 결과가 지도에 표시돼요.'}
+            </p>
+            </section>
+          )}
+        </section>
+      )}
 
     </section>
   )
@@ -1158,7 +1141,7 @@ function ShoppingScreen({
                           }}
                           type="checkbox"
                         />
-                        <strong>{menu.name}</strong>
+                        <strong>오늘의 제철마켓</strong>
                       </label>
                       <button className="toss-menu-remove" onClick={() => onRemoveMenu(menu.id)} type="button">
                         선택삭제
@@ -1178,7 +1161,8 @@ function ShoppingScreen({
                             />
                             <em aria-hidden="true">{ingredientIconImage(item.name)}</em>
                             <span>
-                              <strong>{item.name}</strong>
+                              <strong>내일 도착 예정</strong>
+                              <small>{item.name}, {item.quantity}</small>
                             </span>
                             <div className="cart-product-side">
                               <b>
@@ -1256,7 +1240,7 @@ function ShoppingScreen({
                 <em aria-hidden="true">{ingredientIconImage(ingredient.name)}</em>
                 <div>
                   <strong>내일 도착 예정</strong>
-                  <span>{ingredient.name}</span>
+                  <span>{ingredient.name}, {ingredient.quantity}</span>
                   <b>{formatWon(ingredient.price * quantity)} · {quantity}개</b>
                   <small>무료 배송</small>
                 </div>
@@ -1353,42 +1337,25 @@ function ShoppingScreen({
 function KakaoRestaurantMap({
   fallbackRestaurants,
   keyword,
+  onRequestCurrentLocation,
   useCurrentLocation,
 }: {
   fallbackRestaurants: NearbyRestaurant[]
   keyword: string
+  onRequestCurrentLocation: () => void
   useCurrentLocation: boolean
 }) {
   const mapRef = useRef<HTMLDivElement | null>(null)
   const mapInstanceRef = useRef<KakaoMapInstance | null>(null)
   const markersRef = useRef<KakaoMapMarker[]>([])
-  const placeMarkerRef = useRef(new Map<string, {
-    infoWindow: KakaoInfoWindow
-    marker: KakaoMapMarker
-    position: KakaoLatLng
-  }>())
-  const [statusMessage, setStatusMessage] = useState(kakaoMapAppKey ? '카카오맵을 불러오는 중이에요.' : '카카오맵 키를 설정하면 실제 지도가 표시돼요.')
+  const [, setStatusMessage] = useState(kakaoMapAppKey ? '카카오맵을 불러오는 중이에요.' : '카카오맵 키를 설정하면 실제 지도가 표시돼요.')
   const [places, setPlaces] = useState<KakaoPlace[]>([])
-  const [selectedPlace, setSelectedPlace] = useState<KakaoPlace | null>(null)
-
-  const openPlace = (place: KakaoPlace) => {
-    setSelectedPlace(place)
-
-    const markerInfo = placeMarkerRef.current.get(place.id)
-    if (!markerInfo || !mapInstanceRef.current) return
-
-    placeMarkerRef.current.forEach(({ infoWindow }) => infoWindow.close())
-    markerInfo.infoWindow.open(mapInstanceRef.current, markerInfo.marker)
-    mapInstanceRef.current.panTo(markerInfo.position)
-  }
 
   useEffect(() => {
     const appKey = kakaoMapAppKey ?? ''
     if (!appKey || !mapRef.current) return
 
     let canceled = false
-    const placeMarkers = placeMarkerRef.current
-    setSelectedPlace(null)
     setPlaces([])
 
     async function renderMap() {
@@ -1406,14 +1373,13 @@ function KakaoRestaurantMap({
           level: kakaoMapDefaultLevel,
         })
         mapInstanceRef.current = map
-        map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT)
+        map.setZoomable(false)
         const places = new kakao.maps.services.Places()
         const searchOptions = useCurrentLocation
           ? { location: centerLatLng, radius: 100000 }
           : undefined
 
         markersRef.current.forEach((marker) => marker.setMap(null))
-        placeMarkers.clear()
         markersRef.current = [
           new kakao.maps.Marker({
             map,
@@ -1425,7 +1391,7 @@ function KakaoRestaurantMap({
           if (canceled) return
 
           if (status !== kakao.maps.services.Status.OK) {
-            setStatusMessage(`${keyword} 검색 결과가 없어서 추천 목록을 먼저 보여드려요.`)
+            setStatusMessage('검색결과가 없어서 추천 목록을 띄워드릴게요')
             setPlaces([])
             return
           }
@@ -1434,22 +1400,11 @@ function KakaoRestaurantMap({
           nextPlaces.forEach((place) => {
             const position = new kakao.maps.LatLng(Number(place.y), Number(place.x))
             const marker = new kakao.maps.Marker({ map, position })
-            const infoWindow = new kakao.maps.InfoWindow({
-              content: `<div style="padding:8px 10px;font-size:12px;font-weight:700;white-space:nowrap;">${escapeHtml(place.place_name)}</div>`,
-            })
 
-            kakao.maps.event.addListener(marker, 'click', () => {
-              openPlace(place)
-            })
-
-            placeMarkers.set(place.id, { infoWindow, marker, position })
             markersRef.current.push(marker)
           })
 
           setPlaces(nextPlaces)
-          if (nextPlaces[0]) {
-            openPlace(nextPlaces[0])
-          }
           setStatusMessage(`${keyword} 검색 결과 ${nextPlaces.length}곳을 표시했어요.`)
         }, searchOptions)
       } catch (error) {
@@ -1465,7 +1420,6 @@ function KakaoRestaurantMap({
       canceled = true
       markersRef.current.forEach((marker) => marker.setMap(null))
       markersRef.current = []
-      placeMarkers.clear()
     }
   }, [keyword, useCurrentLocation])
 
@@ -1477,40 +1431,27 @@ function KakaoRestaurantMap({
     <div className="kakao-place-section">
       <div className="home-map-preview has-kakao" aria-label="주변 음식점 지도">
         <div className="kakao-map-canvas" ref={mapRef} />
-        <p className="kakao-map-status">{statusMessage}</p>
+        <button className="home-map-location-button" aria-label="내 위치" onClick={onRequestCurrentLocation} type="button">
+          <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('location')} />
+          내 위치
+        </button>
       </div>
-      {selectedPlace && (
-        <article className="kakao-place-card">
-          <span className="kakao-place-selected-label"><img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('location')} /> 선택한 맛집</span>
-          <strong>{selectedPlace.place_name}</strong>
-          <span>{selectedPlace.road_address_name || selectedPlace.address_name || '주소 정보 없음'}</span>
-          <div>
-            {selectedPlace.phone && <small>{selectedPlace.phone}</small>}
-            {selectedPlace.distance && <small>{Number(selectedPlace.distance).toLocaleString('ko-KR')}m</small>}
-          </div>
-          {selectedPlace.place_url && (
-            <a href={selectedPlace.place_url} rel="noreferrer" target="_blank">상세보기</a>
-          )}
-        </article>
-      )}
       {places.length > 0 && (
         <div className="kakao-place-list" aria-label="주변 맛집 검색 결과">
           {places.map((place) => {
-            const isSelected = selectedPlace?.id === place.id
             const distanceText = place.distance ? `${Number(place.distance).toLocaleString('ko-KR')}m` : '카카오맵 장소'
 
             return (
-              <button
-                aria-pressed={isSelected}
-                className={isSelected ? 'active' : undefined}
+              <a
+                href={place.place_url}
                 key={place.id}
-                onClick={() => openPlace(place)}
-                type="button"
+                rel="noreferrer"
+                target="_blank"
               >
                 <strong>{place.place_name}</strong>
                 <span>{place.road_address_name || place.address_name || '주소 정보 없음'}</span>
                 <small>{[place.phone, distanceText].filter(Boolean).join(' · ')}</small>
-              </button>
+              </a>
             )
           })}
         </div>
@@ -1557,15 +1498,6 @@ function loadKakaoMapsSdk(appKey: string) {
   })
 
   return window.__kakaoMapsSdkPromise
-}
-
-function escapeHtml(value: string) {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
 }
 
 function getSearchCenter(useCurrentLocation: boolean) {
@@ -1985,6 +1917,7 @@ function MyPage({
   const [page, setPage] = useState<'overview' | 'coupons' | 'orderDetail'>('overview')
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null)
   const totalSpent = orderHistory.reduce((sum, order) => sum + order.total, 0)
+  const level = getPetLevel(exp)
   const availableCouponCount = coupons.filter((coupon) => !usedCouponIds.includes(coupon.id)).length
   const nextCouponRemainingExp = couponRewardExp - (exp % couponRewardExp)
   const selectedOrder = orderHistory.find((order) => order.id === selectedOrderId)
@@ -2015,13 +1948,12 @@ function MyPage({
                 <span aria-hidden="true"><img alt="" className="sudal-modal-icon" src={getPetUiIconImage('profile')} /></span>
             <div>
               <strong>제철 미식가</strong>
-              <p>오늘도 맛있는 제철 음식을 골라보세요.</p>
+              <p><span>LEVEL {level}</span><b>{formatWon(totalSpent)}</b></p>
             </div>
           </div>
 
           <div className="my-page-summary">
             <div><span>주문</span><strong>{orderHistory.length}건</strong></div>
-            <div><span>총 주문금액</span><strong>{formatWon(totalSpent)}</strong></div>
             <button className="my-coupon-summary-button" onClick={() => setPage('coupons')} type="button">
               <span>보유 쿠폰</span>
               <strong>{availableCouponCount}장 ›</strong>

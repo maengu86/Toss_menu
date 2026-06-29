@@ -5,28 +5,28 @@ import { createMenu } from './menuFactory'
 // 개인 수정 가능: 메뉴를 추가할 때 seasonalIngredientIds에는 대표 식재료 id 하나를 우선 넣어주세요.
 // 적용 위치: 홈 > 식재료 선택 후 메뉴 추천, 장보기 재료 목록, 펫홈 식재료 먹이기.
 export const menus: Menu[] = [
-  createMenu('spring-herb-bibimbap', '봄나물 비빔밥', '봄', '맑은 날', 30, '#75b84f', ['dallae'], [
+  createMenu('spring-herb-bibimbap', '달래비빔밥', '봄', '맑은 날', 30, '#75b84f', ['dallae'], [
     ['달래', '1묶음', 2500], ['냉이', '1봉', 2900], ['고추장', '1통', 3500],
   ]),
-  createMenu('dallae-soy-noodle', '달래 간장국수', '봄', '가벼운 날', 27, '#6fb85d', ['dallae'], [
+  createMenu('dallae-soy-noodle', '달래간장국수', '봄', '가벼운 날', 27, '#6fb85d', ['dallae'], [
     ['달래', '1묶음', 2500], ['소면', '1봉', 3200], ['간장', '1병', 3100],
   ]),
-  createMenu('naengi-soybean-soup', '냉이 된장국', '봄', '따뜻한 날', 31, '#8abd63', ['naengi'], [
+  createMenu('naengi-soybean-soup', '냉이된장국', '봄', '따뜻한 날', 31, '#8abd63', ['naengi'], [
     ['냉이', '1봉', 2900], ['된장', '1통', 4200], ['두부', '1모', 2500],
   ]),
-  createMenu('strawberry-toast', '딸기 프렌치토스트', '봄', '브런치 날', 29, '#f06b7d', ['strawberry'], [
+  createMenu('strawberry-toast', '딸기프렌치토스트', '봄', '브런치 날', 29, '#f06b7d', ['strawberry'], [
     ['딸기', '1팩', 6500], ['식빵', '1봉', 3200], ['생크림', '1팩', 3900],
   ]),
-  createMenu('strawberry-salad', '딸기 리코타 샐러드', '봄', '산뜻한 날', 26, '#ec7184', ['strawberry'], [
+  createMenu('strawberry-salad', '딸기리코타샐러드', '봄', '산뜻한 날', 26, '#ec7184', ['strawberry'], [
     ['딸기', '1팩', 6500], ['리코타', '1팩', 5200], ['샐러드 채소', '1팩', 3200],
   ]),
-  createMenu('jukkumi-stir-fry', '주꾸미 볶음', '봄', '매콤한 날', 41, '#d96b4f', ['jukkumi'], [
+  createMenu('jukkumi-stir-fry', '주꾸미볶음', '봄', '매콤한 날', 41, '#d96b4f', ['jukkumi'], [
     ['주꾸미', '300g', 9800], ['양파', '1개', 1200], ['고추장', '1통', 3500],
   ]),
-  createMenu('spring-cabbage-geotjeori', '봄동 겉절이', '봄', '가벼운 반찬', 24, '#8abd63', ['spring-cabbage'], [
+  createMenu('spring-cabbage-geotjeori', '봄동겉절이', '봄', '가벼운 반찬', 24, '#8abd63', ['spring-cabbage'], [
     ['봄동', '1포기', 3200], ['쪽파', '1줌', 1800], ['고춧가루', '1봉', 4200],
   ]),
-  createMenu('dureup-tempura', '두릅 튀김', '봄', '바삭한 날', 33, '#6aa85e', ['dureup'], [
+  createMenu('dureup-tempura', '두릅튀김', '봄', '바삭한 날', 33, '#6aa85e', ['dureup'], [
     ['두릅', '1팩', 6200], ['튀김가루', '1봉', 3300], ['간장', '1병', 3100],
   ]),
   createMenu('minari-pancake', '미나리전', '봄', '향긋한 날', 28, '#52a064', ['minari'], [
@@ -35,16 +35,16 @@ export const menus: Menu[] = [
   createMenu('mugwort-soup', '쑥국', '봄', '향긋한 국물', 26, '#6ca45c', ['mugwort'], [
     ['쑥', '1봉', 2800], ['된장', '1통', 4200], ['두부', '1모', 2500],
   ]),
-  createMenu('bamboo-shoot-rice', '죽순 솥밥', '봄', '아삭한 날', 34, '#8abf63', ['bamboo-shoot'], [
+  createMenu('bamboo-shoot-rice', '죽순솥밥', '봄', '아삭한 날', 34, '#8abf63', ['bamboo-shoot'], [
     ['죽순', '1팩', 6200], ['쌀', '2컵', 1800], ['간장', '1병', 3100],
   ]),
-  createMenu('clam-kalguksu', '바지락 칼국수', '봄', '시원한 국물', 39, '#5c9ab8', ['clam'], [
+  createMenu('clam-kalguksu', '바지락칼국수', '봄', '시원한 국물', 39, '#5c9ab8', ['clam'], [
     ['바지락', '300g', 7600], ['칼국수면', '1봉', 3300], ['애호박', '1개', 1800],
   ]),
-  createMenu('watermelon-kongguksu', '수박 콩국수', '여름', '더운 날', 34, '#ff8a58', ['watermelon'], [
+  createMenu('watermelon-kongguksu', '수박콩국수', '여름', '더운 날', 34, '#ff8a58', ['watermelon'], [
     ['콩국수면', '1인분', 3200], ['수박', '1/6통', 5800], ['콩국물', '500ml', 4200],
   ]),
-  createMenu('watermelon-feta-salad', '수박 페타 샐러드', '여름', '가벼운 날', 28, '#f05d5e', ['watermelon'], [
+  createMenu('watermelon-feta-salad', '수박페타샐러드', '여름', '가벼운 날', 28, '#f05d5e', ['watermelon'], [
     ['수박', '1/8통', 3600], ['샐러드 채소', '1팩', 3200], ['페타치즈', '80g', 5200],
   ]),
   createMenu('watermelon-bingsu', '수박빙수', '여름', '달콤한 날', 24, '#f47f84', ['watermelon'], [
@@ -68,10 +68,10 @@ export const menus: Menu[] = [
   createMenu('watermelon-sherbet', '수박셔벗', '여름', '달콤한 날', 20, '#ef7b8a', ['watermelon'], [
     ['수박', '1/4통', 5800], ['꿀', '1병', 4300], ['민트', '1팩', 1800],
   ]),
-  createMenu('peach-caprese', '복숭아 카프레제', '여름', '입맛 돋는 날', 32, '#f79d8a', ['peach'], [
+  createMenu('peach-caprese', '복숭아카프레제', '여름', '입맛 돋는 날', 32, '#f79d8a', ['peach'], [
     ['복숭아', '2개', 6200], ['모차렐라', '1팩', 4800], ['바질', '1팩', 2500],
   ]),
-  createMenu('peach-yogurt-bowl', '복숭아 요거트볼', '여름', '아침 메뉴', 24, '#ffb39f', ['peach'], [
+  createMenu('peach-yogurt-bowl', '복숭아요거트볼', '여름', '아침 메뉴', 24, '#ffb39f', ['peach'], [
     ['복숭아', '1개', 3100], ['그릭요거트', '1컵', 4200], ['그래놀라', '1봉', 3900],
   ]),
   createMenu('peach-bingsu', '복숭아빙수', '여름', '달콤한 날', 22, '#ff9f9d', ['peach'], [
@@ -80,7 +80,7 @@ export const menus: Menu[] = [
   createMenu('peach-cheong', '복숭아청', '여름', '달콤한 날', 18, '#f7a47c', ['peach'], [
     ['복숭아', '3개', 9300], ['설탕', '1봉', 3200],
   ]),
-  createMenu('peach-compote', '복숭아 콤포트', '여름', '부드러운 날', 20, '#f2a66f', ['peach'], [
+  createMenu('peach-compote', '복숭아콤포트', '여름', '부드러운 날', 20, '#f2a66f', ['peach'], [
     ['복숭아', '2개', 6200], ['꿀', '1병', 4300], ['레몬', '1개', 1800],
   ]),
   createMenu('peach-jorim', '조림', '여름', '달콤한 날', 19, '#e9a05f', ['peach'], [
@@ -89,25 +89,25 @@ export const menus: Menu[] = [
   createMenu('peach-salad', '복숭아샐러드', '여름', '상큼한 날', 21, '#ee9a78', ['peach'], [
     ['복숭아', '2개', 6200], ['샐러드 채소', '1팩', 3200], ['치즈', '1봉', 4800],
   ]),
-  createMenu('peach-sangria', '복숭아 상그리아', '여름', '파티 메뉴', 23, '#f08c72', ['peach'], [
+  createMenu('peach-sangria', '복숭아상그리아', '여름', '파티 메뉴', 23, '#f08c72', ['peach'], [
     ['복숭아', '2개', 6200], ['탄산수', '1병', 1800], ['베리', '1팩', 4200],
   ]),
-  createMenu('peach-smoothie', '복숭아 스무디', '여름', '간식 시간', 21, '#f59b84', ['peach'], [
+  createMenu('peach-smoothie', '복숭아스무디', '여름', '간식 시간', 21, '#f59b84', ['peach'], [
     ['복숭아', '2개', 6200], ['요거트', '1컵', 4200], ['우유', '500ml', 3200],
   ]),
-  createMenu('peach-tart', '복숭아 타르트', '여름', '디저트', 22, '#e7a760', ['peach'], [
+  createMenu('peach-tart', '복숭아타르트', '여름', '디저트', 22, '#e7a760', ['peach'], [
     ['복숭아', '2개', 6200], ['타르트지', '1개', 5200], ['크림', '1팩', 3600],
   ]),
   createMenu('peach-cake', '케이크', '여름', '디저트', 22, '#eaa17a', ['peach'], [
     ['복숭아', '2개', 6200], ['케이크 시트', '1개', 5200], ['생크림', '1팩', 4800],
   ]),
-  createMenu('corn-pot-rice', '초당옥수수 솥밥', '여름', '든든한 날', 36, '#f4c84d', ['corn'], [
+  createMenu('corn-pot-rice', '초당옥수수솥밥', '여름', '든든한 날', 36, '#f4c84d', ['corn'], [
     ['초당옥수수', '2개', 5600], ['쌀', '2컵', 1800], ['버터', '1조각', 1200],
   ]),
-  createMenu('corn-cold-soup', '초당옥수수 냉수프', '여름', '가벼운 날', 29, '#efbd42', ['corn'], [
+  createMenu('corn-cold-soup', '초당옥수수냉수프', '여름', '가벼운 날', 29, '#efbd42', ['corn'], [
     ['초당옥수수', '2개', 5600], ['우유', '500ml', 2600], ['양파', '1개', 1000],
   ]),
-  createMenu('corn-boiled', '초당옥수수 삶기', '여름', '간식 시간', 18, '#f5c95c', ['corn'], [
+  createMenu('corn-boiled', '초당옥수수삶기', '여름', '간식 시간', 18, '#f5c95c', ['corn'], [
     ['초당옥수수', '2개', 5600], ['소금', '1봉', 900],
   ]),
   createMenu('corn-grill', '구이', '여름', '고소한 날', 18, '#e9b64f', ['corn'], [
@@ -128,13 +128,13 @@ export const menus: Menu[] = [
   createMenu('corn-salad', '초당옥수수샐러드', '여름', '상큼한 날', 20, '#edc04c', ['corn'], [
     ['초당옥수수', '2개', 5600], ['샐러드 채소', '1팩', 3200], ['치즈', '1봉', 4800],
   ]),
-  createMenu('tomato-cold-pasta', '토마토 냉파스타', '여름', '더운 날', 35, '#e85b4f', ['tomato'], [
+  createMenu('tomato-cold-pasta', '토마토냉파스타', '여름', '더운 날', 35, '#e85b4f', ['tomato'], [
     ['토마토', '3개', 4200], ['파스타면', '1봉', 3300], ['올리브오일', '1병', 6500],
   ]),
-  createMenu('tomato-marinade', '토마토 마리네이드', '여름', '상큼한 날', 25, '#dd5147', ['tomato'], [
+  createMenu('tomato-marinade', '토마토마리네이드', '여름', '상큼한 날', 25, '#dd5147', ['tomato'], [
     ['토마토', '4개', 5600], ['올리브오일', '1병', 6500], ['양파', '1개', 1000],
   ]),
-  createMenu('tomato-pickle', '방울토마토 절임', '여름', '상큼한 날', 18, '#e86658', ['tomato'], [
+  createMenu('tomato-pickle', '방울토마토절임', '여름', '상큼한 날', 18, '#e86658', ['tomato'], [
     ['방울토마토', '1팩', 6500], ['식초', '1병', 2800], ['설탕', '1봉', 3200],
   ]),
   createMenu('tomato-caprese', '토마토카프레제', '여름', '입맛 돋는 날', 20, '#e9695c', ['tomato'], [
@@ -152,10 +152,10 @@ export const menus: Menu[] = [
   createMenu('tomato-soup', '토마토수프', '여름', '부드러운 날', 20, '#d95448', ['tomato'], [
     ['토마토', '4개', 5600], ['양파', '1개', 1000], ['크림', '1팩', 3600],
   ]),
-  createMenu('cucumber-cold-soup', '오이 냉국', '여름', '무더운 날', 26, '#65b96e', ['cucumber'], [
+  createMenu('cucumber-cold-soup', '오이냉국', '여름', '무더운 날', 26, '#65b96e', ['cucumber'], [
     ['오이', '2개', 2600], ['미역', '1봉', 2200], ['식초', '1병', 2900],
   ]),
-  createMenu('cucumber-bibim-noodle', '오이 비빔국수', '여름', '입맛 돋는 날', 31, '#68aa58', ['cucumber'], [
+  createMenu('cucumber-bibim-noodle', '오이비빔국수', '여름', '입맛 돋는 날', 31, '#68aa58', ['cucumber'], [
     ['오이', '1개', 1300], ['소면', '1봉', 3200], ['고추장', '1통', 3500],
   ]),
   createMenu('cucumber-oiji', '오이지', '여름', '상큼한 날', 18, '#78b86a', ['cucumber'], [
@@ -176,7 +176,7 @@ export const menus: Menu[] = [
   createMenu('cucumber-salad', '오이샐러드', '여름', '상큼한 날', 18, '#6eb66e', ['cucumber'], [
     ['오이', '2개', 2600], ['샐러드 채소', '1팩', 3200], ['치즈', '1봉', 4800],
   ]),
-  createMenu('eggplant-donburi', '가지 덮밥', '여름', '든든한 날', 34, '#7b5ab6', ['eggplant'], [
+  createMenu('eggplant-donburi', '가지덮밥', '여름', '든든한 날', 34, '#7b5ab6', ['eggplant'], [
     ['가지', '2개', 3200], ['밥', '1공기', 1200], ['간장', '1병', 3100],
   ]),
   createMenu('eggplant-grill', '가지구이', '여름', '가볍게 먹는 날', 18, '#7f5ab0', ['eggplant'], [
@@ -197,7 +197,7 @@ export const menus: Menu[] = [
   createMenu('eggplant-fried', '가지튀김', '여름', '간식 시간', 18, '#8c64b5', ['eggplant'], [
     ['가지', '2개', 3200], ['튀김가루', '1봉', 3600], ['식용유', '1병', 5200],
   ]),
-  createMenu('melon-smoothie', '참외 스무디', '여름', '간식 시간', 23, '#e9c955', ['melon'], [
+  createMenu('melon-smoothie', '참외스무디', '여름', '간식 시간', 23, '#e9c955', ['melon'], [
     ['참외', '2개', 5400], ['요거트', '1컵', 3500], ['꿀', '1병', 4300],
   ]),
   createMenu('melon-juice', '참외주스', '여름', '가벼운 날', 20, '#e8c64f', ['melon'], [
@@ -248,7 +248,7 @@ export const menus: Menu[] = [
   createMenu('zucchini-stir-fry', '애호박볶음', '여름', '반찬 만드는 날', 20, '#72aa52', ['zucchini'], [
     ['애호박', '1개', 1800], ['양파', '1개', 1000], ['새우젓', '1병', 3300],
   ]),
-  createMenu('perilla-leaf-rice', '깻잎 쌈밥', '여름', '향긋한 날', 30, '#4f9f5f', ['perilla-leaf'], [
+  createMenu('perilla-leaf-rice', '깻잎쌈밥', '여름', '향긋한 날', 30, '#4f9f5f', ['perilla-leaf'], [
     ['깻잎', '2묶음', 2800], ['밥', '1공기', 1200], ['쌈장', '1통', 3300],
   ]),
   createMenu('perilla-jeon', '깻잎전', '여름', '비 오는 날', 24, '#5fa660', ['perilla-leaf'], [
@@ -260,7 +260,7 @@ export const menus: Menu[] = [
   createMenu('perilla-jangajji', '깻잎장아찌', '여름', '밑반찬 만드는 날', 22, '#5aa05b', ['perilla-leaf'], [
     ['깻잎', '2묶음', 2800], ['간장', '1병', 3100], ['식초', '1병', 2900],
   ]),
-  createMenu('potato-salad', '감자 샐러드', '여름', '부드러운 날', 25, '#d6a94a', ['potato'], [
+  createMenu('potato-salad', '감자샐러드', '여름', '부드러운 날', 25, '#d6a94a', ['potato'], [
     ['감자', '3개', 3600], ['달걀', '6구', 4200], ['마요네즈', '1병', 3900],
   ]),
   createMenu('potato-jeon', '감자전', '여름', '비 오는 날', 24, '#d4a748', ['potato'], [
@@ -287,7 +287,7 @@ export const menus: Menu[] = [
   createMenu('young-radish-kimchi', '열무김치', '여름', '밑반찬 만드는 날', 24, '#68a852', ['young-radish'], [
     ['열무', '1단', 3800], ['고춧가루', '1봉', 4200], ['마늘', '1봉', 2200],
   ]),
-  createMenu('plum-ade', '자두 에이드', '여름', '새콤한 간식', 22, '#d85f7a', ['plum'], [
+  createMenu('plum-ade', '자두에이드', '여름', '새콤한 간식', 22, '#d85f7a', ['plum'], [
     ['자두', '5개', 5800], ['탄산수', '1병', 1800], ['꿀', '1병', 4300],
   ]),
   createMenu('plum-cheong', '자두청', '여름', '달콤한 날', 20, '#ca5375', ['plum'], [
@@ -302,7 +302,7 @@ export const menus: Menu[] = [
   createMenu('plum-tart', '자두타르트', '여름', '간식 시간', 22, '#d25b7b', ['plum'], [
     ['자두', '4개', 4600], ['타르트지', '1팩', 4200], ['크림치즈', '1팩', 5200],
   ]),
-  createMenu('grape-yogurt', '포도 요거트볼', '여름', '달콤한 간식', 24, '#7656a8', ['grape'], [
+  createMenu('grape-yogurt', '포도요거트볼', '여름', '달콤한 간식', 24, '#7656a8', ['grape'], [
     ['포도', '1송이', 6200], ['그릭요거트', '1컵', 4200], ['그래놀라', '1봉', 3900],
   ]),
   createMenu('grape-cheong', '포도청', '여름', '달콤한 날', 20, '#7354a8', ['grape'], [
@@ -317,7 +317,7 @@ export const menus: Menu[] = [
   createMenu('grape-salad', '포도샐러드', '여름', '상큼한 날', 22, '#7b5bb0', ['grape'], [
     ['포도', '1송이', 6200], ['샐러드 채소', '1팩', 3200], ['치즈', '1봉', 4800],
   ]),
-  createMenu('eel-rice-bowl', '장어 덮밥', '여름', '든든한 보양식', 46, '#9a6a42', ['eel'], [
+  createMenu('eel-rice-bowl', '장어덮밥', '여름', '든든한 보양식', 46, '#9a6a42', ['eel'], [
     ['장어', '1팩', 14800], ['밥', '1공기', 1200], ['데리야키소스', '1병', 3900],
   ]),
   createMenu('eel-baeksuk', '장어백숙', '여름', '든든한 보양식', 44, '#a4784c', ['eel'], [
@@ -332,7 +332,7 @@ export const menus: Menu[] = [
   createMenu('eel-soup', '장어탕', '여름', '든든한 보양식', 44, '#8f6a45', ['eel'], [
     ['장어', '1팩', 14800], ['시래기', '1봉', 2800], ['된장', '1통', 3300],
   ]),
-  createMenu('gizzard-shad-salad', '전어 무침', '가을', '신선한 날', 42, '#5f9f68', ['gizzard-shad'], [
+  createMenu('gizzard-shad-salad', '전어무침', '가을', '신선한 날', 42, '#5f9f68', ['gizzard-shad'], [
     ['전어', '300g', 9800], ['쪽파', '1줌', 1800], ['고추장', '1통', 3500],
   ]),
   createMenu('gizzard-shad-grill', '전어구이', '가을', '고소한 날', 18, '#6d9c78', ['gizzard-shad'], [
@@ -350,7 +350,7 @@ export const menus: Menu[] = [
   createMenu('gizzard-shad-fried', '전어튀김', '가을', '바삭한 날', 20, '#caa55c', ['gizzard-shad'], [
     ['전어', '300g', 9800], ['튀김가루', '1봉', 3600], ['식용유', '1병', 5200],
   ]),
-  createMenu('sweet-potato-gratin', '고구마 그라탕', '가을', '포근한 날', 31, '#d9853b', ['sweet-potato'], [
+  createMenu('sweet-potato-gratin', '고구마그라탕', '가을', '포근한 날', 31, '#d9853b', ['sweet-potato'], [
     ['고구마', '2개', 4200], ['치즈', '1봉', 4800], ['우유', '500ml', 2600],
   ]),
   createMenu('sweet-potato-roasted', '군고구마', '가을', '포근한 날', 20, '#c96f63', ['sweet-potato'], [
@@ -380,7 +380,7 @@ export const menus: Menu[] = [
   createMenu('sweet-potato-fried', '고구마튀김', '가을', '바삭한 날', 20, '#d18a3c', ['sweet-potato'], [
     ['고구마', '2개', 4200], ['튀김가루', '1봉', 3600], ['식용유', '1병', 5200],
   ]),
-  createMenu('mushroom-hotpot', '버섯 전골', '가을', '뜨끈한 날', 39, '#9a7656', ['mushroom'], [
+  createMenu('mushroom-hotpot', '버섯전골', '가을', '뜨끈한 날', 39, '#9a7656', ['mushroom'], [
     ['버섯모둠', '1팩', 6800], ['육수', '1팩', 3300], ['쌀', '1컵', 1200],
   ]),
   createMenu('mushroom-bulgogi', '버섯불고기', '가을', '든든한 날', 20, '#9b6f4f', ['mushroom'], [
@@ -410,25 +410,25 @@ export const menus: Menu[] = [
   createMenu('mushroom-fried', '버섯튀김', '가을', '바삭한 날', 20, '#b4864c', ['mushroom'], [
     ['버섯모둠', '1팩', 6800], ['튀김가루', '1봉', 3600], ['식용유', '1병', 5200],
   ]),
-  createMenu('pear-salad', '배 샐러드', '가을', '가벼운 날', 25, '#caa95a', ['pear'], [
+  createMenu('pear-salad', '배샐러드', '가을', '가벼운 날', 25, '#caa95a', ['pear'], [
     ['배', '1개', 3800], ['루꼴라', '1팩', 3300], ['견과류', '1봉', 4500],
   ]),
-  createMenu('chestnut-rice', '밤 솥밥', '가을', '든든한 날', 34, '#8c6a42', ['chestnut'], [
+  createMenu('chestnut-rice', '밤솥밥', '가을', '든든한 날', 34, '#8c6a42', ['chestnut'], [
     ['밤', '1봉', 6200], ['쌀', '2컵', 1800], ['버터', '1조각', 1200],
   ]),
-  createMenu('pumpkin-soup', '단호박 수프', '가을', '부드러운 날', 29, '#d88a38', ['pumpkin'], [
+  createMenu('pumpkin-soup', '단호박수프', '가을', '부드러운 날', 29, '#d88a38', ['pumpkin'], [
     ['단호박', '1통', 5200], ['우유', '500ml', 2600], ['양파', '1개', 1200],
   ]),
-  createMenu('apple-pork-salad', '사과 돼지고기 샐러드', '가을', '상큼한 날', 35, '#d95d5d', ['apple'], [
+  createMenu('apple-pork-salad', '사과돼지고기샐러드', '가을', '상큼한 날', 35, '#d95d5d', ['apple'], [
     ['사과', '2개', 4200], ['돼지고기', '200g', 7600], ['샐러드 채소', '1팩', 3200],
   ]),
-  createMenu('shrimp-salt-grill', '대하 소금구이', '가을', '고소한 날', 44, '#d98b55', ['shrimp'], [
+  createMenu('shrimp-salt-grill', '대하소금구이', '가을', '고소한 날', 44, '#d98b55', ['shrimp'], [
     ['대하', '300g', 12000], ['굵은소금', '1봉', 1800], ['레몬', '1개', 1500],
   ]),
-  createMenu('persimmon-salad', '감 샐러드', '가을', '달콤한 날', 25, '#d9893c', ['persimmon'], [
+  createMenu('persimmon-salad', '감샐러드', '가을', '달콤한 날', 25, '#d9893c', ['persimmon'], [
     ['감', '2개', 4300], ['루꼴라', '1팩', 3300], ['견과류', '1봉', 4500],
   ]),
-  createMenu('fig-toast', '무화과 토스트', '가을', '브런치 날', 30, '#9b5f7b', ['fig'], [
+  createMenu('fig-toast', '무화과토스트', '가을', '브런치 날', 30, '#9b5f7b', ['fig'], [
     ['무화과', '4개', 7200], ['식빵', '1봉', 3200], ['크림치즈', '1통', 5200],
   ]),
   createMenu('mackerel-grill', '고등어구이', '가을', '집밥 먹는 날', 36, '#4f7890', ['mackerel'], [
@@ -437,34 +437,34 @@ export const menus: Menu[] = [
   createMenu('oyster-gukbap', '굴국밥', '겨울', '따뜻한 날', 48, '#4f97b8', ['oyster'], [
     ['생굴', '200g', 7600], ['대파', '1대', 1200], ['쌀', '1공기', 1200],
   ]),
-  createMenu('radish-beef-soup', '무 소고기국', '겨울', '시원한 국물', 36, '#7fa7b8', ['radish'], [
+  createMenu('radish-beef-soup', '무소고기국', '겨울', '시원한 국물', 36, '#7fa7b8', ['radish'], [
     ['무', '1/3개', 1900], ['소고기', '200g', 8900], ['대파', '1대', 1200],
   ]),
-  createMenu('cabbage-hotpot', '배추 밀푀유나베', '겨울', '추운 날', 43, '#7fb86a', ['cabbage'], [
+  createMenu('cabbage-hotpot', '배추밀푀유나베', '겨울', '추운 날', 43, '#7fb86a', ['cabbage'], [
     ['배추', '1/2포기', 4200], ['샤브샤브용 고기', '300g', 9800], ['육수', '1팩', 3300],
   ]),
-  createMenu('mandarin-pudding', '귤 푸딩', '겨울', '간식 시간', 22, '#f2a13b', ['mandarin'], [
+  createMenu('mandarin-pudding', '귤푸딩', '겨울', '간식 시간', 22, '#f2a13b', ['mandarin'], [
     ['귤', '5개', 4300], ['우유', '500ml', 2600], ['젤라틴', '1봉', 2400],
   ]),
   createMenu('cod-stew', '대구탕', '겨울', '뜨끈한 날', 45, '#4f8faf', ['cod'], [
     ['대구', '1팩', 9800], ['무', '1/4개', 1500], ['쑥갓', '1봉', 2600],
   ]),
-  createMenu('spinach-namul', '시금치 나물', '겨울', '담백한 반찬', 23, '#5f9f68', ['spinach'], [
+  createMenu('spinach-namul', '시금치나물', '겨울', '담백한 반찬', 23, '#5f9f68', ['spinach'], [
     ['시금치', '1단', 3200], ['참기름', '1병', 5900], ['깨', '1봉', 2200],
   ]),
-  createMenu('cockle-bibimbap', '꼬막 비빔밥', '겨울', '감칠맛 나는 날', 42, '#8a6a58', ['cockle'], [
+  createMenu('cockle-bibimbap', '꼬막비빔밥', '겨울', '감칠맛 나는 날', 42, '#8a6a58', ['cockle'], [
     ['꼬막', '300g', 9800], ['밥', '1공기', 1200], ['부추', '1줌', 2200],
   ]),
-  createMenu('lotus-root-jorim', '연근 조림', '겨울', '아삭한 반찬', 27, '#b48a64', ['lotus-root'], [
+  createMenu('lotus-root-jorim', '연근조림', '겨울', '아삭한 반찬', 27, '#b48a64', ['lotus-root'], [
     ['연근', '1팩', 4200], ['간장', '1병', 3100], ['올리고당', '1병', 3600],
   ]),
-  createMenu('burdock-gimbap', '우엉 김밥', '겨울', '든든한 도시락', 32, '#9c744c', ['burdock'], [
+  createMenu('burdock-gimbap', '우엉김밥', '겨울', '든든한 도시락', 32, '#9c744c', ['burdock'], [
     ['우엉', '1팩', 3600], ['김', '1봉', 2800], ['밥', '2공기', 2400],
   ]),
-  createMenu('hallabong-salad', '한라봉 샐러드', '겨울', '상큼한 날', 26, '#f29a3b', ['hallabong'], [
+  createMenu('hallabong-salad', '한라봉샐러드', '겨울', '상큼한 날', 26, '#f29a3b', ['hallabong'], [
     ['한라봉', '2개', 7800], ['샐러드 채소', '1팩', 3200], ['리코타', '1팩', 5200],
   ]),
-  createMenu('yellowtail-sashimi-bowl', '방어 덮밥', '겨울', '기름진 제철', 44, '#4f8faf', ['yellowtail'], [
+  createMenu('yellowtail-sashimi-bowl', '방어덮밥', '겨울', '기름진 제철', 44, '#4f8faf', ['yellowtail'], [
     ['방어', '200g', 13800], ['밥', '1공기', 1200], ['무순', '1팩', 1800],
   ]),
 ]
