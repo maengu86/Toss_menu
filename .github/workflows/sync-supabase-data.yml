@@ -31,7 +31,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
+      - name: Check database secret
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "SUPABASE_DB_URL secret is missing."
+            exit 1
+          fi
+          echo "Database secret is configured. If the next step fails with Network is unreachable, use the Supabase Pooler connection string."
+
       - name: Apply data sync SQL
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          PGSSLMODE: require
         run: psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f supabase/latest-data-sync.sql
