@@ -306,7 +306,7 @@
 
 .season-panel {
   overflow: hidden;
-  margin: 10px 0 20px;
+  margin: 0 0 12px;
   padding: 0;
   border: 1px solid #e5e8eb;
   border-radius: 10px;
@@ -334,7 +334,7 @@
 
 .season-tabs button {
   width: 74px;
-  min-height: 42px;
+  min-height: 36px;
   border: 0;
   border-radius: 0;
   clip-path: none;
@@ -392,7 +392,7 @@
 
 .season-tabs button.active {
   color: #3f3a36;
-  min-height: 42px;
+  min-height: 36px;
   position: relative;
   z-index: 2;
   border-radius: 0;
@@ -406,11 +406,11 @@
 }
 
 .season-panel-index {
-  --season-index-height: 237px;
+  --season-index-height: 204px;
   display: grid;
   grid-template-columns: 90px minmax(0, 1fr);
   align-items: stretch;
-  margin-top: 4px;
+  margin-top: 0;
   box-shadow: 0 10px 14px -10px rgba(25, 31, 40, 0.24);
 }
 
@@ -418,7 +418,7 @@
   height: var(--season-index-height);
   grid-template-rows: repeat(4, minmax(0, 1fr));
   box-sizing: border-box;
-  padding: 8px 0 8px 8px;
+  padding: 6px 0 6px 8px;
   border-right: 0;
   background: #ffffff;
 }
@@ -433,11 +433,11 @@
   box-sizing: border-box;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-auto-rows: 66px;
+  grid-auto-rows: 58px;
   justify-content: stretch;
   align-content: start;
-  gap: 7px;
-  padding: 9px 7px 7px;
+  gap: 6px;
+  padding: 7px 7px 6px;
   background: #ffffff;
   overflow-x: hidden;
   overflow-y: auto;
@@ -454,12 +454,12 @@
 .season-panel-index .seasonal-tile {
   width: 100%;
   min-width: 0;
-  height: 66px;
-  min-height: 66px;
+  height: 58px;
+  min-height: 58px;
   aspect-ratio: auto;
   align-content: center;
-  gap: 4px;
-  padding: 7px 3px 3px;
+  gap: 3px;
+  padding: 5px 3px 3px;
   border-radius: 8px;
   background: transparent;
   box-shadow: none;
@@ -1191,6 +1191,9 @@
   border-top: 1px solid rgba(102, 79, 45, 0.12);
   background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(16px);
+  overscroll-behavior: contain;
+  touch-action: none;
+  user-select: none;
 }
 
 .tab-bar button {
@@ -1936,15 +1939,15 @@
   appearance: none;
   display: grid;
   place-items: center;
-  border: 1.5px solid #d1d6db;
-  border-radius: 5px;
+  border: 1.5px solid rgba(244, 162, 97, 0.55);
+  border-radius: 999px;
   background: #ffffff;
 }
 
 .toss-select-all input:checked::after {
   content: "✓";
-  color: #6b7684;
-  font-size: 13px;
+  color: #ffffff;
+  font-size: 12px;
   font-weight: 900;
   line-height: 1;
 }
@@ -2045,16 +2048,16 @@
   appearance: none;
   display: grid;
   place-items: center;
-  border: 1.5px solid #d1d6db;
-  border-radius: 4px;
+  border: 1.5px solid rgba(244, 162, 97, 0.55);
+  border-radius: 999px;
   background: #ffffff;
 }
 
 .toss-menu-box-head input:checked::after,
 .toss-row input:checked::after {
   content: "✓";
-  color: #6b7684;
-  font-size: 13px;
+  color: #ffffff;
+  font-size: 12px;
   font-weight: 900;
   line-height: 1;
 }
@@ -2066,18 +2069,28 @@
 }
 
 .toss-menu-remove {
-  min-height: 34px;
-  padding: 0 10px;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  display: grid;
+  place-items: center;
+  padding: 0;
   border: 0;
-  border-radius: 10px;
-  color: #6b7684;
-  font-size: 12px;
+  border-radius: 999px;
+  color: #8b95a1;
+  font-size: 22px;
   font-weight: 900;
+  line-height: 1;
   background: #f2f4f6;
 }
 
 .toss-menu-remove:active {
   background: #e5e8eb;
+}
+
+.toss-menu-remove .sudal-ui-icon {
+  width: 22px;
+  height: 22px;
 }
 
 .toss-list .toss-row {
@@ -2115,8 +2128,8 @@
   appearance: none;
   display: grid;
   place-items: center;
-  border: 1.5px solid #d1d6db;
-  border-radius: 4px;
+  border: 1.5px solid rgba(244, 162, 97, 0.55);
+  border-radius: 999px;
   background: #ffffff;
 }
 
@@ -2124,8 +2137,10 @@
    개인 수정 가능: 체크 색상은 color 값으로 조정해도 됩니다.
    적용 위치: 장보기 장바구니의 메뉴/식재료 체크박스. */
 .toss-menu-box-head input:checked,
+.toss-select-all input:checked,
 .toss-row input:checked {
-  background: #ffffff;
+  border-color: var(--orange);
+  background: var(--orange);
 }
 
 .toss-product-list strong {
@@ -2522,7 +2537,7 @@
   position: sticky;
   top: -26px;
   z-index: 90;
-  margin: -26px -20px 10px;
+  margin: -26px -20px 0;
   padding: 14px 16px 12px;
   border-bottom: 0;
   background: rgba(255, 255, 255, 0.97);
@@ -2913,8 +2928,8 @@
 }
 
 .home-purchase-section {
-  margin-top: 20px;
-  padding: 6px 10px 10px;
+  margin-top: 10px;
+  padding: 4px 10px 8px;
   position: relative;
   z-index: 6;
   overflow: visible;
@@ -2929,7 +2944,7 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0;
   margin-top: 0;
-  padding: 4px 0 12px;
+  padding: 2px 0 8px;
   border: 0;
   background: transparent;
 }
@@ -3055,7 +3070,7 @@
 .home-purchase-tabs button {
   width: 100%;
   min-width: 0;
-  min-height: 52px;
+  min-height: 38px;
   display: grid;
   place-items: center;
   border: 0;
@@ -3073,13 +3088,13 @@
 .home-purchase-tabs button b {
   width: 44px;
   min-width: 44px;
-  height: 24px;
+  height: 21px;
   display: inline-grid;
   place-items: center;
   padding: 0;
   border-radius: 0;
   color: #49372f;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   line-height: 1;
   text-align: center;
@@ -3290,8 +3305,8 @@
 .home-delivery-panel {
   margin: 6px 0 0;
   box-sizing: border-box;
-  height: min(390px, calc(100svh - 570px));
-  max-height: min(390px, calc(100svh - 570px));
+  height: min(430px, calc(100svh - 515px));
+  max-height: min(430px, calc(100svh - 515px));
   min-height: 0;
   padding: 2px 4px 0 0;
   position: relative;
@@ -4106,12 +4121,22 @@
 }
 
 .shopping-cart-head {
-  padding: 10px 12px 0;
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  padding: 8px 12px 0;
   background: #ffffff;
 }
 
 .shopping-cart-head > button {
-  font-size: 37px;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
 }
 
 .shopping-cart-head > div {
@@ -5178,11 +5203,16 @@
   flex: 0 0 390px;
   position: relative;
   display: grid;
-  align-items: end;
+  align-items: center;
   justify-items: center;
   margin: 0;
   border: 0;
   border-radius: 0;
+}
+
+.pet-home-screen .pet-room-stage::before,
+.pet-home-screen .pet-room-stage .pet-stage::before {
+  display: none;
 }
 
 .pet-home-screen .pet-room-stage.has-room-image {
@@ -5196,7 +5226,7 @@
   min-height: 0;
   max-height: none;
   display: grid;
-  align-items: end;
+  align-items: center;
   justify-items: center;
   overflow: visible;
 }
@@ -5205,40 +5235,54 @@
   width: min(74%, 264px);
   max-width: 264px;
   max-height: 302px;
-  margin-bottom: 54px;
+  margin-bottom: 0;
   animation: none;
-  transform: none;
+  transform: translateY(-5px);
   filter: none;
 }
 
+.pet-room-stage.is-share-capturing .pet-stage-level,
+.pet-room-stage.is-share-capturing .pet-share-button {
+  visibility: hidden;
+}
+
 .pet-stage-level {
-  width: min(210px, calc(100% - 104px));
-  min-height: 30px;
+  width: min(196px, calc(100% - 92px));
+  min-height: 28px;
   display: grid;
-  grid-template-columns: auto minmax(76px, 1fr) auto;
+  grid-template-columns: auto minmax(72px, 1fr) auto;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
   position: absolute;
-  left: 50%;
-  bottom: 16px;
-  transform: translateX(-50%);
+  left: 14px;
+  top: 18px;
   z-index: 6;
-  padding: 7px 10px;
-  border: 1px solid rgba(201, 139, 82, 0.28);
+  padding: 6px 9px;
+  border: 1px solid rgba(188, 126, 72, 0.24);
   border-radius: 999px;
-  color: #825632;
-  background: rgba(255, 250, 244, 0.9);
-  box-shadow: 0 6px 18px rgba(132, 85, 42, 0.08);
-  backdrop-filter: blur(6px);
+  color: #7a4e2d;
+  background: rgba(255, 250, 244, 0.82);
+  box-shadow: none;
+  backdrop-filter: blur(8px);
+}
+
+.pet-stage-level::before {
+  display: none;
 }
 
 .pet-stage-level span,
 .pet-stage-level b {
-  color: #825632;
+  color: #7a4e2d;
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 900;
   line-height: 1;
   white-space: nowrap;
+}
+
+.pet-stage-level span {
+  padding: 0;
+  color: #7a4e2d;
+  background: transparent;
 }
 
 .pet-stage-level .progress-track {
