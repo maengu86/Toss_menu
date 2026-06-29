@@ -976,16 +976,15 @@ function ShoppingScreen({
   const checkedProductCount = checkedIngredients.filter((key) => allIngredientKeys.includes(key)).length
   const allChecked = allIngredientKeys.length > 0 && allIngredientKeys.every((key) => checkedIngredients.includes(key))
   const detailMenu = catalogMenus[0]
-  const [excludedDetailIngredientKeys, setExcludedDetailIngredientKeys] = useState<string[]>([])
+  const [selectedDetailIngredientKeys, setSelectedDetailIngredientKeys] = useState<string[]>([])
   const [cartMovePromptOpen, setCartMovePromptOpen] = useState(false)
   const [deliveryAddress, setDeliveryAddress] = useState('서울특별시 중구 세종대로 110')
   const [buyerPhone, setBuyerPhone] = useState('010-0000-0000')
   const [addressEditOpen, setAddressEditOpen] = useState(false)
   const [draftAddress, setDraftAddress] = useState(deliveryAddress)
   const [draftBuyerPhone, setDraftBuyerPhone] = useState(buyerPhone)
-  const selectedDetailIngredientKeys = detailMenu?.ingredients
-    .map((ingredient) => ingredientKey(detailMenu.id, ingredient.name))
-    .filter((key) => !excludedDetailIngredientKeys.includes(key)) ?? []
+  const detailIngredientKeys = detailMenu?.ingredients.map((ingredient) => ingredientKey(detailMenu.id, ingredient.name)) ?? []
+  const activeDetailIngredientKeys = selectedDetailIngredientKeys.filter((key) => detailIngredientKeys.includes(key))
   const selectedCartProducts = selectedMenus.flatMap((menu) => menu.ingredients
     .filter((ingredient) => checkedIngredients.includes(ingredientKey(menu.id, ingredient.name)))
     .map((ingredient) => {
@@ -995,17 +994,17 @@ function ShoppingScreen({
   const selectedCartQuantity = selectedCartProducts.reduce((total, product) => total + product.quantity, 0)
 
   function toggleDetailIngredient(key: string) {
-    setExcludedDetailIngredientKeys((current) => (
+    setSelectedDetailIngredientKeys((current) => (
       current.includes(key) ? current.filter((item) => item !== key) : [...current, key]
     ))
   }
 
   function addSelectedDetailIngredients(nextStep: 'cart' | 'checkout') {
-    if (!detailMenu || selectedDetailIngredientKeys.length === 0) return
+    if (!detailMenu || activeDetailIngredientKeys.length === 0) return
 
     detailMenu.ingredients.forEach((ingredient) => {
       const key = ingredientKey(detailMenu.id, ingredient.name)
-      if (selectedDetailIngredientKeys.includes(key)) onAddProduct(detailMenu.id, ingredient.name)
+      if (activeDetailIngredientKeys.includes(key)) onAddProduct(detailMenu.id, ingredient.name)
     })
     if (nextStep === 'cart') {
       setCartMovePromptOpen(true)
@@ -1047,7 +1046,7 @@ function ShoppingScreen({
               <div>
                 {detailMenu.ingredients.map((ingredient) => {
                   const key = ingredientKey(detailMenu.id, ingredient.name)
-                  const selected = selectedDetailIngredientKeys.includes(key)
+                  const selected = activeDetailIngredientKeys.includes(key)
                   return (
                     <button
                       aria-pressed={selected}
@@ -1067,14 +1066,14 @@ function ShoppingScreen({
           </div>
           <div className="shopping-detail-actions">
             <button
-              disabled={selectedDetailIngredientKeys.length === 0}
+              disabled={activeDetailIngredientKeys.length === 0}
               onClick={() => addSelectedDetailIngredients('cart')}
               type="button"
             >
               장바구니
             </button>
             <button
-              disabled={selectedDetailIngredientKeys.length === 0}
+              disabled={activeDetailIngredientKeys.length === 0}
               onClick={() => addSelectedDetailIngredients('checkout')}
               type="button"
             >
@@ -1127,7 +1126,9 @@ function ShoppingScreen({
       {step === 'cart' && (
         <>
           <div className="shopping-cart-head">
-            <div>{selectedMenus.length > 0 && <strong>장바구니 {checkedTotal}</strong>}</div>
+            <button aria-label="뒤로가기" onClick={onGoHome} type="button">
+              <img alt="" aria-hidden="true" className="sudal-ui-icon sudal-back-icon" src={getPetUiIconImage('back')} />
+            </button>
           </div>
           <div className="toss-menu-list">
             {selectedMenus.length === 0 && (
@@ -1173,10 +1174,10 @@ function ShoppingScreen({
                           }}
                           type="checkbox"
                         />
-                        <strong>오늘의 제철마켓</strong>
+                        <strong>{menu.name}</strong>
                       </label>
-                      <button className="toss-menu-remove" onClick={() => onRemoveMenu(menu.id)} type="button">
-                        선택삭제
+                      <button aria-label={`${menu.name} 삭제`} className="toss-menu-remove" onClick={() => onRemoveMenu(menu.id)} type="button">
+                        <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('clear')} />
                       </button>
                     </div>
                     <div className="ingredient-list toss-list toss-product-list">
@@ -1193,8 +1194,7 @@ function ShoppingScreen({
                             />
                             <em aria-hidden="true">{ingredientIconImage(item.name)}</em>
                             <span>
-                              <strong>내일 도착 예정</strong>
-                              <small>{item.name}, {item.quantity}</small>
+                              <strong>{item.name}</strong>
                             </span>
                             <div className="cart-product-side">
                               <b>
@@ -1271,8 +1271,7 @@ function ShoppingScreen({
               <article key={key}>
                 <em aria-hidden="true">{ingredientIconImage(ingredient.name)}</em>
                 <div>
-                  <strong>내일 도착 예정</strong>
-                  <span>{ingredient.name}, {ingredient.quantity}</span>
+                  <strong>{ingredient.name}</strong>
                   <b>{formatWon(ingredient.price * quantity)} · {quantity}개</b>
                   <small>무료 배송</small>
                 </div>
@@ -1307,8 +1306,6 @@ function ShoppingScreen({
                 </button>
               ))}
             </div>
-            <h2>토스포인트 사용</h2>
-            <div className="shopping-points"><span>0</span><b>원</b></div>
             <div className="shopping-total">
               <strong>총 결제 금액</strong><b>{formatWon(orderTotal)}</b>
               <span>총 주문 금액</span><span>{formatWon(checkedPrice)}</span>
@@ -2310,11 +2307,16 @@ function PetHomeScreen({
     const target = petRoomRef.current
     if (!target) return
 
+    target.classList.add('is-share-capturing')
     try {
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => resolve())
+      })
       const canvas = await renderPetHomeShareCanvas(target, {
         background,
         roomImage,
       })
+      target.classList.remove('is-share-capturing')
       const blob = await canvasToBlob(canvas)
       const file = new File([blob], 'mukbo-pet-home.png', { type: 'image/png' })
 
@@ -2330,6 +2332,8 @@ function PetHomeScreen({
       downloadBlob(blob, file.name)
     } catch {
       onShareFallback()
+    } finally {
+      target.classList.remove('is-share-capturing')
     }
   }
 
@@ -2485,7 +2489,12 @@ function TabBar({ current, cartCount, onChange }: { current: Screen; cartCount: 
   ]
 
   return (
-    <nav className="tab-bar" aria-label="하단 탭">
+    <nav
+      className="tab-bar"
+      aria-label="하단 탭"
+      onTouchMove={(event) => event.preventDefault()}
+      onWheel={(event) => event.preventDefault()}
+    >
       {tabs.map((tab) => (
         <button className={current === tab.id ? 'active' : ''} key={tab.id} onClick={() => onChange(tab.id)} type="button">
           <span className="tab-icon" aria-hidden="true">
