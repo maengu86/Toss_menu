@@ -5126,36 +5126,38 @@
   width: min(74%, 264px);
   max-width: 264px;
   max-height: 302px;
-  margin-bottom: 18px;
+  margin-bottom: 54px;
   animation: none;
   transform: none;
   filter: none;
 }
 
 .pet-stage-level {
-  width: min(196px, calc(100% - 92px));
-  min-height: 28px;
+  width: min(210px, calc(100% - 104px));
+  min-height: 30px;
   display: grid;
-  grid-template-columns: auto minmax(72px, 1fr) auto;
+  grid-template-columns: auto minmax(76px, 1fr) auto;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   position: absolute;
-  left: 14px;
-  top: 18px;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
   z-index: 6;
-  padding: 6px 9px;
-  border: 1px solid rgba(188, 126, 72, 0.24);
+  padding: 7px 10px;
+  border: 1px solid rgba(201, 139, 82, 0.28);
   border-radius: 999px;
-  color: #7a4e2d;
-  background: rgba(255, 250, 244, 0.82);
-  backdrop-filter: blur(8px);
+  color: #825632;
+  background: rgba(255, 250, 244, 0.9);
+  box-shadow: 0 6px 18px rgba(132, 85, 42, 0.08);
+  backdrop-filter: blur(6px);
 }
 
 .pet-stage-level span,
 .pet-stage-level b {
-  color: #7a4e2d;
+  color: #825632;
   font-size: 10px;
-  font-weight: 900;
+  font-weight: 800;
   line-height: 1;
   white-space: nowrap;
 }
