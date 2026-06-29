@@ -31,7 +31,53 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
+      - name: Check database secret
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "SUPABASE_DB_URL secret is missing."
+            exit 1
+          fi
+          node <<'NODE'
+          const connectionString = process.env.SUPABASE_DB_URL;
+          let url;
+
+          try {
+            url = new URL(connectionString);
+          } catch {
+            console.error("SUPABASE_DB_URL is not a valid PostgreSQL URL.");
+            process.exit(1);
+          }
+
+          const username = decodeURIComponent(url.username);
+          const host = url.hostname;
+          const port = url.port;
+
+          console.log(`Database host: ${host}`);
+          console.log(`Database port: ${port || "(default)"}`);
+          console.log(`Database user: ${username}`);
+
+          if (!host.includes("pooler.supabase.com")) {
+            console.error("Use the Supabase Pooler connection string, not the direct db.*.supabase.co URL.");
+            process.exit(1);
+          }
+
+          if (username !== "postgres.tjjmjqlbxskejvicghdh") {
+            console.error('Pooler username must be "postgres.tjjmjqlbxskejvicghdh".');
+            process.exit(1);
+          }
+
+          if (!url.searchParams.has("sslmode")) {
+            console.error('Add "?sslmode=require" to SUPABASE_DB_URL.');
+            process.exit(1);
+          }
+
+          console.log("Database secret format looks correct.");
+          NODE
+
       - name: Apply data sync SQL
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          PGSSLMODE: require
         run: psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f supabase/latest-data-sync.sql
