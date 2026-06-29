@@ -159,13 +159,13 @@ function mapSeasonalIngredient(row: SeasonalIngredientRow): SeasonalIngredient {
 }
 
 function mapMenu(row: MenuRow): Menu {
-  const ingredients = [...(row.menu_ingredients ?? [])]
+  const ingredients = sanitizeMenuIngredients(row.name, [...(row.menu_ingredients ?? [])]
     .sort((a, b) => a.sort_order - b.sort_order)
     .map<Ingredient>((ingredient) => ({
       name: ingredient.name,
       quantity: ingredient.quantity,
       price: ingredient.price,
-    }))
+    })))
 
   return {
     id: row.id,
@@ -180,6 +180,23 @@ function mapMenu(row: MenuRow): Menu {
     seasonalIngredientIds: (row.menu_seasonal_ingredients ?? []).map((ingredient) => ingredient.ingredient_id),
     ingredients,
   }
+}
+
+function sanitizeMenuIngredients(menuName: string, ingredients: Ingredient[]) {
+  const menuKey = normalizeIngredientCompareText(menuName)
+  const seen = new Set<string>()
+
+  return ingredients.filter((ingredient) => {
+    const ingredientKey = normalizeIngredientCompareText(ingredient.name)
+    if (!ingredientKey || ingredientKey === menuKey) return false
+    if (seen.has(ingredientKey)) return false
+    seen.add(ingredientKey)
+    return true
+  })
+}
+
+function normalizeIngredientCompareText(value: string) {
+  return value.replace(/[\s/·・,()[\]-]/g, '').toLowerCase()
 }
 
 function mergeMenus(remoteMenus: Menu[]) {
@@ -217,12 +234,130 @@ function mergeMenus(remoteMenus: Menu[]) {
   })
   const remoteOnlyMenus = remoteMenus
     .filter((menu) => !fallbackIds.has(menu.id))
-    .map((menu) => ({
-      ...menu,
-      exp: menu.ingredients.reduce((total, ingredient) => total + ingredient.price, 0),
-    }))
+    .map((menu) => {
+      const remoteIngredientExp = menu.ingredients.reduce((total, ingredient) => total + ingredient.price, 0)
+      const ingredients = remoteIngredientExp > 0
+        ? menu.ingredients
+        : createMissingMenuIngredients(menu.name)
+
+      return {
+        ...menu,
+        ingredients,
+        exp: ingredients.reduce((total, ingredient) => total + ingredient.price, 0),
+      }
+    })
 
   return [...knownMenus, ...remoteOnlyMenus]
+}
+
+const primaryIngredientDefaults = [
+  { keywords: ['감자'], name: '감자', quantity: '3개', price: 3600 },
+  { keywords: ['곶감'], name: '감', quantity: '2개', price: 4300 },
+  { keywords: ['사과'], name: '사과', quantity: '2개', price: 4200 },
+  { keywords: ['죽순'], name: '죽순', quantity: '1팩', price: 6200 },
+  { keywords: ['우엉'], name: '우엉', quantity: '1팩', price: 3600 },
+  { keywords: ['바지락', '봉골레'], name: '바지락', quantity: '300g', price: 7600 },
+  { keywords: ['꼬막'], name: '꼬막', quantity: '300g', price: 9800 },
+  { keywords: ['두릅'], name: '두릅', quantity: '1팩', price: 6200 },
+  { keywords: ['장어'], name: '장어', quantity: '1팩', price: 14800 },
+  { keywords: ['무화과'], name: '무화과', quantity: '4개', price: 7200 },
+  { keywords: ['포도'], name: '포도', quantity: '1송이', price: 6200 },
+  { keywords: ['한라봉'], name: '한라봉', quantity: '2개', price: 7800 },
+  { keywords: ['연근'], name: '연근', quantity: '1팩', price: 4200 },
+  { keywords: ['고등어'], name: '고등어', quantity: '1마리', price: 6800 },
+  { keywords: ['참외'], name: '참외', quantity: '2개', price: 5400 },
+  { keywords: ['미나리'], name: '미나리', quantity: '1단', price: 3600 },
+  { keywords: ['쑥'], name: '쑥', quantity: '1봉', price: 2800 },
+  { keywords: ['꽈리고추'], name: '꽈리고추', quantity: '1봉', price: 2400 },
+  { keywords: ['깻잎'], name: '깻잎', quantity: '2묶음', price: 2800 },
+  { keywords: ['감'], name: '감', quantity: '2개', price: 4300 },
+  { keywords: ['자두'], name: '자두', quantity: '5개', price: 5800 },
+  { keywords: ['대하'], name: '대하', quantity: '300g', price: 12000 },
+  { keywords: ['방어'], name: '방어', quantity: '200g', price: 13800 },
+  { keywords: ['열무'], name: '열무김치', quantity: '1팩', price: 5600 },
+  { keywords: ['애호박'], name: '애호박', quantity: '1개', price: 1800 },
+] as const
+
+const defaultSupportingIngredients: [Ingredient, Ingredient] = [
+  { name: '양파', quantity: '1개', price: 1200 },
+  { name: '간장', quantity: '1병', price: 3100 },
+]
+
+function createMissingMenuIngredients(menuName: string): Ingredient[] {
+  const primary = primaryIngredientDefaults.find((item) => item.keywords.some((keyword) => menuName.includes(keyword)))
+  const supporting = getSupportingIngredients(menuName)
+
+  return [
+    primary
+      ? { name: primary.name, quantity: primary.quantity, price: primary.price }
+      : { name: '제철 식재료', quantity: '1팩', price: 4500 },
+    ...supporting,
+  ]
+}
+
+function getSupportingIngredients(menuName: string): [Ingredient, Ingredient] {
+  if (/파이|타르트/.test(menuName)) {
+    return [{ name: '밀가루', quantity: '1봉', price: 2800 }, { name: '버터', quantity: '1개', price: 3200 }]
+  }
+  if (/잼|청|마말레이드/.test(menuName)) {
+    return [{ name: '설탕', quantity: '1봉', price: 2300 }, { name: '레몬', quantity: '1개', price: 1500 }]
+  }
+  if (/조림/.test(menuName)) {
+    return [{ name: '간장', quantity: '1병', price: 3100 }, { name: '올리고당', quantity: '1병', price: 3600 }]
+  }
+  if (/주스|에이드|화채/.test(menuName)) {
+    return [{ name: '탄산수', quantity: '1병', price: 1800 }, { name: '꿀', quantity: '1병', price: 4300 }]
+  }
+  if (/샐러드/.test(menuName)) {
+    return [{ name: '샐러드 채소', quantity: '1팩', price: 3200 }, { name: '치즈', quantity: '1봉', price: 4800 }]
+  }
+  if (/된장찌개|된장국/.test(menuName)) {
+    return [{ name: '된장', quantity: '1통', price: 4200 }, { name: '두부', quantity: '1모', price: 2500 }]
+  }
+  if (/전$/.test(menuName)) {
+    return [{ name: '부침가루', quantity: '1봉', price: 3300 }, { name: '달걀', quantity: '6구', price: 4200 }]
+  }
+  if (/튀김/.test(menuName)) {
+    return [{ name: '튀김가루', quantity: '1봉', price: 3300 }, { name: '식용유', quantity: '1병', price: 4500 }]
+  }
+  if (/구이/.test(menuName)) {
+    return [{ name: '굵은소금', quantity: '1봉', price: 1800 }, { name: '레몬', quantity: '1개', price: 1500 }]
+  }
+  if (/회$/.test(menuName)) {
+    return [{ name: '무순', quantity: '1팩', price: 1800 }, { name: '간장', quantity: '1병', price: 3100 }]
+  }
+  if (/초밥|비빔밥|밥$/.test(menuName)) {
+    return [{ name: '쌀', quantity: '2컵', price: 1800 }, { name: '간장', quantity: '1병', price: 3100 }]
+  }
+  if (/김치|소박이/.test(menuName)) {
+    return [{ name: '부추', quantity: '1줌', price: 2200 }, { name: '고춧가루', quantity: '1봉', price: 4200 }]
+  }
+  if (/장아찌|피클/.test(menuName)) {
+    return [{ name: '식초', quantity: '1병', price: 2900 }, { name: '간장', quantity: '1병', price: 3100 }]
+  }
+  if (/무침|나물|숙회|데침/.test(menuName)) {
+    return [{ name: '참기름', quantity: '1병', price: 5900 }, { name: '깨', quantity: '1봉', price: 2200 }]
+  }
+  if (/떡|인절미/.test(menuName)) {
+    return [{ name: '찹쌀가루', quantity: '1봉', price: 3500 }, { name: '콩가루', quantity: '1봉', price: 2800 }]
+  }
+  if (/말랭이|차$/.test(menuName)) {
+    return [{ name: '설탕', quantity: '1봉', price: 2300 }, { name: '꿀', quantity: '1병', price: 4300 }]
+  }
+  if (/파스타/.test(menuName)) {
+    return [{ name: '파스타면', quantity: '1봉', price: 3300 }, { name: '올리브오일', quantity: '1병', price: 6500 }]
+  }
+  if (/술찜/.test(menuName)) {
+    return [{ name: '화이트와인', quantity: '1병', price: 8900 }, { name: '버터', quantity: '1개', price: 3200 }]
+  }
+  if (/탕|국|백숙|전골|찜/.test(menuName)) {
+    return [{ name: '육수', quantity: '1팩', price: 3300 }, { name: '대파', quantity: '1대', price: 1200 }]
+  }
+  if (/볶음/.test(menuName)) {
+    return [{ name: '양파', quantity: '1개', price: 1200 }, { name: '간장', quantity: '1병', price: 3100 }]
+  }
+
+  return defaultSupportingIngredients
 }
 
 function normalizeMenuCatalog(menus: Menu[]) {
