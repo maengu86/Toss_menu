@@ -1948,7 +1948,7 @@ function MyPage({
                 <span aria-hidden="true"><img alt="" className="sudal-modal-icon" src={getPetUiIconImage('profile')} /></span>
             <div>
               <strong>제철 미식가</strong>
-              <p><span>LEVEL {level}</span><b>{formatWon(totalSpent)}</b></p>
+              <p><span>LEVEL {level}</span></p>
             </div>
           </div>
 
