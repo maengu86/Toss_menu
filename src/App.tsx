@@ -1272,7 +1272,7 @@ function ShoppingScreen({
                 <em aria-hidden="true">{ingredientIconImage(ingredient.name)}</em>
                 <div>
                   <strong>내일 도착 예정</strong>
-                  <span>{ingredient.name}, {ingredient.quantity}</span>
+                  <span>{ingredient.name}</span>
                   <b>{formatWon(ingredient.price * quantity)} · {quantity}개</b>
                   <small>무료 배송</small>
                 </div>
