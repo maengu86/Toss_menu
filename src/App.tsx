@@ -1916,7 +1916,6 @@ function MyPage({
 }) {
   const [page, setPage] = useState<'overview' | 'coupons' | 'orderDetail'>('overview')
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null)
-  const totalSpent = orderHistory.reduce((sum, order) => sum + order.total, 0)
   const level = getPetLevel(exp)
   const availableCouponCount = coupons.filter((coupon) => !usedCouponIds.includes(coupon.id)).length
   const nextCouponRemainingExp = couponRewardExp - (exp % couponRewardExp)
