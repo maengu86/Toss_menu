@@ -997,10 +997,7 @@ function ShoppingScreen({
         <div className="shopping-detail">
           <header className="shopping-sub-header">
             <button aria-label="뒤로가기" className="shopping-back-button" onClick={onGoHome} type="button">
-              <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('back')} />
-            </button>
-            <button aria-label="장바구니" className="shopping-cart-button" onClick={() => onSetStep('cart')} type="button">
-              <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('cart')} />
+              <img alt="" aria-hidden="true" className="sudal-ui-icon sudal-back-icon" src={getPetUiIconImage('back')} />
             </button>
           </header>
           <div className="shopping-detail-visual">
@@ -1221,7 +1218,7 @@ function ShoppingScreen({
         <div className="shopping-checkout">
           <header className="shopping-sub-header">
             <button aria-label="뒤로가기" onClick={() => onSetStep('cart')} type="button">
-              <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('back')} />
+              <img alt="" aria-hidden="true" className="sudal-ui-icon sudal-back-icon" src={getPetUiIconImage('back')} />
             </button>
           </header>
           <section className="shopping-address">
@@ -1935,7 +1932,7 @@ function MyPage({
     <section className="my-page">
       <header className="my-page-header">
         <button aria-label={page === 'overview' ? '마이페이지 닫기' : '마이페이지로 돌아가기'} onClick={goBack} type="button">
-          <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('back')} />
+          <img alt="" aria-hidden="true" className="sudal-ui-icon sudal-back-icon" src={getPetUiIconImage('back')} />
         </button>
         <h1>{pageTitle}</h1>
         <span />
@@ -2177,6 +2174,13 @@ function PetHomeScreen({
           <img alt="" aria-hidden="true" src={getPetShareIconImage()} />
         </button>
         <PetAvatar outfit={outfit} background={background} accessory={accessory} body="sudal" />
+        <div className="pet-stage-level" aria-label={`Level ${level}, ${expLabel}`}>
+          <span>LEVEL {level}</span>
+          <div className="progress-track">
+            <div className="progress-fill" style={{ width: `${levelProgress}%` }} />
+          </div>
+          <b>{Math.round(levelProgress)}%</b>
+        </div>
       </div>
 
       <div className="pet-action-panel">
@@ -2203,23 +2207,6 @@ function PetHomeScreen({
 
         {petTab === 'feed' && (
           <section className="pet-feed-panel">
-            <div className="level-card">
-              <div className="pet-level-card-main">
-                <div className="pet-level-mark">
-                  <small>LEVEL</small>
-                  <strong>{level}</strong>
-                </div>
-                <div className="pet-level-copy">
-                  <span>{expLabel}</span>
-                </div>
-              </div>
-              <div className="pet-level-progress-row">
-                <div className="progress-track">
-                  <div className="progress-fill" style={{ width: `${levelProgress}%` }} />
-                </div>
-                <b>{Math.round(levelProgress)}%</b>
-              </div>
-            </div>
             <div className="feed-list compact-feed-list">
               {feedIngredients.length === 0 && (
                 <p className="empty">메뉴를 주문해 주세요</p>
