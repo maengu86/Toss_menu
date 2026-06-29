@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import './App.css'
 import PetAvatar from './components/PetAvatar'
@@ -275,6 +275,8 @@ type KakaoPlace = {
   phone?: string
   place_url?: string
   distance?: string
+  menuName?: string
+  searchKeyword?: string
 }
 
 type PetHomeDecorTab = 'all' | 'background' | 'accessory'
@@ -720,6 +722,7 @@ function HomeScreen({
 }) {
   const [purchaseTab, setPurchaseTab] = useState<'cook' | 'delivery'>('cook')
   const [locationPreview, setLocationPreview] = useState(false)
+  const [locationRequestId, setLocationRequestId] = useState(0)
   const [searchQuery, setSearchQuery] = useState('')
   const normalizedQuery = searchQuery.trim().toLowerCase()
   const hasSearch = normalizedQuery.length > 0
@@ -733,6 +736,7 @@ function HomeScreen({
     ))
     : []
   const selectedSeasonalIngredient = seasonIngredients.find((ingredient) => ingredient.id === selectedSeasonalIngredientId)
+  const seasonalMenuNames = useMemo(() => seasonalMenus.map((menu) => menu.name), [seasonalMenus])
   const nearbyRestaurants = seasonalMenus.map((menu, index) => ({
     id: `${menu.id}-restaurant`,
     name: index === 0 ? `오늘의 ${menu.name}` : `${menu.name} 맛집`,
@@ -844,7 +848,15 @@ function HomeScreen({
             <button className={purchaseTab === 'cook' ? 'active' : ''} onClick={() => setPurchaseTab('cook')} type="button">
               <b>요리</b>
             </button>
-            <button className={purchaseTab === 'delivery' ? 'active' : ''} onClick={() => setPurchaseTab('delivery')} type="button">
+            <button
+              className={purchaseTab === 'delivery' ? 'active' : ''}
+              onClick={() => {
+                setPurchaseTab('delivery')
+                setLocationPreview(true)
+                setLocationRequestId((current) => current + 1)
+              }}
+              type="button"
+            >
               <b>배달</b>
             </button>
           </nav>
@@ -873,8 +885,14 @@ function HomeScreen({
           <section className="home-delivery-panel">
           <KakaoRestaurantMap
             fallbackRestaurants={nearbyRestaurants}
+            ingredientName={selectedSeasonalIngredient?.name ?? '제철'}
             keyword={`${selectedSeasonalIngredient?.name ?? '제철'} 맛집`}
-            onRequestCurrentLocation={() => setLocationPreview(true)}
+            locationRequestId={locationRequestId}
+            menuNames={seasonalMenuNames}
+            onRequestCurrentLocation={() => {
+              setLocationPreview(true)
+              setLocationRequestId((current) => current + 1)
+            }}
             useCurrentLocation={locationPreview}
           />
 
@@ -1333,27 +1351,75 @@ function ShoppingScreen({
 
 function KakaoRestaurantMap({
   fallbackRestaurants,
+  ingredientName,
   keyword,
+  locationRequestId,
+  menuNames,
   onRequestCurrentLocation,
   useCurrentLocation,
 }: {
   fallbackRestaurants: NearbyRestaurant[]
+  ingredientName: string
   keyword: string
+  locationRequestId: number
+  menuNames: string[]
   onRequestCurrentLocation: () => void
   useCurrentLocation: boolean
 }) {
   const mapRef = useRef<HTMLDivElement | null>(null)
   const mapInstanceRef = useRef<KakaoMapInstance | null>(null)
   const markersRef = useRef<KakaoMapMarker[]>([])
+  const currentLocationMarkerRef = useRef<KakaoMapMarker | null>(null)
+  const lastLocationRequestIdRef = useRef(0)
+  const menuKeywordSignature = menuNames.join('|')
+  const searchKeywords = useMemo(
+    () => buildMenuSearchKeywords(menuKeywordSignature ? menuKeywordSignature.split('|') : [], ingredientName, keyword),
+    [ingredientName, keyword, menuKeywordSignature],
+  )
   const [, setStatusMessage] = useState(kakaoMapAppKey ? '카카오맵을 불러오는 중이에요.' : '카카오맵 키를 설정하면 실제 지도가 표시돼요.')
   const [places, setPlaces] = useState<KakaoPlace[]>([])
+
+  useEffect(() => {
+    const appKey = kakaoMapAppKey ?? ''
+    if (!appKey || !useCurrentLocation || locationRequestId === lastLocationRequestIdRef.current) return
+
+    let canceled = false
+
+    async function moveToCurrentLocation() {
+      try {
+        const center = await getSearchCenter(true)
+        if (canceled || !mapRef.current) return
+
+        await loadKakaoMapsSdk(appKey)
+        if (canceled || !window.kakao) return
+
+        const centerLatLng = new window.kakao.maps.LatLng(center.lat, center.lng)
+        mapInstanceRef.current?.panTo(centerLatLng)
+        if (mapInstanceRef.current) {
+          currentLocationMarkerRef.current?.setMap(null)
+          currentLocationMarkerRef.current = new window.kakao.maps.Marker({
+            map: mapInstanceRef.current,
+            position: centerLatLng,
+          })
+        }
+        lastLocationRequestIdRef.current = locationRequestId
+      } catch (error) {
+        console.warn('Kakao current location move failed.', error)
+      }
+    }
+
+    moveToCurrentLocation()
+
+    return () => {
+      canceled = true
+    }
+  }, [locationRequestId, useCurrentLocation])
 
   useEffect(() => {
     const appKey = kakaoMapAppKey ?? ''
     if (!appKey || !mapRef.current) return
 
     let canceled = false
-    setPlaces([])
 
     async function renderMap() {
       try {
@@ -1372,38 +1438,39 @@ function KakaoRestaurantMap({
         mapInstanceRef.current = map
         map.setZoomable(false)
         const places = new kakao.maps.services.Places()
-        const searchOptions = useCurrentLocation
-          ? { location: centerLatLng, radius: 100000 }
-          : undefined
+        const searchOptions = { location: centerLatLng, radius: 5000 }
 
+        currentLocationMarkerRef.current?.setMap(null)
+        currentLocationMarkerRef.current = new kakao.maps.Marker({
+          map,
+          position: centerLatLng,
+        })
         markersRef.current.forEach((marker) => marker.setMap(null))
-        markersRef.current = [
-          new kakao.maps.Marker({
-            map,
-            position: centerLatLng,
-          }),
-        ]
+        markersRef.current = []
 
-        places.keywordSearch(keyword, (results: KakaoPlace[], status: string) => {
-          if (canceled) return
+        const nextPlaces = await searchKakaoMenuPlaces(
+          places,
+          searchKeywords,
+          searchOptions,
+          kakao.maps.services.Status.OK,
+        )
+        if (canceled) return
 
-          if (status !== kakao.maps.services.Status.OK) {
-            setStatusMessage('검색결과가 없어서 추천 목록을 띄워드릴게요')
-            setPlaces([])
-            return
-          }
+        if (nextPlaces.length === 0) {
+          setStatusMessage(`${ingredientName} 메뉴 검색 결과가 없어서 추천 목록을 띄워드릴게요`)
+          setPlaces([])
+          return
+        }
 
-          const nextPlaces = results.slice(0, 8)
-          nextPlaces.forEach((place) => {
-            const position = new kakao.maps.LatLng(Number(place.y), Number(place.x))
-            const marker = new kakao.maps.Marker({ map, position })
+        nextPlaces.forEach((place) => {
+          const position = new kakao.maps.LatLng(Number(place.y), Number(place.x))
+          const marker = new kakao.maps.Marker({ map, position })
 
-            markersRef.current.push(marker)
-          })
+          markersRef.current.push(marker)
+        })
 
-          setPlaces(nextPlaces)
-          setStatusMessage(`${keyword} 검색 결과 ${nextPlaces.length}곳을 표시했어요.`)
-        }, searchOptions)
+        setPlaces(nextPlaces)
+        setStatusMessage(`${ingredientName} 메뉴 검색 결과 ${nextPlaces.length}곳을 표시했어요.`)
       } catch (error) {
         console.warn('Kakao map load failed.', error)
         setStatusMessage('카카오맵을 불러오지 못해서 미리보기 지도를 보여드려요.')
@@ -1418,7 +1485,7 @@ function KakaoRestaurantMap({
       markersRef.current.forEach((marker) => marker.setMap(null))
       markersRef.current = []
     }
-  }, [keyword, useCurrentLocation])
+  }, [ingredientName, keyword, searchKeywords, useCurrentLocation])
 
   if (!kakaoMapAppKey) {
     return <FallbackRestaurantMap fallbackRestaurants={fallbackRestaurants} />
@@ -1428,10 +1495,11 @@ function KakaoRestaurantMap({
     <div className="kakao-place-section">
       <div className="home-map-preview has-kakao" aria-label="주변 음식점 지도">
         <div className="kakao-map-canvas" ref={mapRef} />
-        <button className="home-map-location-button" aria-label="내 위치" onClick={onRequestCurrentLocation} type="button">
+        <button className="home-map-location-button" aria-label="내 위치로 돌아가기" onClick={onRequestCurrentLocation} type="button">
           <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('location')} />
-          내 위치
+          내 위치로 돌아가기
         </button>
+        <p className="kakao-map-status">현재 위치 기준으로 메뉴 맛집을 보여줘요.</p>
       </div>
       {places.length > 0 && (
         <div className="kakao-place-list" aria-label="주변 맛집 검색 결과">
@@ -1446,6 +1514,7 @@ function KakaoRestaurantMap({
                 target="_blank"
               >
                 <strong>{place.place_name}</strong>
+                <span>{place.menuName ? `${place.menuName} 검색 결과` : '카카오맵 검색 결과'}</span>
                 <span>{place.road_address_name || place.address_name || '주소 정보 없음'}</span>
                 <small>{[place.phone, distanceText].filter(Boolean).join(' · ')}</small>
               </a>
@@ -1455,6 +1524,60 @@ function KakaoRestaurantMap({
       )}
     </div>
   )
+}
+
+
+function buildMenuSearchKeywords(menuNames: string[], ingredientName: string, fallbackKeyword: string) {
+  const compactIngredientName = ingredientName.replace(/\s+/g, '')
+  const normalizedMenuNames = menuNames
+    .map((menuName) => menuName.trim())
+    .filter(Boolean)
+    .slice(0, 6)
+
+  const menuKeywords = normalizedMenuNames.flatMap((menuName) => {
+    const spacedMenuName = compactIngredientName && menuName.includes(compactIngredientName)
+      ? menuName.replaceAll(compactIngredientName, ingredientName)
+      : menuName
+    return [`${spacedMenuName} 맛집`, spacedMenuName]
+  })
+
+  return [...new Set([...menuKeywords, fallbackKeyword])]
+}
+
+function searchKakaoMenuPlaces(
+  placesService: KakaoMapsSdk['maps']['services']['Places'] extends new () => infer Service ? Service : never,
+  keywords: string[],
+  searchOptions: { location: KakaoLatLng; radius: number },
+  okStatus: string,
+) {
+  const foundPlaces = new Map<string, KakaoPlace>()
+
+  return keywords.reduce<Promise<KakaoPlace[]>>(async (previousSearch, searchKeyword) => {
+    const currentPlaces = await previousSearch
+    if (currentPlaces.length >= 8) return currentPlaces
+
+    const results = await searchKakaoKeyword(placesService, searchKeyword, searchOptions, okStatus)
+    const menuName = searchKeyword.replace(/\s*맛집\s*$/, '')
+    results.forEach((place) => {
+      if (foundPlaces.has(place.id)) return
+      foundPlaces.set(place.id, { ...place, menuName, searchKeyword })
+    })
+
+    return Array.from(foundPlaces.values()).slice(0, 8)
+  }, Promise.resolve([]))
+}
+
+function searchKakaoKeyword(
+  placesService: KakaoMapsSdk['maps']['services']['Places'] extends new () => infer Service ? Service : never,
+  keyword: string,
+  searchOptions: { location: KakaoLatLng; radius: number },
+  okStatus: string,
+) {
+  return new Promise<KakaoPlace[]>((resolve) => {
+    placesService.keywordSearch(keyword, (results: KakaoPlace[], status: string) => {
+      resolve(status === okStatus ? results : [])
+    }, searchOptions)
+  })
 }
 
 function FallbackRestaurantMap({ fallbackRestaurants }: { fallbackRestaurants: NearbyRestaurant[] }) {
