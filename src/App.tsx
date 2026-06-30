@@ -166,7 +166,7 @@ import zucchiniJeonImage from './assets/sudal-icons/menus/zucchini-jeon.png'
 import zucchiniJeongolImage from './assets/sudal-icons/menus/zucchini-jeongol.png'
 import zucchiniNamulImage from './assets/sudal-icons/menus/zucchini-namul.png'
 import zucchiniStirFryImage from './assets/sudal-icons/menus/zucchini-stir-fry.png'
-import discountCouponImage from '../discount-coupon-20.jpg'
+import discountCouponImage from '../discount-coupon-20.png'
 
 const menuDishImages = import.meta.glob('./assets/sudal-icons/menus/*.png', {
   eager: true,
@@ -2220,6 +2220,7 @@ function winterMenuImageByName(menu: Menu) {
     if (name.includes('계란') || name.includes('달걀')) return menuDishImageById('spinach-egg-stir-fry')
     if (name.includes('전')) return menuDishImageById('spinach-jeon')
     if (name.includes('파스타')) return menuDishImageById('spinach-pasta')
+    if (name.includes('수프')) return menuDishImageById('spinach-cream-soup')
   }
 
   if (hasSeasonal('cockle') || name.includes('꼬막')) {
