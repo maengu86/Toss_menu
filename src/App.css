@@ -4627,6 +4627,7 @@
 
 .shopping-coupon select:disabled {
   color: #c18a61;
+  font-weight: 500;
   border-color: rgba(236, 173, 122, 0.34);
   opacity: 1;
   background:
@@ -4656,7 +4657,7 @@
 
 .shopping-payment-options button.active {
   border-color: var(--orange);
-  color: var(--orange);
+  color: #9f5a2f;
   background: #fff7f1;
 }
 

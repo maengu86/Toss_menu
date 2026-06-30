@@ -1139,7 +1139,10 @@ function ShoppingScreen({
             <div className="cart-move-modal-actions">
               <button
                 className="toss-secondary"
-                onClick={() => setCartMovePromptOpen(false)}
+                onClick={() => {
+                  setCartMovePromptOpen(false)
+                  onGoHome()
+                }}
                 type="button"
               >
                 아니요
