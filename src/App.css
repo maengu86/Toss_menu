@@ -5636,6 +5636,11 @@
     padding-left: 16px;
   }
 
+  .screen.shopping-step-detail {
+    padding-right: 0;
+    padding-left: 0;
+  }
+
   .home-global-bar {
     margin-right: -16px;
     margin-left: -16px;
