@@ -2163,6 +2163,7 @@ function winterMenuImageByName(menu: Menu) {
   const hasSeasonal = (id: string) => seasonalIds.includes(id)
 
   if (hasSeasonal('oyster') || name.includes('굴')) {
+    if (name.includes('굴젓')) return menuDishImageById('oyster-jeot')
     if (name.includes('국밥')) return menuDishImageById('oyster-gukbap')
     if (name.includes('무침')) return menuDishImageById('oyster-muchim')
     if (name.includes('튀김')) return menuDishImageById('oyster-fried')
