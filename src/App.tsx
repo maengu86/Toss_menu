@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { CSSProperties } from 'react'
+import type { CSSProperties, UIEvent } from 'react'
 import './App.css'
 import PetAvatar from './components/PetAvatar'
 import { getRoomBackgroundImage } from './data/decorAssets'
@@ -377,6 +377,9 @@ function App() {
   const [selectedAccessory, setSelectedAccessory] = useState('')
   const [toast, setToast] = useState('')
   const [isScrolling, setIsScrolling] = useState(false)
+  const [homeScrollSnapshot, setHomeScrollSnapshot] = useState({ cookMenu: 0, screen: 0 })
+  const homeScrollTopRef = useRef(0)
+  const homeCookMenuScrollTopRef = useRef(0)
   const scrollTimerRef = useRef<number | undefined>(undefined)
   const orderSequenceRef = useRef(0)
 
@@ -443,6 +446,23 @@ function App() {
     setIsScrolling(true)
     if (scrollTimerRef.current) window.clearTimeout(scrollTimerRef.current)
     scrollTimerRef.current = window.setTimeout(() => setIsScrolling(false), 900)
+  }
+
+  function handleHomeScroll(event: UIEvent<HTMLElement>) {
+    homeScrollTopRef.current = event.currentTarget.scrollTop
+    handleScrollActivity()
+  }
+
+  function handleHomeCookMenuScroll(event: UIEvent<HTMLElement>) {
+    homeCookMenuScrollTopRef.current = event.currentTarget.scrollTop
+    handleScrollActivity()
+  }
+
+  function saveHomeScrollSnapshot() {
+    setHomeScrollSnapshot({
+      cookMenu: homeCookMenuScrollTopRef.current,
+      screen: homeScrollTopRef.current,
+    })
   }
 
   function changeSeason(season: SeasonKey) {
@@ -597,10 +617,14 @@ function App() {
             selectedSeason={selectedSeason}
             selectedSeasonalIngredientId={activeSeasonalIngredientId}
             selectedMenuIds={selectedMenuIds}
-            onScrollActivity={handleScrollActivity}
+            restoredCookMenuScrollTop={homeScrollSnapshot.cookMenu}
+            restoredScrollTop={homeScrollSnapshot.screen}
+            onCookMenuScroll={handleHomeCookMenuScroll}
+            onScrollActivity={handleHomeScroll}
             onSelectSeason={changeSeason}
             onSelectSeasonalIngredient={setSelectedSeasonalIngredientId}
             onOpenMenuDetail={(menuId) => {
+              saveHomeScrollSnapshot()
               setShoppingCatalogMenuIds([menuId])
               setShopStep('detail')
               setScreen('shopping')
@@ -691,6 +715,7 @@ function App() {
           current={screen}
           cartCount={checkedTotal}
           onChange={(nextScreen) => {
+            if (screen === 'home' && nextScreen !== 'home') saveHomeScrollSnapshot()
             if (nextScreen === 'shopping') {
               setShoppingCatalogMenuIds(selectedMenuIds)
               setShopStep('cart')
@@ -714,6 +739,9 @@ function HomeScreen({
   selectedSeason,
   selectedSeasonalIngredientId,
   selectedMenuIds,
+  restoredCookMenuScrollTop,
+  restoredScrollTop,
+  onCookMenuScroll,
   onScrollActivity,
   onSelectSeason,
   onSelectSeasonalIngredient,
@@ -728,12 +756,17 @@ function HomeScreen({
   selectedSeason: SeasonKey
   selectedSeasonalIngredientId: string
   selectedMenuIds: string[]
-  onScrollActivity: () => void
+  restoredCookMenuScrollTop: number
+  restoredScrollTop: number
+  onCookMenuScroll: (event: UIEvent<HTMLElement>) => void
+  onScrollActivity: (event: UIEvent<HTMLElement>) => void
   onSelectSeason: (season: SeasonKey) => void
   onSelectSeasonalIngredient: (id: string) => void
   onOpenMenuDetail: (id: string) => void
   onOpenProfile: () => void
 }) {
+  const screenRef = useRef<HTMLElement | null>(null)
+  const cookMenuListRef = useRef<HTMLDivElement | null>(null)
   const [purchaseTab, setPurchaseTab] = useState<'cook' | 'delivery'>('cook')
   const [locationPreview, setLocationPreview] = useState(false)
   const [locationRequestId, setLocationRequestId] = useState(0)
@@ -761,8 +794,17 @@ function HomeScreen({
     rating: (4.8 - index * 0.1).toFixed(1),
   }))
 
+  useEffect(() => {
+    const frameId = window.requestAnimationFrame(() => {
+      if (screenRef.current) screenRef.current.scrollTop = restoredScrollTop
+      if (cookMenuListRef.current) cookMenuListRef.current.scrollTop = restoredCookMenuScrollTop
+    })
+
+    return () => window.cancelAnimationFrame(frameId)
+  }, [restoredCookMenuScrollTop, restoredScrollTop])
+
   return (
-    <section className="screen" onScroll={onScrollActivity}>
+    <section className="screen" onScroll={onScrollActivity} ref={screenRef}>
       <header className="home-global-bar">
         <label className="shopping-search">
           <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('search')} />
@@ -876,7 +918,7 @@ function HomeScreen({
           </nav>
 
           {purchaseTab === 'cook' && (
-            <div className="menu-list nested-menu-list">
+            <div className="menu-list nested-menu-list" onScroll={onCookMenuScroll} ref={cookMenuListRef}>
               {seasonalMenus.map((menu) => (
                 <button
                   className="menu-card"
@@ -1143,20 +1185,25 @@ function ShoppingScreen({
 
       {step === 'cart' && (
         <>
-          <div className="shopping-cart-head">
-            <button aria-label="뒤로가기" onClick={onGoHome} type="button">
-              <img alt="" aria-hidden="true" className="sudal-ui-icon sudal-back-icon" src={getPetUiIconImage('back')} />
-            </button>
-          </div>
+          {selectedMenus.length > 0 && (
+            <div className="shopping-cart-head">
+              <button aria-label="뒤로가기" onClick={onGoHome} type="button">
+                <img alt="" aria-hidden="true" className="sudal-ui-icon sudal-back-icon" src={getPetUiIconImage('back')} />
+              </button>
+            </div>
+          )}
           <div className="toss-menu-list">
             {selectedMenus.length === 0 && (
               <div className="empty-cart-pet">
                 <div className="empty-cart-pet-room">
                   <PetAvatar outfit={outfit} accessory={accessory} body="sudal" />
                 </div>
-                <h2>배고파요...</h2>
-                <p>오늘은 뭐 먹을래요?</p>
-                <div>
+                <div className="empty-cart-copy">
+                  <span>꼬르륵</span>
+                  <h2>배고파요...</h2>
+                  <p>작은 수달이 빈 그릇 앞에서 기다리고 있어요.</p>
+                </div>
+                <div className="empty-cart-action">
                   <button className="toss-primary" onClick={onGoHome} type="button">제철홈에서 메뉴 고르기</button>
                 </div>
               </div>
@@ -1254,15 +1301,17 @@ function ShoppingScreen({
                 )
             })}
           </div>
-          <div className="toss-cart-orderbar" aria-label="주문 예상 금액">
-            <div>
-              <span>총 주문 예상금액</span>
-              <strong>{formatWon(checkedPrice)}</strong>
+          {selectedMenus.length > 0 && (
+            <div className="toss-cart-orderbar" aria-label="주문 예상 금액">
+              <div>
+                <span>총 주문 예상금액</span>
+                <strong>{formatWon(checkedPrice)}</strong>
+              </div>
+              <button className="toss-primary toss-cart-continue" disabled={!canContinue} onClick={() => onSetStep('checkout')} type="button">
+                {checkedTotal}건 · {formatWon(checkedPrice)} 주문하기
+              </button>
             </div>
-            <button className="toss-primary toss-cart-continue" disabled={!canContinue} onClick={() => onSetStep('checkout')} type="button">
-              {checkedTotal}건 · {formatWon(checkedPrice)} 주문하기
-            </button>
-          </div>
+          )}
         </>
       )}
 
@@ -1288,7 +1337,8 @@ function ShoppingScreen({
               <article key={key}>
                 <em aria-hidden="true">{ingredientIconImage(ingredient.name)}</em>
                 <div>
-                  <strong>{ingredient.name}</strong>
+                  <strong>내일 도착 예정</strong>
+                  <span>{ingredient.name}</span>
                   <b>{formatWon(ingredient.price * quantity)} · {quantity}개</b>
                   <small>무료 배송</small>
                 </div>
@@ -1897,6 +1947,7 @@ function menuCardVisualImage(menu: Menu) {
   const menuImage = menuImagesById[menu.id]
     || menuDishImageById(menu.id)
     || renderableMenuImage(menu.image)
+    || appleMenuImageByName(menu)
     || tomatoMenuImageByName(menu)
     || cornMenuImageByName(menu)
     || peachMenuImageByName(menu)
@@ -1907,6 +1958,7 @@ function menuCardVisualImage(menu: Menu) {
     || mackerelMenuImageByName(menu)
     || watermelonMenuImageByName(menu)
     || yellowtailMenuImageByName(menu)
+    || chestnutMenuImageByName(menu)
     || winterMenuImageByName(menu)
     || menu.seasonalIngredientIds?.map((id) => getPetFeedIconImageById(id)).find(Boolean)
 
@@ -1915,6 +1967,37 @@ function menuCardVisualImage(menu: Menu) {
   }
 
   return ingredientIconImage(menu.ingredients[0]?.name ?? menu.name)
+}
+
+function appleMenuImageByName(menu: Menu) {
+  const name = menu.name
+  const isAppleMenu = menu.seasonalIngredientIds?.includes('apple') || name.includes('사과')
+  if (!isAppleMenu) return ''
+
+  if (name.includes('돼지고기') || name.includes('포크')) return menuDishImageById('apple-pork-salad')
+  if (name.includes('잼')) return menuDishImageById('apple-jam')
+  if (name.includes('주스')) return menuDishImageById('apple-juice')
+  if (name.includes('파이')) return menuDishImageById('apple-pie')
+  if (name.includes('샐러드')) return menuDishImageById('apple-salad')
+  if (name.includes('타르트')) return menuDishImageById('apple-tart')
+
+  return ''
+}
+
+function chestnutMenuImageByName(menu: Menu) {
+  const name = menu.name
+  const isChestnutMenu = menu.seasonalIngredientIds?.includes('chestnut') || name.includes('밤') || name.includes('마롱')
+  if (!isChestnutMenu) return ''
+
+  if (name.includes('단자')) return menuDishImageById('chestnut-danja')
+  if (name.includes('조림')) return menuDishImageById('chestnut-jorim')
+  if (name.includes('죽')) return menuDishImageById('chestnut-porridge')
+  if (name.includes('수프') || name.includes('스프')) return menuDishImageById('chestnut-soup')
+  if (name.includes('튀김')) return menuDishImageById('chestnut-fried')
+  if (name.includes('밤크림')) return menuDishImageById('chestnut-cream')
+  if (name.includes('마롱크림')) return menuDishImageById('marron-cream')
+
+  return ''
 }
 
 function pearMenuImageByName(menu: Menu) {

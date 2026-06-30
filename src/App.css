@@ -1963,20 +1963,22 @@
 }
 
 .empty-cart-pet {
-  min-height: 560px;
+  min-height: calc(100dvh - 128px);
   display: grid;
   align-content: center;
   justify-items: center;
-  gap: 10px;
-  padding: 22px 16px;
-  border-radius: 18px;
-  background: transparent;
+  gap: 14px;
+  padding: 18px 18px 34px;
+  border-radius: 0;
+  background:
+    radial-gradient(circle at 50% 26%, rgba(245, 174, 112, 0.18) 0 88px, transparent 89px),
+    linear-gradient(180deg, #fffdf9 0%, #ffffff 78%);
 }
 
 .empty-cart-pet .pet-stage {
   width: 100%;
-  max-width: 300px;
-  height: 250px;
+  max-width: 320px;
+  height: 270px;
   margin: 0;
   border: 0;
   background: transparent;
@@ -1988,23 +1990,50 @@
 }
 
 .empty-cart-pet .pet-svg {
-  width: 240px;
+  width: 260px;
+}
+
+.empty-cart-copy {
+  width: min(100%, 310px);
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 14px 16px 16px;
+  border: 1px solid rgba(238, 180, 132, 0.42);
+  border-radius: 20px;
+  background: rgba(255, 250, 246, 0.92);
+  box-shadow: 0 12px 24px -20px rgba(120, 72, 38, 0.32);
+}
+
+.empty-cart-copy span {
+  min-width: 58px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #fff2e8;
+  color: #c9783d;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: center;
 }
 
 .empty-cart-pet h2 {
-  margin: 6px 0 0;
-  color: #191f28;
-  font-size: 26px;
+  margin: 0;
+  color: #2b1f18;
+  font-size: 25px;
+  line-height: 1.18;
+  letter-spacing: 0;
 }
 
 .empty-cart-pet p {
   margin: 0;
-  color: #6b7684;
-  font-size: 15px;
+  color: #7a5a43;
+  font-size: 14px;
   font-weight: 800;
+  line-height: 1.45;
+  text-align: center;
 }
 
-.empty-cart-pet > div {
+.empty-cart-pet .empty-cart-action {
   width: 100%;
   display: grid;
   grid-template-columns: 1fr;
@@ -2015,6 +2044,13 @@
 .empty-cart-pet .toss-primary,
 .empty-cart-pet .toss-secondary {
   margin-top: 0;
+}
+
+.empty-cart-pet .toss-primary {
+  height: 54px;
+  border-radius: 16px;
+  background: #f0aa73;
+  box-shadow: 0 10px 18px -14px rgba(176, 94, 43, 0.54);
 }
 
 .toss-menu-box {
@@ -4009,16 +4045,18 @@
 }
 
 .shopping-step-detail .shopping-detail-ingredients button {
+  position: relative;
   min-height: 104px;
   padding: 8px 7px;
-  border-color: #f0d8c4;
+  border-color: #d1d6db;
   border-radius: 12px;
-  background: #fffaf6;
+  background: #ffffff;
+  box-shadow: none;
 }
 
 .shopping-step-detail .shopping-detail-ingredients button.active {
   border-color: var(--orange);
-  background: #fff6ef;
+  background: rgba(240, 170, 115, 0.3);
   box-shadow: inset 0 0 0 1px var(--orange);
 }
 
