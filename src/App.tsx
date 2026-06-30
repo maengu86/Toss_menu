@@ -1956,6 +1956,7 @@ function menuCardVisualImage(menu: Menu) {
     || mackerelMenuImageByName(menu)
     || watermelonMenuImageByName(menu)
     || yellowtailMenuImageByName(menu)
+    || chestnutMenuImageByName(menu)
     || winterMenuImageByName(menu)
     || menu.seasonalIngredientIds?.map((id) => getPetFeedIconImageById(id)).find(Boolean)
 
@@ -1964,6 +1965,22 @@ function menuCardVisualImage(menu: Menu) {
   }
 
   return ingredientIconImage(menu.ingredients[0]?.name ?? menu.name)
+}
+
+function chestnutMenuImageByName(menu: Menu) {
+  const name = menu.name
+  const isChestnutMenu = menu.seasonalIngredientIds?.includes('chestnut') || name.includes('밤') || name.includes('마롱')
+  if (!isChestnutMenu) return ''
+
+  if (name.includes('단자')) return menuDishImageById('chestnut-danja')
+  if (name.includes('조림')) return menuDishImageById('chestnut-jorim')
+  if (name.includes('죽')) return menuDishImageById('chestnut-porridge')
+  if (name.includes('수프') || name.includes('스프')) return menuDishImageById('chestnut-soup')
+  if (name.includes('튀김')) return menuDishImageById('chestnut-fried')
+  if (name.includes('밤크림')) return menuDishImageById('chestnut-cream')
+  if (name.includes('마롱크림')) return menuDishImageById('marron-cream')
+
+  return ''
 }
 
 function pearMenuImageByName(menu: Menu) {
