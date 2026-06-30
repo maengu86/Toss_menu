@@ -5614,21 +5614,32 @@
   background: transparent;
 }
 
-@media (max-width: 520px) {
+@media (max-width: 520px), (hover: none) and (pointer: coarse) {
   :root {
     --phone-bottom-offset: 0px;
   }
 
   .app-shell {
+    width: 100%;
     padding: 0;
   }
 
   .phone {
-    width: 100%;
+    width: 100vw;
+    max-width: none;
     height: 100svh;
     min-height: 100svh;
     border: 0;
     border-radius: 0;
+    box-shadow: none;
+  }
+
+  .shopping-detail-actions,
+  .toss-cart-orderbar,
+  .shopping-paybar {
+    right: 0;
+    left: 0;
+    width: 100vw;
   }
 
   .screen {
