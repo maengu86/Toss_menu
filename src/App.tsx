@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { CSSProperties, FocusEvent, UIEvent } from 'react'
+import type { CSSProperties, UIEvent } from 'react'
 import './App.css'
 import PetAvatar from './components/PetAvatar'
 import { getRoomBackgroundImage } from './data/decorAssets'
@@ -216,7 +216,6 @@ const tossShoppingOptions = [
   { name: '동네픽업', eta: '60분 후 픽업', fee: 0, perk: '근처 마트 수령' },
 ]
 const paymentOptions = ['토스페이', '카드 간편결제', '계좌 결제']
-const deliveryOptions = ['문 앞에 놓기', '직접 받을게요']
 const defaultCheckoutAddress = '서울특별시 중구 세종대로 110'
 const defaultBuyerName = '제철 미식가'
 const defaultBuyerPhone = '010-0000-0000'
@@ -224,7 +223,6 @@ const checkoutStorageKeys = {
   address: 'toss-menu-checkout-address',
   buyerName: 'toss-menu-checkout-buyer-name',
   buyerPhone: 'toss-menu-checkout-buyer-phone',
-  deliveryOption: 'toss-menu-checkout-delivery-option',
 } as const
 
 function readStoredText(key: string, fallback: string) {
@@ -392,10 +390,6 @@ function App() {
   const [exp, setExp] = useState(0)
   const [shopStep, setShopStep] = useState<ShopStep>('cart')
   const [paymentMethod, setPaymentMethod] = useState(paymentOptions[0])
-  const [deliveryOption, setDeliveryOption] = useState(() => {
-    const storedDeliveryOption = readStoredText(checkoutStorageKeys.deliveryOption, deliveryOptions[0])
-    return deliveryOptions.includes(storedDeliveryOption) ? storedDeliveryOption : deliveryOptions[0]
-  })
   const [shoppingRewardUnlocked, setShoppingRewardUnlocked] = useState(false)
   const [selectedBackground, setSelectedBackground] = useState('아늑한 집안')
   const [selectedOutfit, setSelectedOutfit] = useState('')
@@ -423,10 +417,6 @@ function App() {
       isMounted = false
     }
   }, [])
-
-  useEffect(() => {
-    writeStoredText(checkoutStorageKeys.deliveryOption, deliveryOption)
-  }, [deliveryOption])
 
   const selectedMenus = menus.filter((menu) => selectedMenuIds.includes(menu.id))
   const cartMenus = selectedMenus
@@ -544,7 +534,6 @@ function App() {
     setRemovedCartIngredientKeys((current) => current.filter((item) => item !== key))
     setCheckedIngredients((current) => current.includes(key) ? current : [...current, key])
     setCartQuantities((current) => current[key] ? current : { ...current, [key]: 1 })
-    showToast(`${ingredientName}을 장바구니에 담았어요`)
   }
 
   function completeOrderFlow() {
@@ -671,8 +660,6 @@ function App() {
             cartQuantities={cartQuantities}
             checkedIngredients={checkedIngredients}
             checkedTotal={checkedTotal}
-            deliveryOption={deliveryOption}
-            deliveryOptions={deliveryOptions}
             catalogMenus={shoppingCatalogMenus}
             couponDiscount={displayCouponDiscount}
             selectedMenus={cartMenus}
@@ -702,7 +689,6 @@ function App() {
             }}
             onRemoveMenu={removeMenu}
             onScrollActivity={handleScrollActivity}
-            onSelectDelivery={setDeliveryOption}
             onSelectPayment={setPaymentMethod}
             onSetStep={setShopStep}
             onToggleIngredient={toggleIngredient}
@@ -1008,14 +994,11 @@ function ShoppingScreen({
   step,
   paymentMethod,
   paymentOptions,
-  deliveryOption,
-  deliveryOptions,
   onToggleIngredient,
   onAddProduct,
   onApplyCoupon,
   onChangeQuantity,
   onSelectPayment,
-  onSelectDelivery,
   onSetStep,
   onCompleteOrder,
   onGoHome,
@@ -1037,14 +1020,11 @@ function ShoppingScreen({
   step: ShopStep
   paymentMethod: string
   paymentOptions: string[]
-  deliveryOption: string
-  deliveryOptions: string[]
   onToggleIngredient: (name: string) => void
   onAddProduct: (menuId: string, ingredientName: string) => void
   onApplyCoupon: (couponId: string) => void
   onChangeQuantity: (key: string, quantity: number) => void
   onSelectPayment: (method: string) => void
-  onSelectDelivery: (option: string) => void
   onSetStep: (step: ShopStep) => void
   onCompleteOrder: () => void
   onGoHome: () => void
@@ -1058,15 +1038,14 @@ function ShoppingScreen({
   const allChecked = allIngredientKeys.length > 0 && allIngredientKeys.every((key) => checkedIngredients.includes(key))
   const detailMenu = catalogMenus[0]
   const [selectedDetailIngredientKeys, setSelectedDetailIngredientKeys] = useState<string[]>([])
-  const [cartMovePromptOpen, setCartMovePromptOpen] = useState(false)
   const [deliveryAddress, setDeliveryAddress] = useState(() => readStoredText(checkoutStorageKeys.address, defaultCheckoutAddress))
   const [buyerName, setBuyerName] = useState(() => readStoredText(checkoutStorageKeys.buyerName, defaultBuyerName))
   const [buyerPhone, setBuyerPhone] = useState(() => readStoredText(checkoutStorageKeys.buyerPhone, defaultBuyerPhone))
   const [addressEditOpen, setAddressEditOpen] = useState(false)
+  const [cartMovePromptOpen, setCartMovePromptOpen] = useState(false)
   const [draftAddress, setDraftAddress] = useState(deliveryAddress)
   const [draftBuyerName, setDraftBuyerName] = useState(buyerName)
   const [draftBuyerPhone, setDraftBuyerPhone] = useState(buyerPhone)
-  const [deliverySelectOpen, setDeliverySelectOpen] = useState(false)
   const detailIngredientKeys = detailMenu?.ingredients.map((ingredient) => ingredientKey(detailMenu.id, ingredient.name)) ?? []
   const activeDetailIngredientKeys = selectedDetailIngredientKeys.filter((key) => detailIngredientKeys.includes(key))
   const selectedCartProducts = selectedMenus.flatMap((menu) => menu.ingredients
@@ -1123,14 +1102,42 @@ function ShoppingScreen({
     setAddressEditOpen(false)
   }
 
-  function closeDeliverySelectOnBlur(event: FocusEvent<HTMLDivElement>) {
-    const nextTarget = event.relatedTarget
-    if (nextTarget instanceof Node && event.currentTarget.contains(nextTarget)) return
-    setDeliverySelectOpen(false)
-  }
-
   return (
     <section className={`screen toss-screen shopping-step-${step}`} onScroll={onScrollActivity}>
+      {cartMovePromptOpen && (
+        <div className="cart-move-modal" onClick={() => setCartMovePromptOpen(false)} role="presentation">
+          <div
+            aria-labelledby="cart-move-modal-title"
+            aria-modal="true"
+            className="cart-move-modal-card"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+          >
+            <span aria-hidden="true"><img alt="" className="sudal-modal-icon" src={getPetUiIconImage('cart')} /></span>
+            <h2 id="cart-move-modal-title">장바구니에 넣었습니다</h2>
+            <p>담은 재료를 바로 확인할까요?</p>
+            <div className="cart-move-modal-actions">
+              <button
+                className="toss-secondary"
+                onClick={() => setCartMovePromptOpen(false)}
+                type="button"
+              >
+                계속 둘러보기
+              </button>
+              <button
+                className="toss-primary"
+                onClick={() => {
+                  setCartMovePromptOpen(false)
+                  onSetStep('cart')
+                }}
+                type="button"
+              >
+                장바구니 보기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {step === 'detail' && detailMenu && (
         <div className="shopping-detail">
           <header className="shopping-sub-header">
@@ -1183,46 +1190,6 @@ function ShoppingScreen({
             >
               구매하기
             </button>
-          </div>
-        </div>
-      )}
-
-      {cartMovePromptOpen && (
-        <div
-          className="cart-move-modal"
-          onClick={() => setCartMovePromptOpen(false)}
-          role="presentation"
-        >
-          <div
-            aria-labelledby="cart-move-modal-title"
-            aria-modal="true"
-            className="cart-move-modal-card"
-            onClick={(event) => event.stopPropagation()}
-            role="dialog"
-          >
-            <span aria-hidden="true"><img alt="" className="sudal-modal-icon" src={getPetUiIconImage('cart')} /></span>
-            <h2 id="cart-move-modal-title">선택한 재료를 장바구니에 담았어요</h2>
-            <p>장바구니로 이동하시겠습니까?</p>
-            <div>
-              <button
-                onClick={() => {
-                  setCartMovePromptOpen(false)
-                  onGoHome()
-                }}
-                type="button"
-              >
-                아니오
-              </button>
-              <button
-                onClick={() => {
-                  setCartMovePromptOpen(false)
-                  onSetStep('cart')
-                }}
-                type="button"
-              >
-                예
-              </button>
-            </div>
           </div>
         </div>
       )}
@@ -1371,51 +1338,22 @@ function ShoppingScreen({
             <p>{deliveryAddress}</p>
             <small>{buyerName} · {buyerPhone}</small>
             <button onClick={openAddressEdit} type="button">변경</button>
-            <div className="shopping-delivery-select" onBlur={closeDeliverySelectOnBlur}>
-              <button
-                aria-expanded={deliverySelectOpen}
-                aria-haspopup="listbox"
-                className={deliverySelectOpen ? 'open' : ''}
-                onClick={() => setDeliverySelectOpen((open) => !open)}
-                type="button"
-              >
-                {deliveryOption}
-                <span aria-hidden="true" />
-              </button>
-              {deliverySelectOpen && (
-                <div className="shopping-delivery-options" role="listbox">
-                  {deliveryOptions.map((option) => (
-                    <button
-                      aria-selected={deliveryOption === option}
-                      className={deliveryOption === option ? 'active' : ''}
-                      key={option}
-                      onClick={() => {
-                        onSelectDelivery(option)
-                        setDeliverySelectOpen(false)
-                      }}
-                      role="option"
-                      type="button"
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
           </section>
           <section className="shopping-order-products">
             <h2>주문상품 {selectedCartQuantity}개</h2>
-            {selectedCartProducts.map(({ key, ingredient, quantity }) => (
-              <article key={key}>
-                <em aria-hidden="true">{ingredientIconImage(ingredient.name)}</em>
-                <div>
-                  <strong>내일 도착 예정</strong>
-                  <span>{ingredient.name}</span>
-                  <b>{formatWon(ingredient.price * quantity)} · {quantity}개</b>
-                  <small>무료 배송</small>
-                </div>
-              </article>
-            ))}
+            <div className="shopping-order-product-list">
+              {selectedCartProducts.map(({ key, ingredient, quantity }) => (
+                <article key={key}>
+                  <em aria-hidden="true">{ingredientIconImage(ingredient.name)}</em>
+                  <div>
+                    <strong>내일 도착 예정</strong>
+                    <span>{ingredient.name}</span>
+                    <b>{formatWon(ingredient.price * quantity)} · {quantity}개</b>
+                    <small>무료 배송</small>
+                  </div>
+                </article>
+              ))}
+            </div>
           </section>
           <section className="shopping-payment-section">
             <div className="shopping-coupon">
@@ -1522,10 +1460,6 @@ function ShoppingScreen({
             <div>
               <span>배송 방식</span>
               <b>{deliveryTypeInfo.name}</b>
-            </div>
-            <div>
-              <span>배송 요청</span>
-              <b>{deliveryOption}</b>
             </div>
             {couponDiscount > 0 && (
               <div>
@@ -2474,7 +2408,6 @@ function MyPage({
               >
                 <div className="my-order-card-head">
                   <span>{order.orderedAt}</span>
-                  <strong>{order.status}</strong>
                 </div>
                 <div className="my-order-items">
                   <em aria-hidden="true">{ingredientIconImage(order.items[0]?.name ?? '')}</em>
@@ -2608,7 +2541,7 @@ function PetHomeScreen({
 }) {
   const [decorTab, setDecorTab] = useState<PetHomeDecorTab>('all')
   const [petTab, setPetTab] = useState<'feed' | 'decor'>('feed')
-  const [feedFeedback, setFeedFeedback] = useState<{ id: number; name: string; leveledUp: boolean } | null>(null)
+  const [feedFeedback, setFeedFeedback] = useState<{ id: number; name: string } | null>(null)
   const petRoomRef = useRef<HTMLDivElement>(null)
   const feedFeedbackTimerRef = useRef<number | undefined>(undefined)
   const feedFeedbackIdRef = useRef(0)
@@ -2670,15 +2603,13 @@ function PetHomeScreen({
   }
 
   function handleFeed(ingredient: FeedIngredient) {
-    const currentLevel = getPetLevel(exp)
-    const nextLevel = getPetLevel(exp + getIngredientExp(ingredient))
     window.clearTimeout(feedFeedbackTimerRef.current)
     feedFeedbackIdRef.current += 1
-    setFeedFeedback({ id: feedFeedbackIdRef.current, name: ingredient.name, leveledUp: nextLevel > currentLevel })
+    setFeedFeedback({ id: feedFeedbackIdRef.current, name: ingredient.name })
     onFeed(ingredient)
     feedFeedbackTimerRef.current = window.setTimeout(() => {
       setFeedFeedback(null)
-    }, 1300)
+    }, 950)
   }
 
   useEffect(() => () => {
@@ -2689,7 +2620,7 @@ function PetHomeScreen({
     <section className="screen pet-home-screen" onScroll={onScrollActivity}>
       <div className="pet-home-shell">
       <div
-        className={`pet-room-stage ${roomClass(background)} ${roomImage ? 'has-room-image' : ''} ${feedFeedback ? 'is-feeding' : ''} ${feedFeedback?.leveledUp ? 'is-level-up' : ''}`}
+        className={`pet-room-stage ${roomClass(background)} ${roomImage ? 'has-room-image' : ''} ${feedFeedback ? 'is-feeding' : ''}`}
         ref={petRoomRef}
         style={roomImage ? { backgroundImage: `url(${roomImage})` } : undefined}
       >
@@ -2700,13 +2631,6 @@ function PetHomeScreen({
         {feedFeedback && (
           <div className="pet-feed-effect" key={feedFeedback.id} aria-hidden="true">
             <span>♥</span>
-            <span>+XP</span>
-            <span>♥</span>
-          </div>
-        )}
-        {feedFeedback?.leveledUp && (
-          <div className="pet-level-up-badge" key={`level-up-${feedFeedback.id}`} aria-live="polite">
-            LEVEL UP
           </div>
         )}
         <div className="pet-stage-level" aria-label={`${nickname}, Level ${level}, ${expLabel}`}>
