@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { CSSProperties } from 'react'
+import type { CSSProperties, UIEvent } from 'react'
 import './App.css'
 import PetAvatar from './components/PetAvatar'
 import { getRoomBackgroundImage } from './data/decorAssets'
@@ -363,6 +363,7 @@ function App() {
   const [usedCouponIds, setUsedCouponIds] = useState<string[]>([])
   const [appliedCouponId, setAppliedCouponId] = useState('')
   const [profileOpen, setProfileOpen] = useState(false)
+  const [nickname, setNickname] = useState('제철 미식가')
   // 작업: 펫 경험치는 레벨별 잔여치가 아니라 누적 XP로 저장합니다.
   // 개인 수정 가능: 기본 시작 XP를 바꾸고 싶으면 0을 원하는 값으로 변경해도 됩니다.
   // 적용 위치: 펫홈 레벨 카드와 밥먹이기 후 성장 상태.
@@ -376,6 +377,9 @@ function App() {
   const [selectedAccessory, setSelectedAccessory] = useState('')
   const [toast, setToast] = useState('')
   const [isScrolling, setIsScrolling] = useState(false)
+  const [homeScrollSnapshot, setHomeScrollSnapshot] = useState({ cookMenu: 0, screen: 0 })
+  const homeScrollTopRef = useRef(0)
+  const homeCookMenuScrollTopRef = useRef(0)
   const scrollTimerRef = useRef<number | undefined>(undefined)
   const orderSequenceRef = useRef(0)
 
@@ -444,6 +448,23 @@ function App() {
     scrollTimerRef.current = window.setTimeout(() => setIsScrolling(false), 900)
   }
 
+  function handleHomeScroll(event: UIEvent<HTMLElement>) {
+    homeScrollTopRef.current = event.currentTarget.scrollTop
+    handleScrollActivity()
+  }
+
+  function handleHomeCookMenuScroll(event: UIEvent<HTMLElement>) {
+    homeCookMenuScrollTopRef.current = event.currentTarget.scrollTop
+    handleScrollActivity()
+  }
+
+  function saveHomeScrollSnapshot() {
+    setHomeScrollSnapshot({
+      cookMenu: homeCookMenuScrollTopRef.current,
+      screen: homeScrollTopRef.current,
+    })
+  }
+
   function changeSeason(season: SeasonKey) {
     const firstIngredient = seasonalIngredients.find((ingredient) => ingredient.seasonKey === season)
     setSelectedSeason(season)
@@ -474,6 +495,16 @@ function App() {
   }
 
   function changeCartQuantity(key: string, quantity: number) {
+    if (Number.isFinite(quantity) && quantity < 1) {
+      setRemovedCartIngredientKeys((current) => current.includes(key) ? current : [...current, key])
+      setCheckedIngredients((current) => current.filter((item) => item !== key))
+      setCartQuantities((current) => {
+        const next = { ...current }
+        delete next[key]
+        return next
+      })
+      return
+    }
     const normalizedQuantity = Number.isFinite(quantity) ? Math.min(99, Math.max(1, Math.floor(quantity))) : 1
     setCartQuantities((current) => ({ ...current, [key]: normalizedQuantity }))
   }
@@ -586,10 +617,14 @@ function App() {
             selectedSeason={selectedSeason}
             selectedSeasonalIngredientId={activeSeasonalIngredientId}
             selectedMenuIds={selectedMenuIds}
-            onScrollActivity={handleScrollActivity}
+            restoredCookMenuScrollTop={homeScrollSnapshot.cookMenu}
+            restoredScrollTop={homeScrollSnapshot.screen}
+            onCookMenuScroll={handleHomeCookMenuScroll}
+            onScrollActivity={handleHomeScroll}
             onSelectSeason={changeSeason}
             onSelectSeasonalIngredient={setSelectedSeasonalIngredientId}
             onOpenMenuDetail={(menuId) => {
+              saveHomeScrollSnapshot()
               setShoppingCatalogMenuIds([menuId])
               setShopStep('detail')
               setScreen('shopping')
@@ -653,6 +688,7 @@ function App() {
             exp={exp}
             feedIngredients={feedIngredients}
             level={level}
+            nickname={nickname}
             outfit={selectedOutfit}
             shoppingRewardUnlocked={shoppingRewardUnlocked}
             onClearDecor={clearDecor}
@@ -667,9 +703,11 @@ function App() {
           <MyPage
             coupons={earnedCoupons}
             exp={exp}
+            nickname={nickname}
             orderHistory={orderHistory}
             usedCouponIds={usedCouponIds}
             onClose={() => setProfileOpen(false)}
+            onChangeNickname={setNickname}
           />
         )}
 
@@ -677,6 +715,7 @@ function App() {
           current={screen}
           cartCount={checkedTotal}
           onChange={(nextScreen) => {
+            if (screen === 'home' && nextScreen !== 'home') saveHomeScrollSnapshot()
             if (nextScreen === 'shopping') {
               setShoppingCatalogMenuIds(selectedMenuIds)
               setShopStep('cart')
@@ -700,6 +739,9 @@ function HomeScreen({
   selectedSeason,
   selectedSeasonalIngredientId,
   selectedMenuIds,
+  restoredCookMenuScrollTop,
+  restoredScrollTop,
+  onCookMenuScroll,
   onScrollActivity,
   onSelectSeason,
   onSelectSeasonalIngredient,
@@ -714,12 +756,17 @@ function HomeScreen({
   selectedSeason: SeasonKey
   selectedSeasonalIngredientId: string
   selectedMenuIds: string[]
-  onScrollActivity: () => void
+  restoredCookMenuScrollTop: number
+  restoredScrollTop: number
+  onCookMenuScroll: (event: UIEvent<HTMLElement>) => void
+  onScrollActivity: (event: UIEvent<HTMLElement>) => void
   onSelectSeason: (season: SeasonKey) => void
   onSelectSeasonalIngredient: (id: string) => void
   onOpenMenuDetail: (id: string) => void
   onOpenProfile: () => void
 }) {
+  const screenRef = useRef<HTMLElement | null>(null)
+  const cookMenuListRef = useRef<HTMLDivElement | null>(null)
   const [purchaseTab, setPurchaseTab] = useState<'cook' | 'delivery'>('cook')
   const [locationPreview, setLocationPreview] = useState(false)
   const [locationRequestId, setLocationRequestId] = useState(0)
@@ -747,8 +794,17 @@ function HomeScreen({
     rating: (4.8 - index * 0.1).toFixed(1),
   }))
 
+  useEffect(() => {
+    const frameId = window.requestAnimationFrame(() => {
+      if (screenRef.current) screenRef.current.scrollTop = restoredScrollTop
+      if (cookMenuListRef.current) cookMenuListRef.current.scrollTop = restoredCookMenuScrollTop
+    })
+
+    return () => window.cancelAnimationFrame(frameId)
+  }, [restoredCookMenuScrollTop, restoredScrollTop])
+
   return (
-    <section className="screen" onScroll={onScrollActivity}>
+    <section className="screen" onScroll={onScrollActivity} ref={screenRef}>
       <header className="home-global-bar">
         <label className="shopping-search">
           <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('search')} />
@@ -862,7 +918,7 @@ function HomeScreen({
           </nav>
 
           {purchaseTab === 'cook' && (
-            <div className="menu-list nested-menu-list">
+            <div className="menu-list nested-menu-list" onScroll={onCookMenuScroll} ref={cookMenuListRef}>
               {seasonalMenus.map((menu) => (
                 <button
                   className="menu-card"
@@ -976,16 +1032,17 @@ function ShoppingScreen({
   const checkedProductCount = checkedIngredients.filter((key) => allIngredientKeys.includes(key)).length
   const allChecked = allIngredientKeys.length > 0 && allIngredientKeys.every((key) => checkedIngredients.includes(key))
   const detailMenu = catalogMenus[0]
-  const [excludedDetailIngredientKeys, setExcludedDetailIngredientKeys] = useState<string[]>([])
+  const [selectedDetailIngredientKeys, setSelectedDetailIngredientKeys] = useState<string[]>([])
   const [cartMovePromptOpen, setCartMovePromptOpen] = useState(false)
   const [deliveryAddress, setDeliveryAddress] = useState('서울특별시 중구 세종대로 110')
+  const [buyerName, setBuyerName] = useState('제철 미식가')
   const [buyerPhone, setBuyerPhone] = useState('010-0000-0000')
   const [addressEditOpen, setAddressEditOpen] = useState(false)
   const [draftAddress, setDraftAddress] = useState(deliveryAddress)
+  const [draftBuyerName, setDraftBuyerName] = useState(buyerName)
   const [draftBuyerPhone, setDraftBuyerPhone] = useState(buyerPhone)
-  const selectedDetailIngredientKeys = detailMenu?.ingredients
-    .map((ingredient) => ingredientKey(detailMenu.id, ingredient.name))
-    .filter((key) => !excludedDetailIngredientKeys.includes(key)) ?? []
+  const detailIngredientKeys = detailMenu?.ingredients.map((ingredient) => ingredientKey(detailMenu.id, ingredient.name)) ?? []
+  const activeDetailIngredientKeys = selectedDetailIngredientKeys.filter((key) => detailIngredientKeys.includes(key))
   const selectedCartProducts = selectedMenus.flatMap((menu) => menu.ingredients
     .filter((ingredient) => checkedIngredients.includes(ingredientKey(menu.id, ingredient.name)))
     .map((ingredient) => {
@@ -995,17 +1052,17 @@ function ShoppingScreen({
   const selectedCartQuantity = selectedCartProducts.reduce((total, product) => total + product.quantity, 0)
 
   function toggleDetailIngredient(key: string) {
-    setExcludedDetailIngredientKeys((current) => (
+    setSelectedDetailIngredientKeys((current) => (
       current.includes(key) ? current.filter((item) => item !== key) : [...current, key]
     ))
   }
 
   function addSelectedDetailIngredients(nextStep: 'cart' | 'checkout') {
-    if (!detailMenu || selectedDetailIngredientKeys.length === 0) return
+    if (!detailMenu || activeDetailIngredientKeys.length === 0) return
 
     detailMenu.ingredients.forEach((ingredient) => {
       const key = ingredientKey(detailMenu.id, ingredient.name)
-      if (selectedDetailIngredientKeys.includes(key)) onAddProduct(detailMenu.id, ingredient.name)
+      if (activeDetailIngredientKeys.includes(key)) onAddProduct(detailMenu.id, ingredient.name)
     })
     if (nextStep === 'cart') {
       setCartMovePromptOpen(true)
@@ -1016,12 +1073,14 @@ function ShoppingScreen({
 
   function openAddressEdit() {
     setDraftAddress(deliveryAddress)
+    setDraftBuyerName(buyerName)
     setDraftBuyerPhone(buyerPhone)
     setAddressEditOpen(true)
   }
 
   function saveAddressEdit() {
     setDeliveryAddress(draftAddress.trim() || deliveryAddress)
+    setBuyerName(draftBuyerName.trim() || buyerName)
     setBuyerPhone(draftBuyerPhone.trim() || buyerPhone)
     setAddressEditOpen(false)
   }
@@ -1047,7 +1106,7 @@ function ShoppingScreen({
               <div>
                 {detailMenu.ingredients.map((ingredient) => {
                   const key = ingredientKey(detailMenu.id, ingredient.name)
-                  const selected = selectedDetailIngredientKeys.includes(key)
+                  const selected = activeDetailIngredientKeys.includes(key)
                   return (
                     <button
                       aria-pressed={selected}
@@ -1067,14 +1126,14 @@ function ShoppingScreen({
           </div>
           <div className="shopping-detail-actions">
             <button
-              disabled={selectedDetailIngredientKeys.length === 0}
+              disabled={activeDetailIngredientKeys.length === 0}
               onClick={() => addSelectedDetailIngredients('cart')}
               type="button"
             >
               장바구니
             </button>
             <button
-              disabled={selectedDetailIngredientKeys.length === 0}
+              disabled={activeDetailIngredientKeys.length === 0}
               onClick={() => addSelectedDetailIngredients('checkout')}
               type="button"
             >
@@ -1098,8 +1157,8 @@ function ShoppingScreen({
             role="dialog"
           >
             <span aria-hidden="true"><img alt="" className="sudal-modal-icon" src={getPetUiIconImage('cart')} /></span>
-            <h2 id="cart-move-modal-title">장바구니로 이동하시겠습니까?</h2>
-            <p>선택한 재료를 장바구니에 담았어요.</p>
+            <h2 id="cart-move-modal-title">선택한 재료를 장바구니에 담았어요.</h2>
+            <p>장바구니로 이동하시겠습니까?</p>
             <div>
               <button
                 onClick={() => {
@@ -1126,18 +1185,25 @@ function ShoppingScreen({
 
       {step === 'cart' && (
         <>
-          <div className="shopping-cart-head">
-            <div>{selectedMenus.length > 0 && <strong>장바구니 {checkedTotal}</strong>}</div>
-          </div>
+          {selectedMenus.length > 0 && (
+            <div className="shopping-cart-head">
+              <button aria-label="뒤로가기" onClick={onGoHome} type="button">
+                <img alt="" aria-hidden="true" className="sudal-ui-icon sudal-back-icon" src={getPetUiIconImage('back')} />
+              </button>
+            </div>
+          )}
           <div className="toss-menu-list">
             {selectedMenus.length === 0 && (
               <div className="empty-cart-pet">
                 <div className="empty-cart-pet-room">
                   <PetAvatar outfit={outfit} accessory={accessory} body="sudal" />
                 </div>
-                <h2>배고파요...</h2>
-                <p>오늘은 뭐 먹을래요?</p>
-                <div>
+                <div className="empty-cart-copy">
+                  <span>꼬르륵</span>
+                  <h2>배고파요...</h2>
+                  <p>작은 수달이 빈 그릇 앞에서 기다리고 있어요.</p>
+                </div>
+                <div className="empty-cart-action">
                   <button className="toss-primary" onClick={onGoHome} type="button">제철홈에서 메뉴 고르기</button>
                 </div>
               </div>
@@ -1173,10 +1239,10 @@ function ShoppingScreen({
                           }}
                           type="checkbox"
                         />
-                        <strong>오늘의 제철마켓</strong>
+                        <strong>{menu.name}</strong>
                       </label>
-                      <button className="toss-menu-remove" onClick={() => onRemoveMenu(menu.id)} type="button">
-                        선택삭제
+                      <button aria-label={`${menu.name} 삭제`} className="toss-menu-remove" onClick={() => onRemoveMenu(menu.id)} type="button">
+                        <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('clear')} />
                       </button>
                     </div>
                     <div className="ingredient-list toss-list toss-product-list">
@@ -1193,8 +1259,7 @@ function ShoppingScreen({
                             />
                             <em aria-hidden="true">{ingredientIconImage(item.name)}</em>
                             <span>
-                              <strong>내일 도착 예정</strong>
-                              <small>{item.name}, {item.quantity}</small>
+                              <strong>{item.name}</strong>
                             </span>
                             <div className="cart-product-side">
                               <b>
@@ -1204,7 +1269,6 @@ function ShoppingScreen({
                               <div className="cart-quantity-control" aria-label={`${item.name} 수량`}>
                                 <button
                                   aria-label={`${item.name} 수량 줄이기`}
-                                  disabled={quantity <= 1}
                                   onClick={() => onChangeQuantity(key, quantity - 1)}
                                   type="button"
                                 >
@@ -1237,15 +1301,17 @@ function ShoppingScreen({
                 )
             })}
           </div>
-          <div className="toss-cart-orderbar" aria-label="주문 예상 금액">
-            <div>
-              <span>총 주문 예상금액</span>
-              <strong>{formatWon(checkedPrice)}</strong>
+          {selectedMenus.length > 0 && (
+            <div className="toss-cart-orderbar" aria-label="주문 예상 금액">
+              <div>
+                <span>총 주문 예상금액</span>
+                <strong>{formatWon(checkedPrice)}</strong>
+              </div>
+              <button className="toss-primary toss-cart-continue" disabled={!canContinue} onClick={() => onSetStep('checkout')} type="button">
+                {checkedTotal}건 · {formatWon(checkedPrice)} 주문하기
+              </button>
             </div>
-            <button className="toss-primary toss-cart-continue" disabled={!canContinue} onClick={() => onSetStep('checkout')} type="button">
-              {checkedTotal}건 · {formatWon(checkedPrice)} 주문하기
-            </button>
-          </div>
+          )}
         </>
       )}
 
@@ -1259,7 +1325,7 @@ function ShoppingScreen({
           <section className="shopping-address">
             <h1><span>집</span>으로 배송</h1>
             <p>{deliveryAddress}</p>
-            <small>구매자 · {buyerPhone}</small>
+            <small>구매자 · {buyerName} · {buyerPhone}</small>
             <button onClick={openAddressEdit} type="button">변경</button>
             <select aria-label="배송 시 요청사항" value={deliveryOption} onChange={(event) => onSelectDelivery(event.target.value)}>
               {deliveryOptions.map((option) => <option key={option}>{option}</option>)}
@@ -1303,15 +1369,17 @@ function ShoppingScreen({
             <div className="shopping-payment-options">
               {paymentOptions.map((option) => (
                 <button className={paymentMethod === option ? 'active' : ''} key={option} onClick={() => onSelectPayment(option)} type="button">
-                  {option}<span>{paymentMethod === option ? '✓' : ''}</span>
+                  {option}
                 </button>
               ))}
             </div>
-            <h2>토스포인트 사용</h2>
-            <div className="shopping-points"><span>0</span><b>원</b></div>
             <div className="shopping-total">
               <strong>총 결제 금액</strong><b>{formatWon(orderTotal)}</b>
-              <span>총 주문 금액</span><span>{formatWon(checkedPrice)}</span>
+              {orderTotal !== checkedPrice && (
+                <>
+                  <span>총 주문 금액</span><span>{formatWon(checkedPrice)}</span>
+                </>
+              )}
               {couponDiscount > 0 && (
                 <>
                   <span>쿠폰 할인</span><span className="shopping-discount-value">-{formatWon(couponDiscount)}</span>
@@ -1342,6 +1410,13 @@ function ShoppingScreen({
                     autoFocus
                     value={draftAddress}
                     onChange={(event) => setDraftAddress(event.target.value)}
+                  />
+                </label>
+                <label>
+                  <span>구매자 이름</span>
+                  <input
+                    value={draftBuyerName}
+                    onChange={(event) => setDraftBuyerName(event.target.value)}
                   />
                 </label>
                 <label>
@@ -1488,7 +1563,7 @@ function KakaoRestaurantMap({
           level: kakaoMapDefaultLevel,
         })
         mapInstanceRef.current = map
-        map.setZoomable(false)
+        map.setZoomable(true)
         const places = new kakao.maps.services.Places()
         const searchOptions = { location: centerLatLng, radius: 5000 }
 
@@ -1551,7 +1626,6 @@ function KakaoRestaurantMap({
           <img alt="" aria-hidden="true" className="sudal-ui-icon" src={getPetUiIconImage('location')} />
           내 위치로 돌아가기
         </button>
-        <p className="kakao-map-status">현재 위치 기준으로 메뉴 맛집을 보여줘요.</p>
       </div>
       {places.length > 0 && (
         <div className="kakao-place-list" aria-label="주변 맛집 검색 결과">
@@ -1876,6 +1950,11 @@ function menuCardVisualImage(menu: Menu) {
     || tomatoMenuImageByName(menu)
     || cornMenuImageByName(menu)
     || peachMenuImageByName(menu)
+    || pearMenuImageByName(menu)
+    || shrimpMenuImageByName(menu)
+    || persimmonMenuImageByName(menu)
+    || figMenuImageByName(menu)
+    || mackerelMenuImageByName(menu)
     || watermelonMenuImageByName(menu)
     || yellowtailMenuImageByName(menu)
     || winterMenuImageByName(menu)
@@ -1886,6 +1965,80 @@ function menuCardVisualImage(menu: Menu) {
   }
 
   return ingredientIconImage(menu.ingredients[0]?.name ?? menu.name)
+}
+
+function pearMenuImageByName(menu: Menu) {
+  const name = menu.name
+  const isPearMenu = menu.seasonalIngredientIds?.includes('pear') || name.includes('배')
+  if (!isPearMenu || name.includes('배추')) return ''
+
+  if (name.includes('샐러드')) return menuDishImageById('pear-salad')
+  if (name.includes('절임')) return menuDishImageById('pear-pickle')
+  if (name.includes('조림')) return menuDishImageById('pear-jorim')
+  if (name.includes('갈비찜')) return menuDishImageById('pear-galbi-juice')
+  if (name.includes('배즙')) return menuDishImageById('pear-juice')
+  if (name.includes('배숙')) return menuDishImageById('baesuk')
+  if (name.includes('타르트')) return menuDishImageById('pear-tart')
+
+  return ''
+}
+
+function mackerelMenuImageByName(menu: Menu) {
+  const name = menu.name
+  const isMackerelMenu = menu.seasonalIngredientIds?.includes('mackerel') || name.includes('고등어')
+  if (!isMackerelMenu) return ''
+
+  if (name.includes('구이')) return menuDishImageById('mackerel-grill')
+  if (name.includes('튀김')) return menuDishImageById('mackerel-fried')
+  if (name.includes('조림')) return menuDishImageById('mackerel-jorim')
+  if (name.includes('김치찜')) return menuDishImageById('mackerel-kimchi-jjim')
+  if (name.includes('회')) return menuDishImageById('mackerel-sashimi')
+
+  return ''
+}
+
+function persimmonMenuImageByName(menu: Menu) {
+  const name = menu.name
+  const isPersimmonMenu = menu.seasonalIngredientIds?.includes('persimmon') || name.includes('감') || name.includes('곶감')
+  if (!isPersimmonMenu) return ''
+
+  if (name.includes('샐러드')) return menuDishImageById('persimmon-salad')
+  if (name.includes('곶감')) return menuDishImageById('persimmon-dried')
+  if (name.includes('말랭이')) return menuDishImageById('persimmon-dried-slices')
+  if (name.includes('조림')) return menuDishImageById('persimmon-jorim')
+  if (name.includes('식초')) return menuDishImageById('persimmon-vinegar')
+
+  return ''
+}
+
+function figMenuImageByName(menu: Menu) {
+  const name = menu.name
+  const isFigMenu = menu.seasonalIngredientIds?.includes('fig') || name.includes('무화과')
+  if (!isFigMenu) return ''
+
+  if (name.includes('토스트')) return menuDishImageById('fig-toast')
+  if (name.includes('청')) return menuDishImageById('fig-cheong')
+  if (name.includes('말랭이')) return menuDishImageById('fig-dried')
+  if (name.includes('잼')) return menuDishImageById('fig-jam')
+  if (name.includes('샐러드')) return menuDishImageById('fig-salad')
+  if (name.includes('타르트')) return menuDishImageById('fig-tart')
+
+  return ''
+}
+
+function shrimpMenuImageByName(menu: Menu) {
+  const name = menu.name
+  const isShrimpMenu = menu.seasonalIngredientIds?.includes('shrimp') || name.includes('대하') || name.includes('새우')
+  if (!isShrimpMenu) return ''
+
+  if (name.includes('소금구이')) return menuDishImageById('shrimp-salt-grill')
+  if (name.includes('버터구이')) return menuDishImageById('shrimp-butter-grill')
+  if (name.includes('튀김')) return menuDishImageById('shrimp-fried')
+  if (name.includes('장')) return menuDishImageById('shrimp-jang')
+  if (name.includes('찜')) return menuDishImageById('shrimp-jjim')
+  if (name.includes('볶음')) return menuDishImageById('shrimp-stir-fry')
+
+  return ''
 }
 
 function cornMenuImageByName(menu: Menu) {
@@ -2076,23 +2229,41 @@ function winterMenuImageByName(menu: Menu) {
 function MyPage({
   coupons,
   exp,
+  nickname,
   orderHistory,
   usedCouponIds,
   onClose,
+  onChangeNickname,
 }: {
   coupons: RewardCoupon[]
   exp: number
+  nickname: string
   orderHistory: OrderHistoryItem[]
   usedCouponIds: string[]
   onClose: () => void
+  onChangeNickname: (nickname: string) => void
 }) {
   const [page, setPage] = useState<'overview' | 'coupons' | 'orderDetail'>('overview')
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null)
+  const [nicknameEditing, setNicknameEditing] = useState(false)
+  const [draftNickname, setDraftNickname] = useState(nickname)
   const level = getPetLevel(exp)
   const availableCouponCount = coupons.filter((coupon) => !usedCouponIds.includes(coupon.id)).length
   const nextCouponRemainingExp = couponRewardExp - (exp % couponRewardExp)
   const selectedOrder = orderHistory.find((order) => order.id === selectedOrderId)
   const pageTitle = page === 'coupons' ? '내 쿠폰함' : page === 'orderDetail' ? '주문 상세' : '마이페이지'
+
+  function saveNickname() {
+    const nextNickname = draftNickname.trim() || nickname
+    onChangeNickname(nextNickname)
+    setDraftNickname(nextNickname)
+    setNicknameEditing(false)
+  }
+
+  function cancelNicknameEdit() {
+    setDraftNickname(nickname)
+    setNicknameEditing(false)
+  }
 
   function goBack() {
     if (page === 'overview') {
@@ -2118,10 +2289,51 @@ function MyPage({
           <div className="my-page-profile">
                 <span aria-hidden="true"><img alt="" className="sudal-modal-icon" src={getPetUiIconImage('profile')} /></span>
             <div>
-              <strong>제철 미식가</strong>
+              <div className="my-page-nickname-row">
+                <strong>{nickname}</strong>
+                <button
+                  aria-label="닉네임 수정"
+                  className="my-page-nickname-edit"
+                  onClick={() => {
+                    setDraftNickname(nickname)
+                    setNicknameEditing(true)
+                  }}
+                  type="button"
+                >
+                  <img alt="" aria-hidden="true" src={getPetUiIconImage('edit')} />
+                </button>
+              </div>
               <p><span>LEVEL {level}</span></p>
             </div>
           </div>
+
+          {nicknameEditing && (
+            <div className="nickname-edit-modal" onClick={cancelNicknameEdit} role="presentation">
+              <div
+                aria-modal="true"
+                className="nickname-edit-card"
+                onClick={(event) => event.stopPropagation()}
+                role="dialog"
+              >
+                <h2>닉네임 수정</h2>
+                <input
+                  aria-label="닉네임"
+                  autoFocus
+                  maxLength={12}
+                  onChange={(event) => setDraftNickname(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') saveNickname()
+                    if (event.key === 'Escape') cancelNicknameEdit()
+                  }}
+                  value={draftNickname}
+                />
+                <div>
+                  <button onClick={cancelNicknameEdit} type="button">취소</button>
+                  <button onClick={saveNickname} type="button">저장</button>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="my-page-summary">
             <div><span>주문</span><strong>{orderHistory.length}건</strong></div>
@@ -2258,6 +2470,7 @@ function MyPage({
 function PetHomeScreen({
   level,
   exp,
+  nickname,
   background,
   outfit,
   accessory,
@@ -2272,6 +2485,7 @@ function PetHomeScreen({
 }: {
   level: number
   exp: number
+  nickname: string
   background: string
   outfit: string
   accessory: string
@@ -2310,11 +2524,16 @@ function PetHomeScreen({
     const target = petRoomRef.current
     if (!target) return
 
+    target.classList.add('is-share-capturing')
     try {
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => resolve())
+      })
       const canvas = await renderPetHomeShareCanvas(target, {
         background,
         roomImage,
       })
+      target.classList.remove('is-share-capturing')
       const blob = await canvasToBlob(canvas)
       const file = new File([blob], 'mukbo-pet-home.png', { type: 'image/png' })
 
@@ -2330,6 +2549,8 @@ function PetHomeScreen({
       downloadBlob(blob, file.name)
     } catch {
       onShareFallback()
+    } finally {
+      target.classList.remove('is-share-capturing')
     }
   }
 
@@ -2349,12 +2570,11 @@ function PetHomeScreen({
           <img alt="" aria-hidden="true" src={getPetShareIconImage()} />
         </button>
         <PetAvatar outfit={outfit} background={background} accessory={accessory} body="sudal" />
-        <div className="pet-stage-level" aria-label={`Level ${level}, ${expLabel}`}>
+        <div className="pet-stage-level" aria-label={`${nickname}, Level ${level}, ${expLabel}`}>
           <span>LEVEL {level}</span>
           <div className="progress-track">
             <div className="progress-fill" style={{ width: `${levelProgress}%` }} />
           </div>
-          <b>{Math.round(levelProgress)}%</b>
         </div>
       </div>
 
@@ -2485,7 +2705,12 @@ function TabBar({ current, cartCount, onChange }: { current: Screen; cartCount: 
   ]
 
   return (
-    <nav className="tab-bar" aria-label="하단 탭">
+    <nav
+      className="tab-bar"
+      aria-label="하단 탭"
+      onTouchMove={(event) => event.preventDefault()}
+      onWheel={(event) => event.preventDefault()}
+    >
       {tabs.map((tab) => (
         <button className={current === tab.id ? 'active' : ''} key={tab.id} onClick={() => onChange(tab.id)} type="button">
           <span className="tab-icon" aria-hidden="true">
