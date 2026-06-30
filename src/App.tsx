@@ -1946,6 +1946,7 @@ function menuCardVisualImage(menu: Menu) {
   const menuImage = menuImagesById[menu.id]
     || menuDishImageById(menu.id)
     || renderableMenuImage(menu.image)
+    || appleMenuImageByName(menu)
     || tomatoMenuImageByName(menu)
     || cornMenuImageByName(menu)
     || peachMenuImageByName(menu)
@@ -1965,6 +1966,21 @@ function menuCardVisualImage(menu: Menu) {
   }
 
   return ingredientIconImage(menu.ingredients[0]?.name ?? menu.name)
+}
+
+function appleMenuImageByName(menu: Menu) {
+  const name = menu.name
+  const isAppleMenu = menu.seasonalIngredientIds?.includes('apple') || name.includes('사과')
+  if (!isAppleMenu) return ''
+
+  if (name.includes('돼지고기') || name.includes('포크')) return menuDishImageById('apple-pork-salad')
+  if (name.includes('잼')) return menuDishImageById('apple-jam')
+  if (name.includes('주스')) return menuDishImageById('apple-juice')
+  if (name.includes('파이')) return menuDishImageById('apple-pie')
+  if (name.includes('샐러드')) return menuDishImageById('apple-salad')
+  if (name.includes('타르트')) return menuDishImageById('apple-tart')
+
+  return ''
 }
 
 function chestnutMenuImageByName(menu: Menu) {
