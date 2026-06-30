@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { CSSProperties, UIEvent } from 'react'
+import type { CSSProperties, FocusEvent, UIEvent } from 'react'
 import './App.css'
 import PetAvatar from './components/PetAvatar'
 import { getRoomBackgroundImage } from './data/decorAssets'
@@ -11,6 +11,7 @@ import petTabAccessoryIcon from './assets/sudal-tabs/accessory.png'
 import petTabAllIcon from './assets/sudal-tabs/all.png'
 import petTabFeedIcon from './assets/sudal-tabs/feed.png'
 import petTabRoomIcon from './assets/sudal-tabs/room.png'
+import hungryEmptyBowlOtterImage from './assets/sudal-illustrations/hungry-empty-bowl-otter-transparent.png'
 import applePorkSaladImage from './assets/sudal-icons/menus/apple-pork-salad.png'
 import burdockGimbapImage from './assets/sudal-icons/menus/burdock-gimbap.png'
 import cabbageHotpotImage from './assets/sudal-icons/menus/cabbage-hotpot.png'
@@ -216,6 +217,27 @@ const tossShoppingOptions = [
 ]
 const paymentOptions = ['토스페이', '카드 간편결제', '계좌 결제']
 const deliveryOptions = ['문 앞에 놓기', '직접 받을게요']
+const defaultCheckoutAddress = '서울특별시 중구 세종대로 110'
+const defaultBuyerName = '제철 미식가'
+const defaultBuyerPhone = '010-0000-0000'
+const checkoutStorageKeys = {
+  address: 'toss-menu-checkout-address',
+  buyerName: 'toss-menu-checkout-buyer-name',
+  buyerPhone: 'toss-menu-checkout-buyer-phone',
+  deliveryOption: 'toss-menu-checkout-delivery-option',
+} as const
+
+function readStoredText(key: string, fallback: string) {
+  if (typeof window === 'undefined') return fallback
+
+  const stored = window.localStorage.getItem(key)
+  return stored && stored.trim() ? stored : fallback
+}
+
+function writeStoredText(key: string, value: string) {
+  if (typeof window === 'undefined') return
+  window.localStorage.setItem(key, value)
+}
 // 작업: 5단계 레벨업에 총 20만 XP가 필요하며 같은 구조를 반복합니다.
 // 적용 위치: 펫홈 레벨 표시, 경험치 바, 20만 XP 단위 할인 쿠폰 발급.
 const petLevelExpRequirements = [10000, 25000, 40000, 55000, 70000] as const
@@ -370,7 +392,10 @@ function App() {
   const [exp, setExp] = useState(0)
   const [shopStep, setShopStep] = useState<ShopStep>('cart')
   const [paymentMethod, setPaymentMethod] = useState(paymentOptions[0])
-  const [deliveryOption, setDeliveryOption] = useState(deliveryOptions[0])
+  const [deliveryOption, setDeliveryOption] = useState(() => {
+    const storedDeliveryOption = readStoredText(checkoutStorageKeys.deliveryOption, deliveryOptions[0])
+    return deliveryOptions.includes(storedDeliveryOption) ? storedDeliveryOption : deliveryOptions[0]
+  })
   const [shoppingRewardUnlocked, setShoppingRewardUnlocked] = useState(false)
   const [selectedBackground, setSelectedBackground] = useState('아늑한 집안')
   const [selectedOutfit, setSelectedOutfit] = useState('')
@@ -398,6 +423,10 @@ function App() {
       isMounted = false
     }
   }, [])
+
+  useEffect(() => {
+    writeStoredText(checkoutStorageKeys.deliveryOption, deliveryOption)
+  }, [deliveryOption])
 
   const selectedMenus = menus.filter((menu) => selectedMenuIds.includes(menu.id))
   const cartMenus = selectedMenus
@@ -515,7 +544,7 @@ function App() {
     setRemovedCartIngredientKeys((current) => current.filter((item) => item !== key))
     setCheckedIngredients((current) => current.includes(key) ? current : [...current, key])
     setCartQuantities((current) => current[key] ? current : { ...current, [key]: 1 })
-    showToast(`${ingredientName}을 장바구니에 담았어요.`)
+    showToast(`${ingredientName}을 장바구니에 담았어요`)
   }
 
   function completeOrderFlow() {
@@ -535,8 +564,10 @@ function App() {
     setOrderHistory((current) => [{
       id: orderId,
       orderedAt: new Intl.DateTimeFormat('ko-KR', {
+        year: 'numeric',
         month: 'long',
         day: 'numeric',
+        hour12: false,
         hour: '2-digit',
         minute: '2-digit',
       }).format(new Date()),
@@ -635,7 +666,6 @@ function App() {
 
         {screen === 'shopping' && (
           <ShoppingScreen
-            accessory={selectedAccessory}
             appliedCouponId={activeCouponId}
             availableCoupons={availableCoupons}
             cartQuantities={cartQuantities}
@@ -651,7 +681,6 @@ function App() {
             orderTotal={displayOrderTotal}
             paymentMethod={paymentMethod}
             paymentOptions={paymentOptions}
-            outfit={selectedOutfit}
             step={shopStep}
             onCompleteOrder={completeOrderFlow}
             onAddProduct={addShoppingProduct}
@@ -965,7 +994,6 @@ function HomeScreen({
 }
 
 function ShoppingScreen({
-  accessory,
   appliedCouponId,
   availableCoupons,
   cartQuantities,
@@ -980,7 +1008,6 @@ function ShoppingScreen({
   step,
   paymentMethod,
   paymentOptions,
-  outfit,
   deliveryOption,
   deliveryOptions,
   onToggleIngredient,
@@ -996,7 +1023,6 @@ function ShoppingScreen({
   onRemoveMenu,
   onScrollActivity,
 }: {
-  accessory: string
   appliedCouponId: string
   availableCoupons: RewardCoupon[]
   cartQuantities: Record<string, number>
@@ -1011,7 +1037,6 @@ function ShoppingScreen({
   step: ShopStep
   paymentMethod: string
   paymentOptions: string[]
-  outfit: string
   deliveryOption: string
   deliveryOptions: string[]
   onToggleIngredient: (name: string) => void
@@ -1034,13 +1059,14 @@ function ShoppingScreen({
   const detailMenu = catalogMenus[0]
   const [selectedDetailIngredientKeys, setSelectedDetailIngredientKeys] = useState<string[]>([])
   const [cartMovePromptOpen, setCartMovePromptOpen] = useState(false)
-  const [deliveryAddress, setDeliveryAddress] = useState('서울특별시 중구 세종대로 110')
-  const [buyerName, setBuyerName] = useState('제철 미식가')
-  const [buyerPhone, setBuyerPhone] = useState('010-0000-0000')
+  const [deliveryAddress, setDeliveryAddress] = useState(() => readStoredText(checkoutStorageKeys.address, defaultCheckoutAddress))
+  const [buyerName, setBuyerName] = useState(() => readStoredText(checkoutStorageKeys.buyerName, defaultBuyerName))
+  const [buyerPhone, setBuyerPhone] = useState(() => readStoredText(checkoutStorageKeys.buyerPhone, defaultBuyerPhone))
   const [addressEditOpen, setAddressEditOpen] = useState(false)
   const [draftAddress, setDraftAddress] = useState(deliveryAddress)
   const [draftBuyerName, setDraftBuyerName] = useState(buyerName)
   const [draftBuyerPhone, setDraftBuyerPhone] = useState(buyerPhone)
+  const [deliverySelectOpen, setDeliverySelectOpen] = useState(false)
   const detailIngredientKeys = detailMenu?.ingredients.map((ingredient) => ingredientKey(detailMenu.id, ingredient.name)) ?? []
   const activeDetailIngredientKeys = selectedDetailIngredientKeys.filter((key) => detailIngredientKeys.includes(key))
   const selectedCartProducts = selectedMenus.flatMap((menu) => menu.ingredients
@@ -1050,6 +1076,18 @@ function ShoppingScreen({
       return { key, menu, ingredient, quantity: cartQuantities[key] ?? 1 }
     }))
   const selectedCartQuantity = selectedCartProducts.reduce((total, product) => total + product.quantity, 0)
+
+  useEffect(() => {
+    writeStoredText(checkoutStorageKeys.address, deliveryAddress)
+  }, [deliveryAddress])
+
+  useEffect(() => {
+    writeStoredText(checkoutStorageKeys.buyerName, buyerName)
+  }, [buyerName])
+
+  useEffect(() => {
+    writeStoredText(checkoutStorageKeys.buyerPhone, buyerPhone)
+  }, [buyerPhone])
 
   function toggleDetailIngredient(key: string) {
     setSelectedDetailIngredientKeys((current) => (
@@ -1083,6 +1121,12 @@ function ShoppingScreen({
     setBuyerName(draftBuyerName.trim() || buyerName)
     setBuyerPhone(draftBuyerPhone.trim() || buyerPhone)
     setAddressEditOpen(false)
+  }
+
+  function closeDeliverySelectOnBlur(event: FocusEvent<HTMLDivElement>) {
+    const nextTarget = event.relatedTarget
+    if (nextTarget instanceof Node && event.currentTarget.contains(nextTarget)) return
+    setDeliverySelectOpen(false)
   }
 
   return (
@@ -1157,7 +1201,7 @@ function ShoppingScreen({
             role="dialog"
           >
             <span aria-hidden="true"><img alt="" className="sudal-modal-icon" src={getPetUiIconImage('cart')} /></span>
-            <h2 id="cart-move-modal-title">선택한 재료를 장바구니에 담았어요.</h2>
+            <h2 id="cart-move-modal-title">선택한 재료를 장바구니에 담았어요</h2>
             <p>장바구니로 이동하시겠습니까?</p>
             <div>
               <button
@@ -1196,12 +1240,12 @@ function ShoppingScreen({
             {selectedMenus.length === 0 && (
               <div className="empty-cart-pet">
                 <div className="empty-cart-pet-room">
-                  <PetAvatar outfit={outfit} accessory={accessory} body="sudal" />
-                </div>
-                <div className="empty-cart-copy">
-                  <span>꼬르륵</span>
-                  <h2>배고파요...</h2>
-                  <p>작은 수달이 빈 그릇 앞에서 기다리고 있어요.</p>
+                  <img
+                    alt=""
+                    aria-hidden="true"
+                    className="empty-cart-pet-image"
+                    src={hungryEmptyBowlOtterImage}
+                  />
                 </div>
                 <div className="empty-cart-action">
                   <button className="toss-primary" onClick={onGoHome} type="button">제철홈에서 메뉴 고르기</button>
@@ -1325,11 +1369,39 @@ function ShoppingScreen({
           <section className="shopping-address">
             <h1><span>집</span>으로 배송</h1>
             <p>{deliveryAddress}</p>
-            <small>구매자 · {buyerName} · {buyerPhone}</small>
+            <small>{buyerName} · {buyerPhone}</small>
             <button onClick={openAddressEdit} type="button">변경</button>
-            <select aria-label="배송 시 요청사항" value={deliveryOption} onChange={(event) => onSelectDelivery(event.target.value)}>
-              {deliveryOptions.map((option) => <option key={option}>{option}</option>)}
-            </select>
+            <div className="shopping-delivery-select" onBlur={closeDeliverySelectOnBlur}>
+              <button
+                aria-expanded={deliverySelectOpen}
+                aria-haspopup="listbox"
+                className={deliverySelectOpen ? 'open' : ''}
+                onClick={() => setDeliverySelectOpen((open) => !open)}
+                type="button"
+              >
+                {deliveryOption}
+                <span aria-hidden="true" />
+              </button>
+              {deliverySelectOpen && (
+                <div className="shopping-delivery-options" role="listbox">
+                  {deliveryOptions.map((option) => (
+                    <button
+                      aria-selected={deliveryOption === option}
+                      className={deliveryOption === option ? 'active' : ''}
+                      key={option}
+                      onClick={() => {
+                        onSelectDelivery(option)
+                        setDeliverySelectOpen(false)
+                      }}
+                      role="option"
+                      type="button"
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </section>
           <section className="shopping-order-products">
             <h2>주문상품 {selectedCartQuantity}개</h2>
@@ -1437,35 +1509,33 @@ function ShoppingScreen({
 
       {step === 'complete' && (
         <div className="complete-card">
-          <h2>주문 체험이 완료됐어요</h2>
-          <p>실제 결제와 주문은 발생하지 않습니다.</p>
-          <div className="receipt-drafts receipt-main" aria-label="주문 완료 영수증">
-            <article className="receipt-draft receipt-draft-1">
-              <dl>
-                <div>
-                  <dt>결제 수단</dt>
-                  <dd>{paymentMethod}</dd>
-                </div>
-                <div>
-                  <dt>배송 방식</dt>
-                  <dd>{deliveryTypeInfo.name}</dd>
-                </div>
-                <div>
-                  <dt>배송 요청</dt>
-                  <dd>{deliveryOption}</dd>
-                </div>
-                {couponDiscount > 0 && (
-                  <div>
-                    <dt>쿠폰 할인</dt>
-                    <dd>-{formatWon(couponDiscount)}</dd>
-                  </div>
-                )}
-                <div>
-                  <dt>총 결제금액</dt>
-                  <dd>{formatWon(orderTotal)}</dd>
-                </div>
-              </dl>
-            </article>
+          <div className="complete-hero">
+            <h2>주문이 완료되었습니다</h2>
+            <p>실제 결제와 주문은 발생하지 않는 MVP 체험 화면입니다.</p>
+          </div>
+          <div className="complete-summary" aria-label="주문 완료 요약">
+            <div>
+              <span>결제 수단</span>
+              <b>{paymentMethod}</b>
+            </div>
+            <div>
+              <span>배송 방식</span>
+              <b>{deliveryTypeInfo.name}</b>
+            </div>
+            <div>
+              <span>배송 요청</span>
+              <b>{deliveryOption}</b>
+            </div>
+            {couponDiscount > 0 && (
+              <div>
+                <span>쿠폰 할인</span>
+                <b className="discount">-{formatWon(couponDiscount)}</b>
+              </div>
+            )}
+            <div className="total">
+              <strong>결제 금액</strong>
+              <b>{formatWon(orderTotal)}</b>
+            </div>
           </div>
           <button className="toss-primary" onClick={onGoPetHome} type="button">밥주러 가기</button>
           <button className="toss-secondary wide" onClick={onGoHome} type="button">장보러 가기</button>
@@ -2373,11 +2443,10 @@ function MyPage({
                   <em aria-hidden="true">{ingredientIconImage(order.items[0]?.name ?? '')}</em>
                   <div>
                     <strong>{order.items[0]?.name ?? '제철 상품'}{order.items.length > 1 ? ` 외 ${order.items.length - 1}개` : ''}</strong>
-                    <p>{order.items.map((item) => `${item.name} ${item.quantity} × ${item.count}`).join(' · ')}</p>
                   </div>
                 </div>
                 {order.discount > 0 && <div className="my-order-discount"><span>쿠폰 할인</span><b>-{formatWon(order.discount)}</b></div>}
-                <div className="my-order-total"><span>결제 금액</span><b>{formatWon(order.total)} ›</b></div>
+                <div className="my-order-total"><span>결제 금액</span><b>{formatWon(order.total)}</b></div>
               </button>
             ))}
           </section>
@@ -2419,20 +2488,19 @@ function MyPage({
 
       {page === 'orderDetail' && selectedOrder && (
         <section className="my-order-detail">
-          <div className="my-order-detail-status">
-            <span>{selectedOrder.orderedAt}</span>
-            <strong>{selectedOrder.status}</strong>
-            <p>주문번호 #{String(selectedOrder.id).padStart(6, '0')}</p>
-          </div>
-
           <div className="my-order-detail-products">
-            <h2>주문 상품</h2>
+            <div className="my-order-detail-heading">
+              <div className="my-order-detail-title-group">
+                <h2>주문 상품</h2>
+                <span>#{String(selectedOrder.id).padStart(6, '0')}</span>
+              </div>
+              <time>{selectedOrder.orderedAt}</time>
+            </div>
             {selectedOrder.items.map((item, index) => (
               <article key={`${item.name}-${index}`}>
                 <em aria-hidden="true">{ingredientIconImage(item.name)}</em>
                 <div>
                   <strong>{item.name}</strong>
-                  <span>{item.quantity} · {item.count}개</span>
                   <b>{formatWon(item.price * item.count)}</b>
                 </div>
               </article>
@@ -2441,23 +2509,27 @@ function MyPage({
 
           <div className="my-order-detail-payment">
             <h2>결제 정보</h2>
-            <div>
-              <span>상품 금액</span>
-              <b>{formatWon(selectedOrder.items.reduce((total, item) => total + item.price * item.count, 0))}</b>
-            </div>
-            <div>
-              <span>배송비</span>
-              <b>무료</b>
-            </div>
-            {selectedOrder.discount > 0 && (
-              <div>
-                <span>쿠폰 할인</span>
-                <b className="discount">-{formatWon(selectedOrder.discount)}</b>
+            <div className="payment-summary-card">
+              <div className="payment-summary-hero">
+                <span>결제 금액</span>
+                <strong>{formatWon(selectedOrder.total)}</strong>
               </div>
-            )}
-            <div className="total">
-              <strong>총 결제 금액</strong>
-              <b>{formatWon(selectedOrder.total)}</b>
+              <div className="payment-summary-breakdown">
+                <p>
+                  <span>상품 금액</span>
+                  <b>{formatWon(selectedOrder.items.reduce((total, item) => total + item.price * item.count, 0))}</b>
+                </p>
+                <p>
+                  <span>배송비</span>
+                  <b>무료</b>
+                </p>
+                {selectedOrder.discount > 0 && (
+                  <p>
+                    <span>쿠폰 할인</span>
+                    <b className="discount">-{formatWon(selectedOrder.discount)}</b>
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </section>
@@ -2499,7 +2571,10 @@ function PetHomeScreen({
 }) {
   const [decorTab, setDecorTab] = useState<PetHomeDecorTab>('all')
   const [petTab, setPetTab] = useState<'feed' | 'decor'>('feed')
+  const [feedFeedback, setFeedFeedback] = useState<{ id: number; name: string; leveledUp: boolean } | null>(null)
   const petRoomRef = useRef<HTMLDivElement>(null)
+  const feedFeedbackTimerRef = useRef<number | undefined>(undefined)
+  const feedFeedbackIdRef = useRef(0)
   const petHomeDecorItems = decorItems.filter((item) => item.type !== 'outfit' && isPetHomeVisibleDecorItem(item))
   const visibleItems = decorTab === 'all' ? petHomeDecorItems : petHomeDecorItems.filter((item) => item.type === decorTab)
   const canClearDecor = decorTab === 'accessory'
@@ -2557,11 +2632,27 @@ function PetHomeScreen({
     void sharePetHomeImage()
   }
 
+  function handleFeed(ingredient: FeedIngredient) {
+    const currentLevel = getPetLevel(exp)
+    const nextLevel = getPetLevel(exp + getIngredientExp(ingredient))
+    window.clearTimeout(feedFeedbackTimerRef.current)
+    feedFeedbackIdRef.current += 1
+    setFeedFeedback({ id: feedFeedbackIdRef.current, name: ingredient.name, leveledUp: nextLevel > currentLevel })
+    onFeed(ingredient)
+    feedFeedbackTimerRef.current = window.setTimeout(() => {
+      setFeedFeedback(null)
+    }, 1300)
+  }
+
+  useEffect(() => () => {
+    window.clearTimeout(feedFeedbackTimerRef.current)
+  }, [])
+
   return (
     <section className="screen pet-home-screen" onScroll={onScrollActivity}>
       <div className="pet-home-shell">
       <div
-        className={`pet-room-stage ${roomClass(background)} ${roomImage ? 'has-room-image' : ''}`}
+        className={`pet-room-stage ${roomClass(background)} ${roomImage ? 'has-room-image' : ''} ${feedFeedback ? 'is-feeding' : ''} ${feedFeedback?.leveledUp ? 'is-level-up' : ''}`}
         ref={petRoomRef}
         style={roomImage ? { backgroundImage: `url(${roomImage})` } : undefined}
       >
@@ -2569,6 +2660,18 @@ function PetHomeScreen({
           <img alt="" aria-hidden="true" src={getPetShareIconImage()} />
         </button>
         <PetAvatar outfit={outfit} background={background} accessory={accessory} body="sudal" />
+        {feedFeedback && (
+          <div className="pet-feed-effect" key={feedFeedback.id} aria-hidden="true">
+            <span>♥</span>
+            <span>+XP</span>
+            <span>♥</span>
+          </div>
+        )}
+        {feedFeedback?.leveledUp && (
+          <div className="pet-level-up-badge" key={`level-up-${feedFeedback.id}`} aria-live="polite">
+            LEVEL UP
+          </div>
+        )}
         <div className="pet-stage-level" aria-label={`${nickname}, Level ${level}, ${expLabel}`}>
           <span>LEVEL {level}</span>
           <div className="progress-track">
@@ -2606,7 +2709,7 @@ function PetHomeScreen({
                 <p className="empty">메뉴를 주문해 주세요</p>
               )}
               {feedIngredients.map((ingredient) => (
-                <button className="feed-card" key={ingredient.id} onClick={() => onFeed(ingredient)} type="button">
+                <button className="feed-card" key={ingredient.id} onClick={() => handleFeed(ingredient)} type="button">
                   <span className="feed-card-icon" aria-hidden="true">{ingredientIconImage(ingredient.name, 'feed-card-icon-image')}</span>
                   <span>
                     <strong>{ingredient.name}</strong>
