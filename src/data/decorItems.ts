@@ -27,7 +27,7 @@ export const decorItems: DecorItem[] = [
   { id: 'swimsuit', name: '수영복', type: 'outfit' },
   { id: 'bell-necklace', name: '방울 목걸이', type: 'accessory' },
   { id: 'pearl-blossom-necklace', name: '진주 꽃 목걸이', type: 'accessory', unlockSeasonKey: 'spring', unlockSeasonSpendWon: 300000 },
-  { id: 'shell-necklace', name: '조개 목걸이', type: 'accessory', unlockSeasonKey: 'summer', unlockSeasonSpendWon: 300000 },
-  { id: 'acorn-maple-necklace', name: '도토리 단풍 목걸이', type: 'accessory', unlockSeasonKey: 'autumn', unlockSeasonSpendWon: 300000 },
+  { id: 'shell-necklace', name: '조개 목걸이', type: 'accessory', unlockLevel: 2 },
+  { id: 'acorn-maple-necklace', name: '가을 목걸이', type: 'accessory', unlockLevel: 2 },
   { id: 'snow-pearl-necklace', name: '눈꽃 진주 목걸이', type: 'accessory', unlockSeasonKey: 'winter', unlockSeasonSpendWon: 300000 },
 ]

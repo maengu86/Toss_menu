@@ -528,12 +528,34 @@ function App() {
     setCartQuantities((current) => ({ ...current, [key]: normalizedQuantity }))
   }
 
-  function addShoppingProduct(menuId: string, ingredientName: string) {
-    const key = ingredientKey(menuId, ingredientName)
+  function addShoppingProducts(menuId: string, ingredientNames: string[]) {
+    const menu = menus.find((item) => item.id === menuId)
+    if (!menu || ingredientNames.length === 0) return
+
+    const selectedKeys = ingredientNames.map((name) => ingredientKey(menuId, name))
+    const selectedKeySet = new Set(selectedKeys)
+    const menuKeys = menu.ingredients.map((ingredient) => ingredientKey(menuId, ingredient.name))
+    const unselectedKeys = menuKeys.filter((key) => !selectedKeySet.has(key))
+
     setSelectedMenuIds((current) => current.includes(menuId) ? current : [...current, menuId])
-    setRemovedCartIngredientKeys((current) => current.filter((item) => item !== key))
-    setCheckedIngredients((current) => current.includes(key) ? current : [...current, key])
-    setCartQuantities((current) => current[key] ? current : { ...current, [key]: 1 })
+    setRemovedCartIngredientKeys((current) => Array.from(new Set([
+      ...current.filter((key) => !selectedKeySet.has(key)),
+      ...unselectedKeys,
+    ])))
+    setCheckedIngredients((current) => Array.from(new Set([
+      ...current.filter((key) => !menuKeys.includes(key)),
+      ...selectedKeys,
+    ])))
+    setCartQuantities((current) => {
+      const next = { ...current }
+      unselectedKeys.forEach((key) => {
+        delete next[key]
+      })
+      selectedKeys.forEach((key) => {
+        if (!next[key]) next[key] = 1
+      })
+      return next
+    })
   }
 
   function completeOrderFlow() {
@@ -670,7 +692,7 @@ function App() {
             paymentOptions={paymentOptions}
             step={shopStep}
             onCompleteOrder={completeOrderFlow}
-            onAddProduct={addShoppingProduct}
+            onAddProducts={addShoppingProducts}
             onApplyCoupon={setAppliedCouponId}
             onChangeQuantity={changeCartQuantity}
             onGoHome={() => {
@@ -788,9 +810,7 @@ function HomeScreen({
   const [searchQuery, setSearchQuery] = useState('')
   const normalizedQuery = searchQuery.trim().toLowerCase()
   const hasSearch = normalizedQuery.length > 0
-  const ingredientSearchResults = hasSearch
-    ? allSeasonalIngredients.filter((ingredient) => ingredient.name.toLowerCase().includes(normalizedQuery))
-    : []
+  const ingredientSearchResults = allSeasonalIngredients.filter(() => false)
   const menuSearchResults = hasSearch
     ? allMenus.filter((menu) => (
       menu.name.toLowerCase().includes(normalizedQuery)
@@ -995,7 +1015,7 @@ function ShoppingScreen({
   paymentMethod,
   paymentOptions,
   onToggleIngredient,
-  onAddProduct,
+  onAddProducts,
   onApplyCoupon,
   onChangeQuantity,
   onSelectPayment,
@@ -1021,7 +1041,7 @@ function ShoppingScreen({
   paymentMethod: string
   paymentOptions: string[]
   onToggleIngredient: (name: string) => void
-  onAddProduct: (menuId: string, ingredientName: string) => void
+  onAddProducts: (menuId: string, ingredientNames: string[]) => void
   onApplyCoupon: (couponId: string) => void
   onChangeQuantity: (key: string, quantity: number) => void
   onSelectPayment: (method: string) => void
@@ -1077,10 +1097,10 @@ function ShoppingScreen({
   function addSelectedDetailIngredients(nextStep: 'cart' | 'checkout') {
     if (!detailMenu || activeDetailIngredientKeys.length === 0) return
 
-    detailMenu.ingredients.forEach((ingredient) => {
-      const key = ingredientKey(detailMenu.id, ingredient.name)
-      if (activeDetailIngredientKeys.includes(key)) onAddProduct(detailMenu.id, ingredient.name)
-    })
+    const selectedIngredientNames = detailMenu.ingredients
+      .filter((ingredient) => activeDetailIngredientKeys.includes(ingredientKey(detailMenu.id, ingredient.name)))
+      .map((ingredient) => ingredient.name)
+    onAddProducts(detailMenu.id, selectedIngredientNames)
     if (nextStep === 'cart') {
       setCartMovePromptOpen(true)
       return
@@ -1114,15 +1134,15 @@ function ShoppingScreen({
             role="dialog"
           >
             <span aria-hidden="true"><img alt="" className="sudal-modal-icon" src={getPetUiIconImage('cart')} /></span>
-            <h2 id="cart-move-modal-title">장바구니에 넣었습니다</h2>
-            <p>담은 재료를 바로 확인할까요?</p>
+            <h2 id="cart-move-modal-title">선택한 재료를 장바구니에 담았어요</h2>
+            <p>장바구니로 이동하시겠습니까?</p>
             <div className="cart-move-modal-actions">
               <button
                 className="toss-secondary"
                 onClick={() => setCartMovePromptOpen(false)}
                 type="button"
               >
-                계속 둘러보기
+                아니요
               </button>
               <button
                 className="toss-primary"
@@ -1132,7 +1152,7 @@ function ShoppingScreen({
                 }}
                 type="button"
               >
-                장바구니 보기
+                예
               </button>
             </div>
           </div>
