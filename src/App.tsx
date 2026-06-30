@@ -2189,6 +2189,7 @@ function winterMenuImageByName(menu: Menu) {
     if (name.includes('된장국')) return menuDishImageById('cabbage-doenjang-soup')
     if (name.includes('겉절이')) return menuDishImageById('cabbage-geotjeori')
     if (name.includes('김치')) return menuDishImageById('cabbage-kimchi')
+    if (name.includes('찜')) return menuDishImageById('cabbage-jjim')
     if (name.includes('전')) return menuDishImageById('cabbage-jeon')
     if (name.includes('쌈')) return menuDishImageById('cabbage-ssam')
   }
