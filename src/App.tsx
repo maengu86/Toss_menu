@@ -167,7 +167,7 @@ import zucchiniJeonImage from './assets/sudal-icons/menus/zucchini-jeon.png'
 import zucchiniJeongolImage from './assets/sudal-icons/menus/zucchini-jeongol.png'
 import zucchiniNamulImage from './assets/sudal-icons/menus/zucchini-namul.png'
 import zucchiniStirFryImage from './assets/sudal-icons/menus/zucchini-stir-fry.png'
-import discountCouponImage from '../discount-coupon-20.jpg'
+import discountCouponImage from '../discount-coupon-20.png'
 
 const menuDishImages = import.meta.glob('./assets/sudal-icons/menus/*.png', {
   eager: true,
@@ -1409,7 +1409,8 @@ function ShoppingScreen({
               <article key={key}>
                 <em aria-hidden="true">{ingredientIconImage(ingredient.name)}</em>
                 <div>
-                  <strong>{ingredient.name}</strong>
+                  <strong>내일 도착 예정</strong>
+                  <span>{ingredient.name}</span>
                   <b>{formatWon(ingredient.price * quantity)} · {quantity}개</b>
                   <small>무료 배송</small>
                 </div>
@@ -2259,6 +2260,7 @@ function winterMenuImageByName(menu: Menu) {
     if (name.includes('된장국')) return menuDishImageById('cabbage-doenjang-soup')
     if (name.includes('겉절이')) return menuDishImageById('cabbage-geotjeori')
     if (name.includes('김치')) return menuDishImageById('cabbage-kimchi')
+    if (name.includes('찜')) return menuDishImageById('cabbage-jjim')
     if (name.includes('전')) return menuDishImageById('cabbage-jeon')
     if (name.includes('쌈')) return menuDishImageById('cabbage-ssam')
   }
@@ -2290,6 +2292,7 @@ function winterMenuImageByName(menu: Menu) {
     if (name.includes('계란') || name.includes('달걀')) return menuDishImageById('spinach-egg-stir-fry')
     if (name.includes('전')) return menuDishImageById('spinach-jeon')
     if (name.includes('파스타')) return menuDishImageById('spinach-pasta')
+    if (name.includes('수프')) return menuDishImageById('spinach-cream-soup')
   }
 
   if (hasSeasonal('cockle') || name.includes('꼬막')) {

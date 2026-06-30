@@ -477,6 +477,10 @@ function isHiddenSeasonalMenu(menu: Menu, menuNameKey: string) {
   const seasonalIngredientIds = menu.seasonalIngredientIds ?? []
   const isStrawberryMenu = seasonalIngredientIds.includes('strawberry')
   const isJukkumiMenu = seasonalIngredientIds.includes('jukkumi')
+  const isPumpkinMenu = seasonalIngredientIds.includes('pumpkin')
+  const isMandarinMenu = seasonalIngredientIds.includes('mandarin')
+  if (isPumpkinMenu && menuNameKey === '빵') return true
+  if (isMandarinMenu && menuNameKey === '귤') return true
 
   return (isStrawberryMenu && /케이크|케이스|타르트|타르느/.test(menuNameKey))
     || (isJukkumiMenu && /라면|짬뽕/.test(menuNameKey))
